@@ -1,0 +1,15 @@
+{
+  "name": "My App",
+
+  "nav": [
+    { "text": "Home", "link": "/#" },
+    { "text": "Contact", "link": "/#contact" },
+    { "text": "About", "link": "/#about" }
+  ],
+
+  "sidebar": [
+    { "text": "Home", "link": "/#" },
+    { "text": "Contact", "link": "/#contact" },
+    { "text": "About", "link": "/#about" }
+  ]
+}
