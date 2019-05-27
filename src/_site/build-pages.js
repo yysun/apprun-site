@@ -44,7 +44,7 @@ const pages = files.map(file => {
 }).filter(p => p !== null);
 
 // console.log(pages);
-const f = fs.createWriteStream('src/pages/index.tsx');
+const f = fs.createWriteStream('src/pages/_index.tsx');
 f.write('// this file is auto-generated\n');
 pages.forEach((p, idx) => {
   let [_, link, name, type] = p;

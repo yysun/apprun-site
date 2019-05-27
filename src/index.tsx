@@ -3,7 +3,7 @@ import app from 'apprun';
 import './_site/route';
 
 import Layout from './layout';
-import pages from './pages';
+import pages from './pages/_index';
 
 import * as config from './config.json';
 const site = {
