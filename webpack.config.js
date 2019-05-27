@@ -20,7 +20,10 @@ module.exports = {
   },
   devServer: {
     contentBase: path.join(__dirname, public),
-    open: true
+    open: true,
+    historyApiFallback: {
+      index: 'index.html'
+    }
   },
   devtool: 'source-map'
 }

@@ -1,16 +1,16 @@
-import { app, ROUTER_EVENT, ROUTER_404_EVENT } from 'apprun';
+import app from 'apprun';
+
+import './_site/route';
 
 import Layout from './layout';
 import pages from './pages';
-import { sidebar } from './pages';
 
 import * as config from './config.json';
 const site = {
   name: config.name,
   nav: config.nav,
-  sidebar: config.sidebar.concat(sidebar)
+  sidebar: config.sidebar
 };
-
 
 const HTML =  ({ url }) => {
   element.innerHTML = '<div></div>';
@@ -29,23 +29,4 @@ pages.forEach(def => {
     const component = new Comp().mount(element);
     app.on(e, (...p) => component.run('.', ...p));
   }
-});
-
-
-const linkClick = e => {
-  e.preventDefault();
-  const menu = e.target as HTMLAnchorElement
-  history.pushState(null, "", menu.href)
-  app.run(menu.pathname);
-}
-
-export const fixAnchors = (selectors: string) => {
-  document.querySelectorAll(selectors)
-    .forEach((a: HTMLAnchorElement) => {
-      a.onclick = linkClick;
-    });
-}
-
-app.on(ROUTER_EVENT, (...rest) => {
-  fixAnchors('a');
 });

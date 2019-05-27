@@ -7,7 +7,7 @@
     "test": "jest --watch",
     "start": "webpack-dev-server --mode development",
     "build": "webpack -p --mode production",
-    "build:pages": "node tools/build-pages"
+    "build:pages": "node src/_site/build-pages"
   },
   "keywords": [],
   "author": "",
