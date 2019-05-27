@@ -1,4 +1,4 @@
-import app from 'apprun';
+import { app, ROUTER_EVENT, ROUTER_404_EVENT } from 'apprun';
 
 import Layout from './layout';
 import pages from './pages';
@@ -22,11 +22,30 @@ const HTML =  ({ url }) => {
 app.render(document.body, <Layout {...site}/>);
 const element = document.getElementById('main');
 pages.forEach(def => {
-  const [event, Comp] = def;
+  const [e, Comp] = def;
   if (typeof Comp === 'string') {
-    app.on(event, () => app.render(element, <HTML url={Comp}/>));
+    app.on(e, () => app.render(element, <HTML url={Comp}/>));
   } else {
     const component = new Comp().mount(element);
-    app.on(event, (...p) => component.run('.', ...p));
+    app.on(e, (...p) => component.run('.', ...p));
   }
+});
+
+
+const linkClick = e => {
+  e.preventDefault();
+  const menu = e.target as HTMLAnchorElement
+  history.pushState(null, "", menu.href)
+  app.run(menu.pathname);
+}
+
+export const fixAnchors = (selectors: string) => {
+  document.querySelectorAll(selectors)
+    .forEach((a: HTMLAnchorElement) => {
+      a.onclick = linkClick;
+    });
+}
+
+app.on(ROUTER_EVENT, (...rest) => {
+  fixAnchors('a');
 });

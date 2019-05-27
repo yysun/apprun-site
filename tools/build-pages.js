@@ -12,7 +12,7 @@ function walkDir(dir, callback) {
 };
 const files = [];
 walkDir('src/pages', function(filePath) {
-  files.push(filePath);
+  files.push(filePath.replace(/\\/g, '/'));
 });
 
 const pages = files.map(file => {
@@ -21,25 +21,25 @@ const pages = files.map(file => {
   const dir = path.dirname(file).substring(10);
   if (dir === '' && ext === '.tsx') return null;
   const public = 'public/pages/' + dir;
-  if (!fs.existsSync(public)) {
-    fs.mkdirSync(public), { recursive: true };
-  }
+  if (!fs.existsSync('public/pages')) fs.mkdirSync('public/pages');
+  if (!fs.existsSync(public)) fs.mkdirSync(public, { recursive: true });
+
   const sname = name === 'index' ? path.basename(dir) : name;
   const relative = `${dir}/${name}`;
-  const hash = `#${relative}`;
+  const hash = `/${relative}`;
 
   switch (ext) {
     case '.md':
       let text = fs.readFileSync(file).toString();
       text = md.render(text);
       fs.writeFileSync(`${public}/${name}.html`, text);
-      return [`${hash}`, `pages/${relative}.html`, sname, ext]
+      return [`${hash}`, `/pages/${relative}.html`, sname, ext]
     case '.ts':
     case '.tsx':
         return [`${hash}`, `./${relative}`, sname, ext]
     default:
       fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
-      return [`${hash}`, `pages/${relative}${ext}`, sname, ext]
+      return [`${hash}`, `/pages/${relative}${ext}`, sname, ext]
   }
 }).filter(p => p !== null);
 
@@ -53,8 +53,8 @@ pages.forEach((p, idx) => {
 f.write('export default [\n');
 pages.forEach((p, idx) => {
   let [_, link, name, type] = p;
-  p[0] = p[0].replace(/\//g, '-')
-  p[0] = p[0].replace('-index', '')
+  p[0] = p[0].replace('/index', '/');
+  p[0] = p[0].replace(/\/$/g, '');
   link = type === '.tsx' ? name+idx : `"${link}"`;
   f.write(`\t["${p[0]}", ${link}],\n`);
 });

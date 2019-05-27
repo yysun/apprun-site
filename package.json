@@ -25,7 +25,7 @@
     "webpack-dev-server": "^3.4.1"
   },
   "dependencies": {
-    "apprun": "^2.19.2"
+    "apprun": "^2.20.0"
   },
   "jest": {
     "transform": {
