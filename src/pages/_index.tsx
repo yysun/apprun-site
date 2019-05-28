@@ -10,7 +10,7 @@ export default [
 	["/", "/pages//index.html"],
 	["/_404", _4046],
 ] as (readonly [string, any])[];
-export const sidebar = [
+export const links = [
 	{"link": "/about", "text": "about"},
 	{"link": "/about/them", "text": "them"},
 	{"link": "/about/us", "text": "us"},

@@ -4,5 +4,6 @@ Thumbs.db
 node_modules
 coverage
 .cache
+dist
 public/dist
 public/pages

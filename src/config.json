@@ -1,5 +1,7 @@
 {
-  "name": "My App",
+  "title": "My App",
+
+  "element": "#main",
 
   "nav": [
     { "text": "Home", "link": "/" },
@@ -13,6 +15,7 @@
     {"link": "/about/them", "text": "them"},
     {"link": "/about/us", "text": "us"},
     {"link": "/about/you", "text": "you"},
-    {"link": "/contact", "text": "contact"}
+    {"link": "/contact", "text": "contact"},
+    {"link": "/tasks", "text": "tasks"}
   ]
 }

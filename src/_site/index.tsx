@@ -1,10 +1,37 @@
 import app from 'apprun';
-import route from './route';
 
-import Layout from '../layout';
-import pages from '../pages/_index';
+/*--- router ---*/
+const route = (url, e?) => {
+  e && e.preventDefault();
+  app.run(url);
+}
 
-export const HTML =  ({ url }) => {
+document.addEventListener("DOMContentLoaded", () => {
+  window.onpopstate = () => route(location.pathname);
+  route(location.pathname);
+});
+
+
+const linkClick = e => {
+  e.preventDefault();
+  const menu = e.target as HTMLAnchorElement
+  history.pushState(null, "", menu.href)
+  route(menu.pathname);
+}
+
+const fixAnchors = (selectors: string) => {
+  document.querySelectorAll(selectors)
+    .forEach((a: HTMLAnchorElement) => {
+      a.onclick = linkClick;
+    });
+}
+
+app.on('//', (...rest) => {
+  fixAnchors('a');
+});
+/*--- ------ ---*/
+
+const HTML =  ({ element, url }) => {
   element.innerHTML = '<div></div>';
   fetch(url)
     .then(response => response.text())
@@ -16,21 +43,18 @@ export const Link = ({ to, className }, children) => <a class={className} href="
   {children}
 </a>
 
-import * as config from '../config.json';
-const site = {
-  name: config.name,
-  nav: config.nav,
-  sidebar: config.sidebar
-};
-
-app.render(document.body, <Layout {...site}/>);
-const element = document.getElementById('main');
-pages.forEach(def => {
-  const [e, Comp] = def;
-  if (typeof Comp === 'string') {
-    app.on(e, () => app.render(element, <HTML url={Comp}/>));
-  } else {
-    const component = new Comp().mount(element);
-    app.on(e, (...p) => component.run('.', ...p));
+export default {
+  start: (config) => {
+    app.render(document.body, <config.layout {...config} />);
+    const element = document.querySelector(config.element);
+    config.pages.forEach(def => {
+      const [e, Comp] = def;
+      if (typeof Comp === 'string') {
+        app.on(e, () => app.render(element, <HTML element={element} url={Comp} />));
+      } else {
+        const component = new Comp().mount(element);
+        app.on(e, (...p) => component.run('.', ...p));
+      }
+    });
   }
-});
+}

@@ -59,7 +59,7 @@ pages.forEach((p, idx) => {
   f.write(`\t["${p[0]}", ${link}],\n`);
 });
 f.write('] as (readonly [string, any])[];\n');
-f.write('export const sidebar = [\n');
+f.write('export const links = [\n');
 pages.forEach(p => {
   const [evt, _, name] = p;
   if(!name.startsWith('_')) f.write(`\t{"link": "${evt}", "text": "${name}"},\n`);
