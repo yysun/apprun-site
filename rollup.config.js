@@ -3,7 +3,7 @@ import { terser } from 'rollup-plugin-terser';
 import unpkg from 'rollup-plugin-unpkg';
 
 export default {
-  input: 'lib/index.js',
+  input: 'lib/_site/index.js',
   output: {
     file: 'public/index.js',
     format: 'esm'

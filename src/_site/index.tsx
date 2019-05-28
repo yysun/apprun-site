@@ -1,11 +1,11 @@
 import app from 'apprun';
 
-import './_site/route';
+import './route';
 
-import Layout from './layout/index';
-import pages from './pages/_index';
+import Layout from '../layout/index';
+import pages from '../pages/_index';
 
-import config from './config';
+import config from '../config';
 const site = {
   name: config.name,
   nav: config.nav,
