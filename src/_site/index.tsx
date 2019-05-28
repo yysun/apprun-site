@@ -3,7 +3,7 @@ import app from 'apprun';
 /*--- router ---*/
 const route = (url, e?) => {
   e && e.preventDefault();
-  app.run(url);
+  if (!app.run(url)) app.run('/_404');
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -27,8 +27,9 @@ const fixAnchors = (selectors: string) => {
 }
 
 app.on('//', (...rest) => {
-  fixAnchors('a');
+  window.setTimeout(()=>fixAnchors('a'));
 });
+
 /*--- ------ ---*/
 
 const HTML =  ({ element, url }) => {
