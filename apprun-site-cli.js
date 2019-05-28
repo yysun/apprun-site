@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const degit = require('degit')
 const build = require('./cli-build')
 const cli = require('cac')()

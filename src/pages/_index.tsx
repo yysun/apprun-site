@@ -1,16 +1,14 @@
 // this file is auto-generated
-import them_1 from './/about/them';
-import _404_6 from './/_404/index';
-import _index_7 from './//_index';
+import _404_0 from './_404/index';
+import them_2 from './about/them';
 export default [
-	["/about", "/pages/about/index.html"],
-	["/about/them", them_1],
-	["/about/us", "/pages/about/us/index.html"],
-	["/about/you", "/pages/about/you.html"],
-	["/contact", "/pages/contact/index.html"],
-	["/", "/pages//index.html"],
-	["/_404", _404_6],
-	["//_index", _index_7],
+	["/_404", _404_0],
+	["/about", "/about/index.html"],
+	["/about/them", them_2],
+	["/about/us", "/about/us/index.html"],
+	["/about/you", "/about/you.html"],
+	["/contact", "/contact/index.html"],
+	["/", "/index.html"],
 ] as (readonly [string, any])[];
 export const links = [
 	{"link": "/about", "text": "about"},
@@ -18,5 +16,5 @@ export const links = [
 	{"link": "/about/us", "text": "us"},
 	{"link": "/about/you", "text": "you"},
 	{"link": "/contact", "text": "contact"},
-	{"link": "/", "text": ""},
+	{"link": "/", "text": "/"},
 ]

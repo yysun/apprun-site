@@ -34,7 +34,7 @@ app.on('//', (...rest) => {
 
 const HTML =  ({ element, url }) => {
   element.innerHTML = '<div></div>';
-  fetch(url)
+  fetch('/pages/' + url)
     .then(response => response.text())
     .then(html => element.innerHTML = html)
 }

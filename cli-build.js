@@ -12,21 +12,25 @@ module.exports = function ({ source, target}) {
         walkDir(dirPath, callback) : callback(path.join(dir, f));
     });
   };
+
+  source = source || 'src/pages';
+  target = target || 'public/pages';
+
   const files = [];
-  walkDir(source || 'src/pages', function(filePath) {
+  walkDir(source, function(filePath) {
     files.push(filePath.replace(/\\/g, '/'));
   });
+
+  if (!fs.existsSync(target)) fs.mkdirSync(target, { recursive: true });
 
   const pages = files.map(file => {
     const name = path.basename(file).replace(/\.[^/.]+$/, "");
     const ext = path.extname(file);
-    const dir = '/' + path.dirname(file).substring(10);
-    if (dir === '' && ext === '.tsx') return null;
-    const public = (target || 'public/pages') + dir;
-    if (!fs.existsSync('public/pages')) fs.mkdirSync('public/pages');
+    const dir = path.dirname(file).replace(source, '');
+    if (name.startsWith('_')) return null;
+    const public = target + dir;
     if (!fs.existsSync(public)) fs.mkdirSync(public, { recursive: true });
-
-    const sname = name === 'index' ? path.basename(dir) : name;
+    const sname = (name === 'index' ? path.basename(dir) : name) || '/';
     const relative = `${dir}/${name}`;
 
     switch (ext) {
@@ -34,18 +38,18 @@ module.exports = function ({ source, target}) {
         let text = fs.readFileSync(file).toString();
         text = md.render(text);
         fs.writeFileSync(`${public}/${name}.html`, text);
-        return [`${relative}`, `/pages${relative}.html`, sname, ext]
+        return [`${relative}`, `${relative}.html`, sname, ext]
       case '.ts':
       case '.tsx':
-        return [`${relative}`, `./${relative}`, sname, ext]
+        return [`${relative}`, `.${relative}`, sname, ext]
       default:
         fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
-        return [`${relative}`, `/pages${relative}${ext}`, sname, ext]
+        return [`${relative}`, `${relative}${ext}`, sname, ext]
     }
   }).filter(p => p !== null);
 
   // console.log(pages);
-  const f = fs.createWriteStream('src/pages/_index.tsx');
+  const f = fs.createWriteStream(`${source}/_index.tsx`);
   f.write('// this file is auto-generated\n');
   pages.forEach((p, idx) => {
     let [_, link, name, type] = p;
@@ -56,10 +60,12 @@ module.exports = function ({ source, target}) {
     let [_, link, name, type] = p;
     p[0] = p[0].replace('/index', '/');
     p[0] = p[0].replace(/\/$/g, '');
+    p[0] = p[0] || '/';
     link = type === '.tsx' ? `${name}_${idx}` : `"${link}"`;
     f.write(`\t["${p[0]}", ${link}],\n`);
   });
   f.write('] as (readonly [string, any])[];\n');
+
   f.write('export const links = [\n');
   pages.forEach(p => {
     const [evt, _, name] = p;
