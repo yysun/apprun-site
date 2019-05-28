@@ -21,7 +21,9 @@ module.exports = function ({ source, target}) {
     files.push(filePath.replace(/\\/g, '/'));
   });
 
-  if (!fs.existsSync(target)) fs.mkdirSync(target, { recursive: true });
+  const ensure = dir => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  }
 
   const pages = files.map(file => {
     const name = path.basename(file).replace(/\.[^/.]+$/, "");
@@ -29,12 +31,12 @@ module.exports = function ({ source, target}) {
     const dir = path.dirname(file).replace(source, '');
     if (name.startsWith('_')) return null;
     const public = target + dir;
-    if (!fs.existsSync(public)) fs.mkdirSync(public, { recursive: true });
     const sname = (name === 'index' ? path.basename(dir) : name) || '/';
     const relative = `${dir}/${name}`;
 
     switch (ext) {
       case '.md':
+        ensure(public);
         let text = fs.readFileSync(file).toString();
         text = md.render(text);
         fs.writeFileSync(`${public}/${name}.html`, text);
@@ -43,6 +45,7 @@ module.exports = function ({ source, target}) {
       case '.tsx':
         return [`${relative}`, `.${relative}`, sname, ext]
       default:
+        ensure(public);
         fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
         return [`${relative}`, `${relative}${ext}`, sname, ext]
     }
