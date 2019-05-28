@@ -8,6 +8,7 @@
     "lib": ["dom", "es2015", "es5"],
     "experimentalDecorators": true,
     "sourceMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "outDir": "lib"
   }
 }

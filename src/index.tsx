@@ -2,15 +2,15 @@ import app from 'apprun';
 
 import './_site/route';
 
-import Layout from './layout';
+import Layout from './layout/index';
 import pages from './pages/_index';
 
-import * as config from './config.json';
+import config from './config';
 const site = {
   name: config.name,
   nav: config.nav,
   sidebar: config.sidebar
-};
+}
 
 const HTML =  ({ url }) => {
   element.innerHTML = '<div></div>';

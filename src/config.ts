@@ -1,4 +1,4 @@
-{
+export default {
   "name": "My App",
 
   "nav": [
