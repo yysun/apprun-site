@@ -1,68 +1,33 @@
-const fs = require('fs'), path = require('path');
-const MarkdownIt = require('markdown-it');
-const md = new MarkdownIt();
+const degit = require('degit')
+const build = require('./cli-build')
+const cli = require('cac')()
 
-function walkDir(dir, callback) {
-  fs.readdirSync(dir).forEach( f => {
-    let dirPath = path.join(dir, f);
-    let isDirectory = fs.statSync(dirPath).isDirectory();
-    isDirectory ?
-      walkDir(dirPath, callback) : callback(path.join(dir, f));
-  });
-};
-const files = [];
-walkDir('src/pages', function(filePath) {
-  files.push(filePath.replace(/\\/g, '/'));
-});
+cli.command('build', 'build pages')
+  .option('-w, --watch', 'watch the folder')
+  .option('-s, --source [sourceDir]', 'source directory')
+  .option('-t, --target [targetDir]', 'target directory')
+  .action((options) => build(options))
 
-const pages = files.map(file => {
-  const name = path.basename(file).replace(/\.[^/.]+$/, "");
-  const ext = path.extname(file);
-  const dir = path.dirname(file).substring(10);
-  if (dir === '' && ext === '.tsx') return null;
-  const public = 'public/pages/' + dir;
-  if (!fs.existsSync('public/pages')) fs.mkdirSync('public/pages');
-  if (!fs.existsSync(public)) fs.mkdirSync(public, { recursive: true });
+cli.command('init [targetDir]', 'initialize project')
+  .option('-r, --repo [repo]', 'source directory')
+  .action((targetDir = '.', options) => {
+    const repo = options.repo || 'apprunjs/apprun-starter'
+    const emitter = degit(repo, {
+      cache: true,
+      force: false,
+      verbose: true
+    });
+    emitter.on('info', info => console.log(info.message));
+    emitter.clone(targetDir||'').then(() => console.log('done'))
+  })
 
-  const sname = name === 'index' ? path.basename(dir) : name;
-  const relative = `${dir}/${name}`;
-  const hash = `/${relative}`;
 
-  switch (ext) {
-    case '.md':
-      let text = fs.readFileSync(file).toString();
-      text = md.render(text);
-      fs.writeFileSync(`${public}/${name}.html`, text);
-      return [`${hash}`, `/pages/${relative}.html`, sname, ext]
-    case '.ts':
-    case '.tsx':
-        return [`${hash}`, `./${relative}`, sname, ext]
-    default:
-      fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
-      return [`${hash}`, `/pages/${relative}${ext}`, sname, ext]
-  }
-}).filter(p => p !== null);
+cli.help()
+cli.version('0.1.0')
+cli.parse()
 
-// console.log(pages);
-const f = fs.createWriteStream('src/pages/_index.tsx');
-f.write('// this file is auto-generated\n');
-pages.forEach((p, idx) => {
-  let [_, link, name, type] = p;
-  if (type==='.tsx') f.write(`import ${name}${idx} from '${link}';\n`);
-});
-f.write('export default [\n');
-pages.forEach((p, idx) => {
-  let [_, link, name, type] = p;
-  p[0] = p[0].replace('/index', '/');
-  p[0] = p[0].replace(/\/$/g, '');
-  link = type === '.tsx' ? name+idx : `"${link}"`;
-  f.write(`\t["${p[0]}", ${link}],\n`);
-});
-f.write('] as (readonly [string, any])[];\n');
-f.write('export const links = [\n');
-pages.forEach(p => {
-  const [evt, _, name] = p;
-  if(!name.startsWith('_')) f.write(`\t{"link": "${evt}", "text": "${name}"},\n`);
-});
-f.write(']\n');
-f.end();
+
+
+
+
+

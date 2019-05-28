@@ -1,7 +1,7 @@
 {
   "name": "apprun-site",
   "version": "0.1.0",
-  "description": "AppRun Static Site",
+  "description": "AppRun Static Site Tool",
   "main": "dist/index.js",
   "module": "dist/es6/index.js",
   "bin": "apprun-site-cli.js",
@@ -9,12 +9,16 @@
     "test": "jest --watch",
     "start": "run-s build:pages start:dev",
     "start:dev": "webpack-dev-server --mode development",
-    "build:pages": "node apprun-site-cli build",
+    "build:pages": "node apprun-site-cli build src/pages public/pages",
     "build": "run-s build:*",
     "build:ts": "tsc -d -p src/_site",
-    "build:js": "webpack -p --mode production"
+    "build:js": "webpack -p --mode production",
+    "cli": "node apprun-site-cli"
   },
-  "keywords": ["AppRun", "Static Site"],
+  "keywords": [
+    "AppRun",
+    "Static Site"
+  ],
   "author": "Yiyi Sun",
   "license": "MIT",
   "devDependencies": {
@@ -31,7 +35,9 @@
     "webpack-dev-server": "^3.4.1"
   },
   "dependencies": {
-    "apprun": "^2.20.0"
+    "apprun": "^2.20.0",
+    "cac": "^6.5.1",
+    "degit": "^2.1.3"
   },
   "jest": {
     "transform": {
