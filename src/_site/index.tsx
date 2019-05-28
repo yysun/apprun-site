@@ -29,7 +29,6 @@ const fixAnchors = (selectors: string) => {
 app.on('//', (...rest) => {
   window.setTimeout(()=>fixAnchors('a'));
 });
-
 /*--- ------ ---*/
 
 const HTML =  ({ element, url }) => {
@@ -47,7 +46,7 @@ export const Link = ({ to, className }, children) => <a class={className} href="
 export default {
   start: (config) => {
     app.render(document.body, <config.layout {...config} />);
-    const element = document.querySelector(config.element);
+    const element = document.getElementById(config.element);
     config.pages.forEach(def => {
       const [e, Comp] = def;
       if (typeof Comp === 'string') {
