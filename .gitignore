@@ -7,3 +7,4 @@ coverage
 dist
 public/dist
 public/pages
+src/pages/_lib

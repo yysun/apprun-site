@@ -12,5 +12,5 @@ const site = {
   layout,
   pages,
 };
-console.log(links)
+
 app.start(site);

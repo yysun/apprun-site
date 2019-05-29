@@ -1,8 +1,10 @@
-module.exports = function ({ source, target}) {
-
+module.exports = function ({ source, target }) {
+  const app = require('apprun');
   const fs = require('fs'), path = require('path');
   const MarkdownIt = require('markdown-it');
+  const MarkdownItV = require('markdown-it-v');
   const md = new MarkdownIt();
+  md.use(MarkdownItV);
 
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach( f => {
@@ -14,7 +16,7 @@ module.exports = function ({ source, target}) {
   };
 
   source = source || 'src/pages';
-  target = target || 'public/pages';
+  target = target || 'public';
 
   const files = [];
   walkDir(source, function(filePath) {
@@ -35,19 +37,42 @@ module.exports = function ({ source, target}) {
     const public = target + dir;
     const sname = (name === 'index' ? path.basename(dir) : name) || '/';
     const relative = `${dir}/${name}`;
+    let tsx;
 
     switch (ext) {
+      case '.html':
+        let html = fs.readFileSync(file).toString();
+        html = `import { app, Component } from 'apprun';
+export default class extends Component {
+  view = _ => '_html:${html}';
+}`
+        tsx = `/_lib${dir}/${name}_html`
+        const html_filename = `${source}${tsx}.tsx`;
+        ensure(path.dirname(html_filename));
+        fs.writeFileSync(`${html_filename}`, html);
+        console.log(`Info: created file: ${file} => ${html_filename}`);
+        return [`${relative}`, `.${tsx}`, `${name}_html`, '.tsx']
+
       case '.md':
-        ensure(public);
         let text = fs.readFileSync(file).toString();
-        text = md.render(text);
-        fs.writeFileSync(`${public}/${name}.html`, text);
-        return [`${relative}`, `${relative}.html`, sname, ext]
+        const sdom = md.render(text);
+        text = sdom.toReact(app.default.createElement);
+        text = `import { app, Component } from 'apprun';
+export default class extends Component {
+  view = _ => ${JSON.stringify(text)};
+}`
+        tsx = `/_lib${dir}/${name}_md`
+        const md_filename = `${source}${tsx}.tsx`;
+        ensure(path.dirname(md_filename));
+        fs.writeFileSync(`${md_filename}`, text);
+        console.log(`Info: created file: ${file} => ${md_filename}`);
+        return [`${relative}`, `.${tsx}`, `${name}_md`, '.tsx']
       case '.tsx':
-        return [`${relative}`, `.${relative}`, name, ext]
+          return [`${relative}`, `.${relative}`, name, ext]
       default:
         ensure(public);
         fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
+        console.log(`Info: copied file: ${file} => ${public}/${name}${ext}`);
         return [`${relative}`, `${relative}${ext}`, sname, ext]
     }
   }).filter(p => p !== null);
@@ -74,7 +99,7 @@ module.exports = function ({ source, target}) {
   f.write('export const links = [\n');
   pages.forEach(p => {
     const [evt, _, name, type] = p;
-    if (!name.startsWith('_') && is_page(type)) {
+    if (!evt.startsWith('/_') && is_page(type)) {
       f.write(`\t{"link": "${evt}", "text": "${evt}"},\n`);
     }
   });
