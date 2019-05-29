@@ -10,12 +10,5 @@
   ],
 
   "sidebar": [
-    {"link": "/", "text": "home"},
-    {"link": "/about", "text": "about"},
-    {"link": "/about/them", "text": "them"},
-    {"link": "/about/us", "text": "us"},
-    {"link": "/about/you", "text": "you"},
-    {"link": "/contact", "text": "contact"},
-    {"link": "/tasks", "text": "tasks"}
   ]
 }
