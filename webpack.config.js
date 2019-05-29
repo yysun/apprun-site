@@ -1,13 +1,13 @@
 const path = require('path');
-const public = 'public';
+const public = 'docs';
 
 module.exports = {
   entry: {
     'dist/index': './src/_site/index.tsx',
-    'dist/app': './src/index.tsx'
+    'docs/dist/app': './src/index.tsx'
   },
   output: {
-    path: path.resolve(__dirname, public),
+    path: path.resolve(__dirname),
     filename: '[name].js'
   },
   resolve: {
