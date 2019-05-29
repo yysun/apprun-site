@@ -25,6 +25,8 @@ module.exports = function ({ source, target}) {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   }
 
+  const is_page = type => (type === '.tsx' || type === '.html' || type === '.md' || type === '.txt');
+
   const pages = files.map(file => {
     const name = path.basename(file).replace(/\.[^/.]+$/, "");
     const ext = path.extname(file);
@@ -41,9 +43,8 @@ module.exports = function ({ source, target}) {
         text = md.render(text);
         fs.writeFileSync(`${public}/${name}.html`, text);
         return [`${relative}`, `${relative}.html`, sname, ext]
-      case '.ts':
       case '.tsx':
-        return [`${relative}`, `.${relative}`, sname, ext]
+        return [`${relative}`, `.${relative}`, name, ext]
       default:
         ensure(public);
         fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
@@ -52,6 +53,7 @@ module.exports = function ({ source, target}) {
   }).filter(p => p !== null);
 
   // console.log(pages);
+
   const f = fs.createWriteStream(`${source}/_index.tsx`);
   f.write('// this file is auto-generated\n');
   pages.forEach((p, idx) => {
@@ -65,14 +67,16 @@ module.exports = function ({ source, target}) {
     p[0] = p[0].replace(/\/$/g, '');
     p[0] = p[0] || '/';
     link = type === '.tsx' ? `${name}_${idx}` : `"${link}"`;
-    f.write(`\t["${p[0]}", ${link}],\n`);
+    is_page(type) && f.write(`\t["${p[0]}", ${link}],\n`);
   });
   f.write('] as (readonly [string, any])[];\n');
 
   f.write('export const links = [\n');
   pages.forEach(p => {
-    const [evt, _, name] = p;
-    if(!name.startsWith('_')) f.write(`\t{"link": "${evt}", "text": "${name}"},\n`);
+    const [evt, _, name, type] = p;
+    if (!name.startsWith('_') && is_page(type)) {
+      f.write(`\t{"link": "${evt}", "text": "${evt}"},\n`);
+    }
   });
   f.write(']\n');
   f.end();
