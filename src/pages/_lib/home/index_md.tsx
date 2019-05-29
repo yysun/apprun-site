@@ -1,4 +1,4 @@
 import { app, Component } from 'apprun';
 export default class extends Component {
-  view = _ => [{"tag":"h1","props":{},"children":["home"]},"\n",{"tag":"p","props":{},"children":[{"tag":"img","props":{"src":"logo.png","alt":""},"children":[]}]},"\n"];
+  view = _ => [{"tag":"h1","props":{},"children":["home"]},"\n",{"tag":"p","props":{},"children":[{"tag":"img","props":{"src":"logo.png","alt":""},"children":[]}]},"\n",{"tag":"p","props":{},"children":["<my-img src='home/logo.png' />"]},"\n"];
 }

@@ -3,11 +3,11 @@ const public = 'docs';
 
 module.exports = {
   entry: {
-    'dist/index': './src/_site/index.tsx',
-    'docs/dist/app': './src/index.tsx'
+    '../dist/index': './src/_site/index.tsx',
+    'dist/app': './src/index.tsx'
   },
   output: {
-    path: path.resolve(__dirname),
+    path: path.resolve(__dirname, public),
     filename: '[name].js'
   },
   resolve: {
