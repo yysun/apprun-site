@@ -2,8 +2,8 @@
   "name": "apprun-site",
   "version": "0.1.0",
   "description": "AppRun Static Site Tool",
-  "main": "dist/index.js",
-  "module": "dist/es6/index.js",
+  "main": "public/dist/index.js",
+  "module": "public/dist/es6/index.js",
   "bin": "apprun-site-cli.js",
   "scripts": {
     "test": "jest --watch",
