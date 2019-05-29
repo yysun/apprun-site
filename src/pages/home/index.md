@@ -1,3 +1,3 @@
 # home
 
-![](./logo.png)
+![](logo.png)

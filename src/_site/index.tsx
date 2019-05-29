@@ -3,6 +3,8 @@ import app from 'apprun';
 /*--- router ---*/
 const route = (url, e?) => {
   e && e.preventDefault();
+  url = url.replace(/\/$/, "");
+  url = url || '/';
   if (!app.run(url)) app.run('/_404');
 }
 
@@ -15,7 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
 const linkClick = e => {
   e.preventDefault();
   const menu = e.target as HTMLAnchorElement
-  history.pushState(null, "", menu.href)
+  let url = menu.href;
+  if (!url.endsWith('/')) url = url + '/';
+  history.pushState(null, "", url)
   route(menu.pathname);
 }
 
