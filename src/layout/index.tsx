@@ -1,8 +1,8 @@
 import app from 'apprun';
 
-export default ({ name, element, nav, sidebar }) => <>
+export default ({ title, element, nav, sidebar }) => <>
   <nav class="main-nav" markdown="0">
-    <a class="nav-title" href="/">{name}</a>
+    <a class="nav-title" href="/">{title}</a>
       <div class="flex"></div>
       {nav.map(item => <a class="nav-item" href={item.link}>{item.text}</a>)}
       <input id="searchBox" type="search" class="search-box" placeholder="Search" aria-label="Search"/>
