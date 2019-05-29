@@ -4,7 +4,8 @@ export default class extends Component {
   state = 'Home';
 
   view = (state) => <>
-    <div>{state}</div>
-    <my-img src='home/logo.png' />
+    <h1>{state}</h1>
+    <div>web components in TSX</div>
+    <my-img src='home/logo.png'></my-img>
   </>
 }
