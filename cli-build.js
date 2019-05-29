@@ -44,7 +44,7 @@ module.exports = function ({ source, target }) {
         let html = fs.readFileSync(file).toString();
         html = `import { app, Component } from 'apprun';
 export default class extends Component {
-  view = _ => '_html:${html}';
+  view = _ => \`_html:${html}\`;
 }`
         tsx = `/_lib${dir}/${name}_html`
         const html_filename = `${source}${tsx}.tsx`;
@@ -91,8 +91,8 @@ export default class extends Component {
     p[0] = p[0].replace('/index', '/');
     p[0] = p[0].replace(/\/$/g, '');
     p[0] = p[0] || '/';
-    link = type === '.tsx' ? `${name}_${idx}` : `"${link}"`;
-    is_page(type) && f.write(`\t["${p[0]}", ${link}],\n`);
+    const link0 = type === '.tsx' ? `${name}_${idx}` : `"${link}"`;
+    is_page(type) && f.write(`\t["${p[0]}", ${link0}],\n`);
   });
   f.write('] as (readonly [string, any])[];\n');
 
