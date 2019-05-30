@@ -13,26 +13,18 @@ document.addEventListener("DOMContentLoaded", () => {
   route(location.pathname);
 });
 
+window.onclick = e => linkClick(e);
 
 const linkClick = e => {
-  e.preventDefault();
   const menu = e.target as HTMLAnchorElement
   let url = menu.href;
-  if (!url.endsWith('/')) url = url + '/';
-  history.pushState(null, "", url)
-  route(menu.pathname);
+  if (url && url.startsWith(document.location.origin)) {
+    e.preventDefault();
+    if (!url.endsWith('/')) url = url + '/';
+    history.pushState(null, "", menu.pathname)
+    route(menu.pathname);
+  }
 }
-
-const fixAnchors = (selectors: string) => {
-  document.querySelectorAll(selectors)
-    .forEach((a: HTMLAnchorElement) => {
-      a.onclick = linkClick;
-    });
-}
-
-app.on('//', (...rest) => {
-  window.setTimeout(()=>fixAnchors('a'));
-});
 /*--- ------ ---*/
 
 const HTML =  ({ element, url }) => {
