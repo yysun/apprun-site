@@ -1,6 +1,6 @@
 {
   "name": "apprun-site",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "AppRun Static Site Tool",
   "main": "dist/index.js",
   "module": "dist/es6/index.js",
