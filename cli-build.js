@@ -9,7 +9,7 @@ md.use(require('markdown-it-v'));
 const chalk = require('chalk');
 const log = console.log;
 const chokidar = require('chokidar');
-const { cyan, yellow, blue, green, magenta, red } = chalk;
+const { cyan, yellow, blue, green, magenta, gray } = chalk;
 
 const is_page = type => (type === '.tsx' || type === '.html' || type === '.md' || type === '.txt');
 
@@ -44,6 +44,7 @@ function build(source, target, verbose) {
 }
 
 function build_file(file, source, target, verbose) {
+  // log(blue('Building: ' + `${file}`))
   file = file.replace(/\\/g, '/')
   const lib = get_lib(source);
   const name = path.basename(file).replace(/\.[^/.]+$/, "");
@@ -85,6 +86,7 @@ export default class extends Component {
       return [`${relative}`, `.${tsx}`, `${name}_md`, '.tsx']
 
     case '.tsx':
+      verbose && log(gray(`Register file: ${file} => ../../${source}${relative}`));
       return [`${relative}`, `../../${source}${relative}`, name, ext]
 
     default:
@@ -97,6 +99,7 @@ export default class extends Component {
 
 function build_index(pages, source, verbose) {
   const lib = get_lib(source);
+  ensure(lib);
   const fn = `${lib}/index.tsx`
   const f = fs.createWriteStream(`${fn}`);
   f.write('// this file is auto-generated\n');
