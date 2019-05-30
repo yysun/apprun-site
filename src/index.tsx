@@ -1,8 +1,5 @@
-import apprun from 'apprun';
 import app from './_site';
-import img from './components/my-img';
-
-apprun.webComponent('my-img', img);
+import './components/my-img';
 
 import layout from './layout';
 import pages, { links } from './pages/_index';

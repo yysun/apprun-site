@@ -1,38 +1,55 @@
 // this file is auto-generated
-import index_html_0 from './_lib/about/index_html';
-import them_1 from './about/them';
-import index_md_3 from './_lib/about/us/index_md';
-import you_md_4 from './_lib/about/you_md';
-import index_md_5 from './_lib/contact/index_md';
-import index_md_6 from './_lib/home/index_md';
-import index_8 from './index';
-import index_9 from './_404/index';
-import index_html_10 from './_lib/about/index_html';
-import index_md_11 from './_lib/about/us/index_md';
-import you_md_12 from './_lib/about/you_md';
-import index_md_13 from './_lib/contact/index_md';
-import index_md_14 from './_lib/home/index_md';
+import index_0 from './_404/index';
+import index_md_1 from './_lib/apprun-site/index_md';
+import index_md_2 from './_lib/configuration/index_md';
+import layout_md_3 from './_lib/configuration/layout_md';
+import nav_md_4 from './_lib/configuration/nav_md';
+import sidebar_md_5 from './_lib/configuration/sidebar_md';
+import theme_md_6 from './_lib/configuration/theme_md';
+import firebase_md_7 from './_lib/deploy/firebase_md';
+import github_md_8 from './_lib/deploy/github_md';
+import index_md_9 from './_lib/deploy/index_md';
+import index_md_10 from './_lib/features/index_md';
+import index_md_11 from './_lib/how-it-works/index_md';
+import index_md_12 from './_lib/index_md';
+import todo_md_14 from './_lib/todo_md';
+import index_html_15 from './_lib/web-components/index_html';
+import md_md_16 from './_lib/web-components/md_md';
+import tsx_17 from './web-components/tsx';
 export default [
-	["/about", index_html_0],
-	["/about/them", them_1],
-	["/about/us", index_md_3],
-	["/about/you", you_md_4],
-	["/contact", index_md_5],
-	["/home", index_md_6],
-	["/", index_8],
-	["/_404", index_9],
-	["/_lib/about/_html", index_html_10],
-	["/_lib/about/us/_md", index_md_11],
-	["/_lib/about/you_md", you_md_12],
-	["/_lib/contact/_md", index_md_13],
-	["/_lib/home/_md", index_md_14],
+	["/_404", index_0],
+	["/apprun-site", index_md_1],
+	["/configuration", index_md_2],
+	["/configuration/layout", layout_md_3],
+	["/configuration/nav", nav_md_4],
+	["/configuration/sidebar", sidebar_md_5],
+	["/configuration/theme", theme_md_6],
+	["/deploy/firebase", firebase_md_7],
+	["/deploy/github", github_md_8],
+	["/deploy", index_md_9],
+	["/features", index_md_10],
+	["/how-it-works", index_md_11],
+	["/", index_md_12],
+	["/todo", todo_md_14],
+	["/web-components", index_html_15],
+	["/web-components/md", md_md_16],
+	["/web-components/tsx", tsx_17],
 ] as (readonly [string, any])[];
 export const links = [
-	{"link": "/about", "text": "/about"},
-	{"link": "/about/them", "text": "/about/them"},
-	{"link": "/about/us", "text": "/about/us"},
-	{"link": "/about/you", "text": "/about/you"},
-	{"link": "/contact", "text": "/contact"},
-	{"link": "/home", "text": "/home"},
+	{"link": "/apprun-site", "text": "/apprun-site"},
+	{"link": "/configuration", "text": "/configuration"},
+	{"link": "/configuration/layout", "text": "/configuration/layout"},
+	{"link": "/configuration/nav", "text": "/configuration/nav"},
+	{"link": "/configuration/sidebar", "text": "/configuration/sidebar"},
+	{"link": "/configuration/theme", "text": "/configuration/theme"},
+	{"link": "/deploy/firebase", "text": "/deploy/firebase"},
+	{"link": "/deploy/github", "text": "/deploy/github"},
+	{"link": "/deploy", "text": "/deploy"},
+	{"link": "/features", "text": "/features"},
+	{"link": "/how-it-works", "text": "/how-it-works"},
 	{"link": "/", "text": "/"},
+	{"link": "/todo", "text": "/todo"},
+	{"link": "/web-components", "text": "/web-components"},
+	{"link": "/web-components/md", "text": "/web-components/md"},
+	{"link": "/web-components/tsx", "text": "/web-components/tsx"},
 ]

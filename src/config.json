@@ -4,9 +4,7 @@
   "element": "main",
 
   "nav": [
-    { "text": "Home", "link": "/" },
-    { "text": "Contact", "link": "/contact" },
-    { "text": "About", "link": "/about" }
+    { "text": "Home", "link": "/" }
   ],
 
   "sidebar": [

@@ -1,10 +1,11 @@
 module.exports = function ({ source, target }) {
   const app = require('apprun');
   const fs = require('fs'), path = require('path');
-  const MarkdownIt = require('markdown-it');
-  const MarkdownItV = require('markdown-it-v');
-  const md = new MarkdownIt();
-  md.use(MarkdownItV);
+  const del = require('del');
+  const md = require('markdown-it')();
+  md.use(require('markdown-it-anchor'));
+  // md.use(require('markdown-it-table-of-contents'));
+  md.use(require('markdown-it-v'));
 
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach( f => {
@@ -17,6 +18,7 @@ module.exports = function ({ source, target }) {
 
   source = source || 'src/pages';
   target = target || 'public';
+  del.sync([`${source}/_lib/**`]);
 
   const files = [];
   walkDir(source, function(filePath) {
