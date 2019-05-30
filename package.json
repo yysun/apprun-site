@@ -7,13 +7,14 @@
   "bin": "apprun-site-cli.js",
   "scripts": {
     "test": "jest --watch",
-    "start": "run-s build:pages start:dev",
+    "start": "run-p pages start:dev",
     "start:dev": "webpack-dev-server --mode development",
     "build:pages": "node apprun-site-cli build --target docs",
     "build": "run-s build:*",
     "build:ts": "tsc -d -p src/_site",
     "build:js": "webpack -p --mode production",
-    "cli": "node apprun-site-cli"
+    "cli": "node apprun-site-cli",
+    "pages": "node apprun-site-cli build --target docs -w -V"
   },
   "keywords": [
     "AppRun",
@@ -33,6 +34,8 @@
   "dependencies": {
     "apprun": "^2.20.3",
     "cac": "^6.5.1",
+    "chalk": "^2.4.2",
+    "chokidar": "^3.0.0",
     "degit": "^2.1.3",
     "del": "^4.1.1",
     "markdown-it": "^8.4.2",

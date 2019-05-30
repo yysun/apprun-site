@@ -1,14 +1,29 @@
-module.exports = function ({ source, target }) {
-  const app = require('apprun');
-  const fs = require('fs'), path = require('path');
-  const del = require('del');
-  const md = require('markdown-it')();
-  md.use(require('markdown-it-anchor'));
-  // md.use(require('markdown-it-table-of-contents'));
-  md.use(require('markdown-it-v'));
+const app = require('apprun');
+const fs = require('fs'), path = require('path');
+const del = require('del');
+const md = require('markdown-it')();
+md.use(require('markdown-it-anchor'));
+// md.use(require('markdown-it-table-of-contents'));
+md.use(require('markdown-it-v'));
+
+const chalk = require('chalk');
+const log = console.log;
+const chokidar = require('chokidar');
+const { cyan, yellow, blue, green, magenta, red } = chalk;
+
+const is_page = type => (type === '.tsx' || type === '.html' || type === '.md' || type === '.txt');
+
+const get_lib = source => `${source}/../_lib`;
+
+const ensure = dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function build(source, target, verbose) {
+  // log(blue('Building: ' + `${source} => ${target}`));
 
   function walkDir(dir, callback) {
-    fs.readdirSync(dir).forEach( f => {
+    fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
       let isDirectory = fs.statSync(dirPath).isDirectory();
       isDirectory ?
@@ -16,76 +31,78 @@ module.exports = function ({ source, target }) {
     });
   };
 
-  source = source || 'src/pages';
-  target = target || 'public';
-  del.sync([`${source}/_lib/**`]);
+  const lib = get_lib(source);
+  if (fs.existsSync(lib)) del.sync([`${lib}`]);
 
   const files = [];
-  walkDir(source, function(filePath) {
-    files.push(filePath.replace(/\\/g, '/'));
+  walkDir(source, function (filePath) {
+    files.push(filePath);
   });
 
-  const ensure = dir => {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  }
+  return files.map(file => build_file(file, source, target, verbose))
+    .filter(f => f !== null);
+}
 
-  const is_page = type => (type === '.tsx' || type === '.html' || type === '.md' || type === '.txt');
+function build_file(file, source, target, verbose) {
+  file = file.replace(/\\/g, '/')
+  const lib = get_lib(source);
+  const name = path.basename(file).replace(/\.[^/.]+$/, "");
+  const ext = path.extname(file);
+  const dir = path.dirname(file).replace(source, '');
+  if (name.startsWith('_')) return null;
+  const public = target + dir;
+  const sname = (name === 'index' ? path.basename(dir) : name) || '/';
+  const relative = `${dir}/${name}`;
+  let tsx;
 
-  const pages = files.map(file => {
-    const name = path.basename(file).replace(/\.[^/.]+$/, "");
-    const ext = path.extname(file);
-    const dir = path.dirname(file).replace(source, '');
-    if (name.startsWith('_')) return null;
-    const public = target + dir;
-    const sname = (name === 'index' ? path.basename(dir) : name) || '/';
-    const relative = `${dir}/${name}`;
-    let tsx;
-
-    switch (ext) {
-      case '.html':
-        let html = fs.readFileSync(file).toString();
-        html = `import { app, Component } from 'apprun';
+  switch (ext) {
+    case '.html':
+      let html = fs.readFileSync(file).toString();
+      html = `import { app, Component } from 'apprun';
 export default class extends Component {
   view = _ => \`_html:${html}\`;
 }`
-        tsx = `/_lib${dir}/${name}_html`
-        const html_filename = `${source}${tsx}.tsx`;
-        ensure(path.dirname(html_filename));
-        fs.writeFileSync(`${html_filename}`, html);
-        console.log(`Info: created file: ${file} => ${html_filename}`);
-        return [`${relative}`, `.${tsx}`, `${name}_html`, '.tsx']
+      tsx = `${dir}/${name}_html`
+      const html_filename = `${lib}${tsx}.tsx`;
+      ensure(path.dirname(html_filename));
+      fs.writeFileSync(`${html_filename}`, html);
+      verbose && log(cyan(`Created file: ${file} => ${html_filename}`));
+      return [`${relative}`, `.${tsx}`, `${name}_html`, '.tsx']
 
-      case '.md':
-        let text = fs.readFileSync(file).toString();
-        const sdom = md.render(text);
-        text = sdom.toReact(app.default.createElement);
-        text = `import { app, Component } from 'apprun';
+    case '.md':
+      let text = fs.readFileSync(file).toString();
+      const sdom = md.render(text);
+      text = sdom.toReact(app.default.createElement);
+      text = `import { app, Component } from 'apprun';
 export default class extends Component {
   view = _ => ${JSON.stringify(text)};
 }`
-        tsx = `/_lib${dir}/${name}_md`
-        const md_filename = `${source}${tsx}.tsx`;
-        ensure(path.dirname(md_filename));
-        fs.writeFileSync(`${md_filename}`, text);
-        console.log(`Info: created file: ${file} => ${md_filename}`);
-        return [`${relative}`, `.${tsx}`, `${name}_md`, '.tsx']
-      case '.tsx':
-          return [`${relative}`, `.${relative}`, name, ext]
-      default:
-        ensure(public);
-        fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
-        console.log(`Info: copied file: ${file} => ${public}/${name}${ext}`);
-        return [`${relative}`, `${relative}${ext}`, sname, ext]
-    }
-  }).filter(p => p !== null);
+      tsx = `${dir}/${name}_md`
+      const md_filename = `${lib}${tsx}.tsx`;
+      ensure(path.dirname(md_filename));
+      fs.writeFileSync(`${md_filename}`, text);
+      verbose && log(green(`Created file: ${file} => ${md_filename}`));
+      return [`${relative}`, `.${tsx}`, `${name}_md`, '.tsx']
 
-  // console.log(pages);
+    case '.tsx':
+      return [`${relative}`, `../../${source}${relative}`, name, ext]
 
-  const f = fs.createWriteStream(`${source}/_index.tsx`);
+    default:
+      ensure(public);
+      fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
+      verbose && log(yellow(`Copied file: ${file} => ${public}/${name}${ext}`));
+      return null; // [`${relative}`, `${relative}${ext}`, sname, ext]
+  }
+}
+
+function build_index(pages, source, verbose) {
+  const lib = get_lib(source);
+  const fn = `${lib}/index.tsx`
+  const f = fs.createWriteStream(`${fn}`);
   f.write('// this file is auto-generated\n');
   pages.forEach((p, idx) => {
     let [_, link, name, type] = p;
-    if (type==='.tsx') f.write(`import ${name}_${idx} from '${link}';\n`);
+    if (type === '.tsx') f.write(`import ${name}_${idx} from '${link}';\n`);
   });
   f.write('export default [\n');
   pages.forEach((p, idx) => {
@@ -107,5 +124,24 @@ export default class extends Component {
   });
   f.write(']\n');
   f.end();
-
+  verbose && log(magenta(`Created file: ${fn}`));
 }
+
+module.exports = function ({ source, target, verbose, watch }) {
+
+  source = source || 'src/pages';
+  target = target || 'public';
+  const pages = build(source, target, verbose);
+
+  build_index(pages, source, verbose);
+
+  if (watch) {
+    let id;
+    log(blue('Watching: ' + source + '... '));
+    chokidar.watch('src/pages', { ignored: /.+\_index\.tsx/ })
+      .on('change', (path) => {
+        if (id) clearTimeout(id);
+        id = setTimeout(() => build_file(path, source, target, verbose), 500);
+      });
+  }
+};

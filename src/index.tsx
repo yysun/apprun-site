@@ -2,7 +2,7 @@ import app from './_site';
 import './components/my-img';
 
 import layout from './layout';
-import pages, { links } from './pages/_index';
+import pages, { links } from './_lib';
 
 import * as config from './config.json';
 const site = {

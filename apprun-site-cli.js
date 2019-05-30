@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
+const cli = require('cac')()
 const degit = require('degit')
 const build = require('./cli-build')
-const cli = require('cac')()
 
 cli.command('build', 'build pages')
   .option('-w, --watch', 'watch the folder')
+  .option('-V, --verbose', 'watch the folder')
   .option('-s, --source [sourceDir]', 'source directory')
   .option('-t, --target [targetDir]', 'target directory')
   .action((options) => build(options))
@@ -25,7 +26,7 @@ cli.command('init [targetDir]', 'initialize project')
 
 
 cli.help()
-cli.version('0.1.0')
+cli.version('0.2.0')
 cli.parse()
 
 

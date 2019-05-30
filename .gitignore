@@ -4,3 +4,4 @@ Thumbs.db
 node_modules
 coverage
 .cache
+src/_lib
