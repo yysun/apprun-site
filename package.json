@@ -7,7 +7,7 @@
   "bin": "apprun-site-cli.js",
   "scripts": {
     "test": "jest --watch",
-    "start": "run-p pages start:dev",
+    "start": "run-p start:dev pages",
     "start:dev": "webpack-dev-server --mode development",
     "build:pages": "node apprun-site-cli build --target docs",
     "build": "run-s build:*",
