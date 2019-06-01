@@ -1,5 +1,6 @@
 const app = require('apprun');
-const fs = require('fs'), path = require('path');
+const fs = require('fs'),
+  path = require('path');
 const del = require('del');
 const md = require('markdown-it')();
 md.use(require('markdown-it-anchor'));
@@ -11,13 +12,14 @@ const log = console.log;
 const chokidar = require('chokidar');
 const { cyan, yellow, blue, green, magenta, gray } = chalk;
 
-const is_page = type => (type === '.tsx' || type === '.html' || type === '.md' || type === '.txt');
+const is_page = type => type === '.tsx' || type === '.html' || type === '.md' || type === '.txt';
 
-const get_lib = source => `${source}/../_lib`;
+const get_lib = source => `${path.dirname(source)}/_lib`; //?
+const esm_dir = '/esm/_lib/'; //?
 
 const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
+};
 
 function build(source, target, verbose) {
   // log(blue('Building: ' + `${source} => ${target}`));
@@ -26,28 +28,26 @@ function build(source, target, verbose) {
     fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
       let isDirectory = fs.statSync(dirPath).isDirectory();
-      isDirectory ?
-        walkDir(dirPath, callback) : callback(path.join(dir, f));
+      isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
     });
-  };
+  }
 
   const lib = get_lib(source);
   if (fs.existsSync(lib)) del.sync([`${lib}`]);
 
   const files = [];
-  walkDir(source, function (filePath) {
+  walkDir(source, function(filePath) {
     files.push(filePath);
   });
 
-  return files.map(file => build_file(file, source, target, verbose))
-    .filter(f => f !== null);
+  return files.map(file => build_file(file, source, target, verbose)).filter(f => f !== null);
 }
 
 function build_file(file, source, target, verbose) {
   // log(blue('Building: ' + `${file}`))
-  file = file.replace(/\\/g, '/')
+  file = file.replace(/\\/g, '/');
   const lib = get_lib(source);
-  const name = path.basename(file).replace(/\.[^/.]+$/, "");
+  const name = path.basename(file).replace(/\.[^/.]+$/, '');
   const ext = path.extname(file);
   const dir = path.dirname(file).replace(source, '');
   if (!name || name.startsWith('_')) return null;
@@ -62,13 +62,13 @@ function build_file(file, source, target, verbose) {
       html = `import { app, Component } from 'apprun';
 export default class extends Component {
   view = _ => \`_html:${html}\`;
-}`
-      tsx = `${dir}/${name}_html`
+}`;
+      tsx = `${dir}/${name}_html`;
       const html_filename = `${lib}${tsx}.tsx`;
       ensure(path.dirname(html_filename));
       fs.writeFileSync(`${html_filename}`, html);
       verbose && log(cyan(`Created file: ${file} => ${html_filename}`));
-      return [relative, `.${tsx}`, `${name}_html`, '.tsx']
+      return [relative, `.${tsx}`, `${name}_html`, '.tsx'];
 
     case '.md':
       let text = fs.readFileSync(file).toString();
@@ -77,18 +77,21 @@ export default class extends Component {
       text = `import { app, Component } from 'apprun';
 export default class extends Component {
   view = _ => ${JSON.stringify(text)};
-}`
-      tsx = `${dir}/${name}_md`
+}`;
+      tsx = `${dir}/${name}_md`;
       const md_filename = `${lib}${tsx}.tsx`;
       ensure(path.dirname(md_filename));
       fs.writeFileSync(`${md_filename}`, text);
       verbose && log(green(`Created file: ${file} => ${md_filename}`));
-      return [relative, `.${tsx}`, `${name}_md`, '.tsx']
+      return [relative, `.${tsx}`, `${name}_md`, '.tsx'];
 
     case '.tsx':
-      tsx = `../${path.basename(source)}${relative}`;
-      verbose && log(gray(`Registered file: ${file} => ${tsx}`));
-      return [relative, tsx, name, ext]
+      tsx = `${dir}/${name}${ext}`;
+      const tsx_filename = `${lib}${tsx}.tsx`;
+      ensure(path.dirname(tsx_filename));
+      fs.copyFileSync(file, tsx_filename);
+      verbose && log(gray(`Copied file: ${file} => ${tsx_filename}`));
+      return [relative, `.${tsx}`, name, ext];
 
     default:
       ensure(public);
@@ -102,8 +105,8 @@ function build_index(pages, source, verbose) {
   const lib = get_lib(source);
   ensure(lib);
 
-
-  let fn = `${lib}/index.tsx`
+  // _lib/index.tsx
+  let fn = `${lib}/index.tsx`;
   let f = fs.createWriteStream(`${fn}`);
   f.write('// this file is auto-generated\n');
   pages.forEach((p, idx) => {
@@ -132,7 +135,8 @@ function build_index(pages, source, verbose) {
   f.end();
   verbose && log(magenta(`Created file: ${fn}`));
 
-  fn = `${lib}/index-esm.tsx`
+  // _lib/index-esm.tsx
+  fn = `${lib}/index-esm.tsx`;
   f = fs.createWriteStream(`${fn}`);
   f.write('// this file is auto-generated\n');
 
@@ -144,6 +148,7 @@ function build_index(pages, source, verbose) {
     p[0] = p[0].replace('/index', '/');
     p[0] = p[0].replace(/\/$/g, '');
     p[0] = p[0] || '/';
+    link = link.replace('./', esm_dir);
     f.write(`\t["${p[0]}", '${link0}', '${link}.js'],\n`);
   });
   f.write(']\n');
@@ -160,8 +165,7 @@ function build_index(pages, source, verbose) {
   verbose && log(magenta(`Created file: ${fn}`));
 }
 
-module.exports = function ({ source, target, verbose, watch }) {
-
+module.exports = function({ source, target, verbose, watch }) {
   source = source || 'src/pages';
   target = target || 'public';
   const pages = build(source, target, verbose);
@@ -171,10 +175,9 @@ module.exports = function ({ source, target, verbose, watch }) {
   if (watch) {
     let id;
     log(blue('Watching: ' + source + '... '));
-    chokidar.watch('src/pages', { ignored: /.+\_index\.tsx/ })
-      .on('change', (path) => {
-        if (id) clearTimeout(id);
-        id = setTimeout(() => build_file(path, source, target, verbose), 500);
-      });
+    chokidar.watch(source, { ignored: /.+\_index\.tsx/ }).on('change', path => {
+      if (id) clearTimeout(id);
+      id = setTimeout(() => build_file(path, source, target, verbose), 500);
+    });
   }
 };
