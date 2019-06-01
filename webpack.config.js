@@ -8,7 +8,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, public),
-    filename: '[name].js'
+    filename: '[name].js',
+    libraryTarget: 'umd'
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
