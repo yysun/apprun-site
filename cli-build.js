@@ -87,7 +87,7 @@ export default class extends Component {
 
     case '.tsx':
       tsx = `../${path.basename(source)}${relative}`;
-      verbose && log(gray(`Register file: ${file} => ${tsx}`));
+      verbose && log(gray(`Registered file: ${file} => ${tsx}`));
       return [relative, tsx, name, ext]
 
     default:

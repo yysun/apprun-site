@@ -3,7 +3,7 @@ const public = 'docs';
 
 module.exports = {
   entry: {
-    '../dist/index': './src/_site/index-esm.tsx',
+    '../dist/index': './src/_site/index.tsx',
     'dist/app': './src/index.tsx'
   },
   output: {
