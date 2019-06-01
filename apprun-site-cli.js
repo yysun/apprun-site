@@ -3,6 +3,7 @@
 const cli = require('cac')();
 const degit = require('degit');
 const build = require('./cli-build');
+const fix = require('./cli-esm-fix');
 
 cli
   .command('build', 'build pages')
@@ -11,6 +12,13 @@ cli
   .option('-s, --source [sourceDir]', 'source directory')
   .option('-t, --target [targetDir]', 'target directory')
   .action(options => build(options));
+
+cli
+  .command('fix-esm', 'fix es modules')
+  .option('-m --modules <modules>', 'Choose a directory for global modules', { default: '_modules' })
+  .option('-V, --verbose', 'show verbose diagnostic information')
+  .option('-s, --source [sourceDir]', 'source directory')
+  .action(options => fix(options));
 
 cli
   .command('init [targetDir]', 'initialize project')
@@ -27,5 +35,5 @@ cli
   });
 
 cli.help();
-cli.version('0.3.0');
+cli.version('0.4.0');
 cli.parse();
