@@ -86,7 +86,7 @@ export default class extends Component {
       return [relative, `.${tsx}`, `${name}_md`, '.tsx'];
 
     case '.tsx':
-      tsx = `${dir}/${name}${ext}`;
+      tsx = `${dir}/${name}_tsx`;
       const tsx_filename = `${lib}${tsx}.tsx`;
       ensure(path.dirname(tsx_filename));
       fs.copyFileSync(file, tsx_filename);
