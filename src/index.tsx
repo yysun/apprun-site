@@ -1,8 +1,8 @@
-import app from './_site';
+import app from './_site/index';
 import './components/my-img';
 
 import layout from './layout';
-import pages, { links } from './_lib';
+import pages, { links } from './_lib/index';
 
 import * as config from './config.json';
 const site = {

@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es2017",
-		"module": "es2015",
+		"module": "esnext",
 		"moduleResolution": "node",
 		"jsx": "react",
 		"reactNamespace": "app",
@@ -9,6 +9,7 @@
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
-		"outDir": "../../dist/es6",
+		"outDir": "../docs/esm",
+		"sourceMap": true
 	}
 }

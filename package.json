@@ -11,7 +11,7 @@
     "start:dev": "webpack-dev-server --mode development",
     "build:pages": "node apprun-site-cli build --target docs",
     "build": "run-s build:*",
-    "build:ts": "tsc -d -p src/_site",
+    "build:ts": "tsc -d -p src",
     "build:js": "webpack -p --mode production",
     "cli": "node apprun-site-cli",
     "pages": "node apprun-site-cli build --target docs -w -V"

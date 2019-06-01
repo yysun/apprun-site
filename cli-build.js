@@ -50,9 +50,9 @@ function build_file(file, source, target, verbose) {
   const name = path.basename(file).replace(/\.[^/.]+$/, "");
   const ext = path.extname(file);
   const dir = path.dirname(file).replace(source, '');
-  if (name.startsWith('_')) return null;
+  if (!name || name.startsWith('_')) return null;
   const public = target + dir;
-  const sname = (name === 'index' ? path.basename(dir) : name) || '/';
+  // const sname = (name === 'index' ? path.basename(dir) : name) || '/';
   const relative = `${dir}/${name}`;
   let tsx;
 
@@ -68,7 +68,7 @@ export default class extends Component {
       ensure(path.dirname(html_filename));
       fs.writeFileSync(`${html_filename}`, html);
       verbose && log(cyan(`Created file: ${file} => ${html_filename}`));
-      return [`${relative}`, `.${tsx}`, `${name}_html`, '.tsx']
+      return [relative, `.${tsx}`, `${name}_html`, '.tsx']
 
     case '.md':
       let text = fs.readFileSync(file).toString();
@@ -83,29 +83,33 @@ export default class extends Component {
       ensure(path.dirname(md_filename));
       fs.writeFileSync(`${md_filename}`, text);
       verbose && log(green(`Created file: ${file} => ${md_filename}`));
-      return [`${relative}`, `.${tsx}`, `${name}_md`, '.tsx']
+      return [relative, `.${tsx}`, `${name}_md`, '.tsx']
 
     case '.tsx':
-      verbose && log(gray(`Register file: ${file} => ../../${source}${relative}`));
-      return [`${relative}`, `../../${source}${relative}`, name, ext]
+      tsx = `../${path.basename(source)}${relative}`;
+      verbose && log(gray(`Register file: ${file} => ${tsx}`));
+      return [relative, tsx, name, ext]
 
     default:
       ensure(public);
-      fs.copyFileSync(`${file}`, `${public}/${name}${ext}`);
+      fs.copyFileSync(file, `${public}/${name}${ext}`);
       verbose && log(yellow(`Copied file: ${file} => ${public}/${name}${ext}`));
-      return null; // [`${relative}`, `${relative}${ext}`, sname, ext]
+      return null; // [relative, `${relative}${ext}`, sname, ext]
   }
 }
 
 function build_index(pages, source, verbose) {
   const lib = get_lib(source);
   ensure(lib);
-  const fn = `${lib}/index.tsx`
-  const f = fs.createWriteStream(`${fn}`);
+
+
+  let fn = `${lib}/index.tsx`
+  let f = fs.createWriteStream(`${fn}`);
   f.write('// this file is auto-generated\n');
   pages.forEach((p, idx) => {
     let [_, link, name, type] = p;
-    if (type === '.tsx') f.write(`import ${name}_${idx} from '${link}';\n`);
+    link0 = `_${name}_${idx}`.replace(/\-/g, '_');
+    if (type === '.tsx') f.write(`import ${link0} from '${link}';\n`);
   });
   f.write('export default [\n');
   pages.forEach((p, idx) => {
@@ -113,10 +117,36 @@ function build_index(pages, source, verbose) {
     p[0] = p[0].replace('/index', '/');
     p[0] = p[0].replace(/\/$/g, '');
     p[0] = p[0] || '/';
-    const link0 = type === '.tsx' ? `${name}_${idx}` : `"${link}"`;
+    const link0 = type === '.tsx' ? `_${name}_${idx}`.replace(/\-/g, '_') : link;
     is_page(type) && f.write(`\t["${p[0]}", ${link0}],\n`);
   });
   f.write('] as (readonly [string, any])[];\n');
+  f.write('export const links = [\n');
+  pages.forEach(p => {
+    const [evt, _, name, type] = p;
+    if (!evt.startsWith('/_') && is_page(type)) {
+      f.write(`\t{"link": "${evt}", "text": "${evt}"},\n`);
+    }
+  });
+  f.write(']\n');
+  f.end();
+  verbose && log(magenta(`Created file: ${fn}`));
+
+  fn = `${lib}/index-esm.tsx`
+  f = fs.createWriteStream(`${fn}`);
+  f.write('// this file is auto-generated\n');
+
+  f.write('export default [\n');
+  pages.forEach((p, idx) => {
+    let [_, link, name, type] = p;
+    if (type !== '.tsx') return;
+    link0 = `_${name}_${idx}`.replace(/\-/g, '_');
+    p[0] = p[0].replace('/index', '/');
+    p[0] = p[0].replace(/\/$/g, '');
+    p[0] = p[0] || '/';
+    f.write(`\t["${p[0]}", '${link0}', '${link}.js'],\n`);
+  });
+  f.write(']\n');
 
   f.write('export const links = [\n');
   pages.forEach(p => {
