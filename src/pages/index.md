@@ -6,25 +6,27 @@
 
 [AppRun](https://apprun.js.org) is a Javascript library for building reliable, high-performance web applications using the Elm inspired Architecture, events, and components.
 
-**AppRun Site CLI** is a tool to create an [AppRun Site](apprun-site), an application framework for AppRun, which has structure that has the following structure:
+**AppRun Site CLI** is a tool to create an [AppRun Site](apprun-site), an application framework for AppRun.
+
+AppRun Site lets you organize your code into well-planned directory structure as following:
 
 ```
 public/
 src/
-  components/
   layout/
-    Layout.tsx
-    index.html
-    style.css
   pages/
-    _lib
-      index.ts
     home/
     contact/
     about/
   config.json
   index.ts
 ```
+It looks like a static site generator. However, don't use it to make a Blog site. AppRun Site an application framework that has the main design gaols are:
+
+* Auto-generate the routing events
+* Separate the layout and content
+* Use web components
+
 
 ## Quick Start
 
@@ -44,6 +46,6 @@ Then, you can use:
 
 ## Ready for More Information
 
-* You can find out AppRun Site [features](/features) of  and  [how it works](/how-it-works).
+* You can find out [how it works](/how-it-works).
 
 

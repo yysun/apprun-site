@@ -13,13 +13,13 @@
     "build": "run-s build:*",
     "build:pages": "node apprun-site-cli build --target docs",
     "build:js": "webpack -p --mode production",
-    "build:esm": "run-s build:esm:*",
-    "build:esm:ts": "tsc -d -p src",
-    "build:esm:fix": "node apprun-site-cli fix-esm --source docs/esm"
+    "-build:esm": "run-s build:esm:*",
+    "-build:esm:ts": "tsc -d -p src",
+    "-build:esm:fix": "node apprun-site-cli fix-esm --source docs/esm"
   },
   "keywords": [
     "AppRun",
-    "Static Site"
+    "Application Framework"
   ],
   "author": "Yiyi Sun",
   "license": "MIT",
