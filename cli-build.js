@@ -1,7 +1,8 @@
 const app = require('apprun');
-const fs = require('fs'),
-  path = require('path');
-const del = require('del');
+const fs = require('fs');
+const path = require('path');
+const fse = require('fs-extra');
+
 const md = require('markdown-it')();
 md.use(require('markdown-it-anchor'));
 // md.use(require('markdown-it-table-of-contents'));
@@ -33,10 +34,10 @@ function build(source, target, verbose) {
   }
 
   const lib = get_lib(source);
-  if (fs.existsSync(lib)) del.sync([`${lib}`]);
+  fse.emptyDirSync(lib);
 
   const files = [];
-  walkDir(source, function(filePath) {
+  walkDir(source, function (filePath) {
     files.push(filePath);
   });
 
@@ -165,19 +166,32 @@ function build_index(pages, source, verbose) {
   verbose && log(magenta(`Created file: ${fn}`));
 }
 
-module.exports = function({ source, target, verbose, watch }) {
+module.exports = function ({ source, target, verbose, watch }) {
   source = source || 'src/pages';
   target = target || 'public';
-  const pages = build(source, target, verbose);
 
-  build_index(pages, source, verbose);
+  const build_all = () => {
+    try {
+      const pages = build(source, target, verbose);
+      build_index(pages, source, verbose);
+    } catch (ex) {
+      log(red(ex.message))
+    }
+  }
+
+  build_all();
 
   if (watch) {
     let id;
     log(blue('Watching: ' + source + '... '));
-    chokidar.watch(source, { ignored: /.+\_index\.tsx/ }).on('change', path => {
-      if (id) clearTimeout(id);
-      id = setTimeout(() => build_file(path, source, target, verbose), 500);
-    });
+    chokidar.watch(source, { ignored: `${get_lib(source)}/**/*`, ignoreInitial:true })
+      .on('change', path => {
+        if (id) clearTimeout(id);
+        id = setTimeout(() => build_file(path, source, target, verbose), 500);
+      }).on('add', _ => {
+        build_all();
+      }).on('unlink', _ => {
+        build_all();
+      })
   }
 };
