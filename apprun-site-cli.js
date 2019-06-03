@@ -7,10 +7,11 @@ const fix = require('./cli-esm-fix');
 
 cli
   .command('build', 'build pages')
-  .option('-w, --watch', 'watch the folder')
-  .option('-V, --verbose', 'show verbose diagnostic information')
+  .option('-r, --root [root]', 'event root, default /, you can make it #')
   .option('-s, --source [sourceDir]', 'source directory')
   .option('-t, --target [targetDir]', 'target directory')
+  .option('-w, --watch', 'watch the folder')
+  .option('-V, --verbose', 'show verbose diagnostic information')
   .action(options => build(options));
 
 cli

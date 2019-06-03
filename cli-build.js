@@ -102,7 +102,8 @@ export default class extends Component {
   }
 }
 
-function build_index(pages, source, verbose) {
+function build_index(root, pages, source, verbose) {
+
   const lib = get_lib(source);
   ensure(lib);
 
@@ -121,19 +122,11 @@ function build_index(pages, source, verbose) {
     p[0] = p[0].replace('/index', '/');
     p[0] = p[0].replace(/\/$/g, '');
     p[0] = p[0] || '/';
+    p[0] = root + p[0].substring(1);
     const link0 = type === '.tsx' ? `_${name}_${idx}`.replace(/\-/g, '_') : link;
     is_page(type) && f.write(`\t["${p[0]}", ${link0}],\n`);
   });
   f.write('] as (readonly [string, any])[];\n');
-  f.write('export const links = [\n');
-  pages.forEach(p => {
-    const [evt, _, name, type] = p;
-    if (!evt.startsWith('/_') && is_page(type)) {
-      f.write(`\t{"link": "${evt}", "text": "${evt}"},\n`);
-    }
-  });
-  f.write(']\n');
-  f.end();
   verbose && log(magenta(`Created file: ${fn}`));
 
   // _lib/index-esm.tsx
@@ -146,34 +139,22 @@ function build_index(pages, source, verbose) {
     let [_, link, name, type] = p;
     if (type !== '.tsx') return;
     link0 = `_${name}_${idx}`.replace(/\-/g, '_');
-    p[0] = p[0].replace('/index', '/');
-    p[0] = p[0].replace(/\/$/g, '');
-    p[0] = p[0] || '/';
     link = link.replace('./', esm_dir);
     f.write(`\t["${p[0]}", '${link0}', '${link}.js'],\n`);
   });
   f.write(']\n');
-
-  f.write('export const links = [\n');
-  pages.forEach(p => {
-    const [evt, _, name, type] = p;
-    if (!evt.startsWith('/_') && is_page(type)) {
-      f.write(`\t{"link": "${evt}", "text": "${evt}"},\n`);
-    }
-  });
-  f.write(']\n');
-  f.end();
   verbose && log(magenta(`Created file: ${fn}`));
 }
 
-module.exports = function ({ source, target, verbose, watch }) {
+module.exports = function ({ root, source, target, verbose, watch }) {
+  root = root || '/';
   source = source || 'src/pages';
   target = target || 'public';
 
   const build_all = () => {
     try {
       const pages = build(source, target, verbose);
-      build_index(pages, source, verbose);
+      build_index(root, pages, source, verbose);
     } catch (ex) {
       log(red(ex.message))
     }
