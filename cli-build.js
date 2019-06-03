@@ -11,7 +11,7 @@ md.use(require('markdown-it-v'));
 const chalk = require('chalk');
 const log = console.log;
 const chokidar = require('chokidar');
-const { cyan, yellow, blue, green, magenta, gray } = chalk;
+const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 
 const is_page = type => type === '.tsx' || type === '.html' || type === '.md' || type === '.txt';
 
@@ -105,7 +105,6 @@ export default class extends Component {
 function build_index(root, pages, source, verbose) {
 
   const lib = get_lib(source);
-  ensure(lib);
 
   // _lib/index.tsx
   let fn = `${lib}/index.tsx`;
@@ -150,6 +149,9 @@ module.exports = function ({ root, source, target, verbose, watch }) {
   root = root || '/';
   source = source || 'src/pages';
   target = target || 'public';
+
+  const lib = get_lib(source);
+  ensure(lib);
 
   const build_all = () => {
     try {
