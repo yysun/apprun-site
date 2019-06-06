@@ -141,8 +141,8 @@ function build_index(root, pages, source, verbose) {
 }
 
 module.exports = function ({ root, source, target, verbose, watch }) {
-  root = root.replace(/\'|\"/g, '');
   root = root || '/';
+  root = root.replace(/\'|\"/g, '');
   source = source || 'src/pages';
   target = target || 'public';
 
