@@ -118,6 +118,7 @@ function build_index(root, pages, source, verbose) {
     p[0] = p[0].replace(/\/$/g, '');
     p[0] = p[0] || '/';
     p[0] = root + p[0].substring(1);
+    if (root.startsWith('#')) p[0] = p[0].replace(/\//g, '_')
     const link0 = type === '.tsx' ? `_${name}_${idx}`.replace(/\-/g, '_') : link;
     is_page(type) && f.write(`\t["${p[0]}", ${link0}],\n`);
   });
