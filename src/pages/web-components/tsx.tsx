@@ -7,6 +7,6 @@ export default class extends Component {
     <pre>
       view = (state) => &lt;my-img src='/logo.png'&gt;&lt;/my-img&gt;
     </pre>
-    <div><my-img src='/logo.png'></my-img></div>
+    <div><my-img src='logo.png'></my-img></div>
   </>
 }

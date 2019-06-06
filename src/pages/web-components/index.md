@@ -2,7 +2,7 @@
 
 Web components are great building blocks for composing applications. Web components are custom elements.
 ```
-<my-img src='/logo.png'></my-img>
+<my-img src='logo.png'></my-img>
 ```
 You can create web components out of AppRun components. Checkout the example of **_src/components/my-img.tsx_**.
 
