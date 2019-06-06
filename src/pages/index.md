@@ -4,7 +4,7 @@
 
 [AppRun](https://apprun.js.org) is a Javascript library for building reliable, high-performance web applications using the Elm inspired Architecture, events, and components.
 
-[AppRun Site](apprun-site) is a framework for building AppRun applications.
+**[AppRun Site](https://yysun.github.io/apprun-site)** is a framework for building AppRun applications.
 
 ## Features
 
@@ -36,6 +36,6 @@ Then, you can use:
 
 ## Ready for More Information
 
-* You can find out [how it works](/how-it-works).
+* You can find out [how it works](#how-it-works).
 
 
