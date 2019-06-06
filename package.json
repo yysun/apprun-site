@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "acorn": "^6.1.1",
-    "apprun": "^2.20.3",
+    "apprun": "^2.20.6",
     "cac": "^6.5.1",
     "chalk": "^2.4.2",
     "chokidar": "^3.0.0",
@@ -45,7 +45,6 @@
     "markdown-it": "^8.4.2",
     "markdown-it-anchor": "^5.2.3",
     "markdown-it-table-of-contents": "^0.4.4",
-    "markdown-it-v": "^1.2.0",
     "read-pkg": "^5.1.1"
   },
   "jest": {

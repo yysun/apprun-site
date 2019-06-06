@@ -3,10 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
 
-const md = require('markdown-it')();
+const md = require('markdown-it')({ html: true });
 md.use(require('markdown-it-anchor'));
-// md.use(require('markdown-it-table-of-contents'));
-md.use(require('markdown-it-v'));
+md.use(require('markdown-it-table-of-contents'));
 
 const chalk = require('chalk');
 const log = console.log;
@@ -69,11 +68,10 @@ export default class extends Component {
 
     case '.md':
       let text = fs.readFileSync(file).toString();
-      const sdom = md.render(text);
-      text = sdom.toReact(app.default.createElement);
+      text = md.render(text);
       text = `import { app, Component } from 'apprun';
 export default class extends Component {
-  view = _ => ${JSON.stringify(text)};
+  view = _ => \`_html:${text}\`;
 }`;
       tsx = `${dir}/${name}_md`;
       const md_filename = `${lib}${tsx}.tsx`;
