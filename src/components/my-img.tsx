@@ -1,5 +1,6 @@
-import { app, Component } from 'apprun';
+import { app, Component, customElement } from 'apprun';
+
+@customElement('my-img')
 class Img extends Component {
   view = ({ src }) => <img src={src} />
 }
-app.webComponent('my-img', Img);
