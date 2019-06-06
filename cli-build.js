@@ -32,10 +32,6 @@ function build(source, target, verbose) {
       isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
     });
   }
-
-  const lib = get_lib(source);
-  fse.emptyDirSync(lib);
-
   const files = [];
   walkDir(source, function (filePath) {
     files.push(filePath);
@@ -146,12 +142,14 @@ function build_index(root, pages, source, verbose) {
 }
 
 module.exports = function ({ root, source, target, verbose, watch }) {
+  root = root.replace(/\'|\"/g, '');
   root = root || '/';
   source = source || 'src/pages';
   target = target || 'public';
 
   const lib = get_lib(source);
   ensure(lib);
+  fse.emptyDirSync(lib);
 
   const build_all = () => {
     try {
@@ -165,16 +163,19 @@ module.exports = function ({ root, source, target, verbose, watch }) {
   build_all();
 
   if (watch) {
-    let id;
     log(blue('Watching: ' + source + '... '));
-    chokidar.watch(source, { ignored: `${get_lib(source)}/**/*`, ignoreInitial:true })
-      .on('change', path => {
-        if (id) clearTimeout(id);
-        id = setTimeout(() => build_file(path, source, target, verbose), 500);
-      }).on('add', _ => {
-        build_all();
-      }).on('unlink', _ => {
-        build_all();
-      })
+    chokidar.watch(source, {
+      ignored: `${get_lib(source)}/*`,
+      ignoreInitial: true,
+      ignorePermissionErrors: true,
+      usePolling: true,
+      interval: 500
+    }).on('change', path => {
+      build_file(path, source, target, verbose);
+    }).on('add', _ => {
+      build_all();
+    }).on('unlink', _ => {
+      build_all();
+    })
   }
 };
