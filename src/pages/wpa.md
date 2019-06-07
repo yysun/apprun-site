@@ -2,7 +2,7 @@
 
 AppRun Site includes the service worker from [PWA Builder](https://www.pwabuilder.com/).
 
-The service worker improves the performance of your app, and make it work offline. The advanced caching service worker allows you to configure files and routes that are cached in different manners (pre-cache, network/server first, cache first, etc.). The tool can be used to build a lightening fast app (even for dynamic content) that works offline.
+The service worker improves the performance of your app, and make it work offline. The advanced caching service worker allows you to configure files and routes that are cached in different manners (pre-cache, network/server first, cache first, etc.). 
 
 ## Register the Service Worker
 

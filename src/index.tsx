@@ -1,5 +1,6 @@
 import app from './_site/index';
 import './components/my-img';
+import './components/my-xkcd';
 
 import layout from './layout';
 import pages  from './_lib/index';
@@ -13,8 +14,8 @@ const links = [
   { "link": "#configuration_diy", "text": "Do It Yourself" },
   { "link": "#components", "text": "Components" },
   { "link": "#web-components", "text": "Web-components" },
-  { "link": "#wpa", "text": "WPA *" },
-  { "link": "#fetch", "text": "Async Fetch *" },
+  { "link": "#fetch", "text": "Async Fetch" },
+  { "link": "#wpa", "text": "WPA" },
   { "link": "#esm", "text": "ES Modules *" },
   { "link": "#deploy", "text": "Deploy *" },
   { "link": "#deploy_firebase", "text": "Deploy/firebase *" },
