@@ -5,6 +5,10 @@ import './components/my-xkcd';
 import layout from './layout';
 import pages  from './_lib/index';
 
+const nav = [
+  { "text": "Home", "link": "/" }
+];
+
 const links = [
   { "link": "#", "text": "Introduction" },
   { "link": "#how-it-works", "text": "How It Works" },
@@ -25,14 +29,13 @@ const links = [
   { "link": "", "text": "* working on docs" }
 ];
 
-import * as config from './config.json';
-const site = {
-  title: config.title,
-  element: config.element,
-  nav: config.nav,
+const config = {
+  title: 'AppRun Site',
+  element: 'main',
+  nav,
   sidebar: links,
   layout,
   pages
 };
 
-app.start(site);
+app.start(config);

@@ -2,14 +2,14 @@ import app from 'apprun';
 
 function configRoot(root = '#') {
 
-  // app.on('///', () => app.run(`${root}404`));
-
   const route = (url, e?) => {
     e && e.preventDefault();
     url = url.replace(/\/$/, "");
     url = url || root;
     if (!app.run(url)) app.run(`${root}_404`);
   }
+
+  if (root.startsWith('#')) app.on('///', () => app.run(`${root}404`));
 
   if (root.startsWith('/')) {
 

@@ -12,13 +12,12 @@
 * Progressive Web App (PWA)
 * Single Page App (SPA)
 * Flexible layouts: 4 built-in and bring your own
-* Routing based on directory
+* Auto generate the index of pages
 * Routing using / or #
-* Compile html, markdown files to AppRun components
-* Web components enabled: create and use
-* Two targets: ES5 or ES Module
+* Compile html, markdown pages to AppRun components
+* Build app logic using Web components and embed in markdown pages
+* Targets ES5 or ES Module
 * Extensible through plugins (WIP)
-
 
 ## Quick Start
 
