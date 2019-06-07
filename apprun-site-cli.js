@@ -27,7 +27,7 @@ cli
   .action((targetDir = '.', options) => {
     const repo = options.repo || 'apprunjs/apprun-starter';
     const emitter = degit(repo, {
-      cache: true,
+      cache: false,
       force: false,
       verbose: true
     });
