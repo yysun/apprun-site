@@ -1,6 +1,6 @@
 # How It Works
 
-You put your code into the directory structure as following:
+You put your AppRun components in the _pages_ directory structure as following:
 
 ```
 src/
@@ -36,8 +36,11 @@ export default [
 ] as (readonly [string, any])[];
 ```
 
-AppRun Site includes the ***app.start*** function to import the generated list, create components, and map the routing events.
+In addition to having AppRun components as pages, you can also add HTML files and markdown files in the _pages_ directory. The _build_ scripts converts them into AppRun components and saves to the **src/_lib** directory.
 
+The generated **src/_lib/index.tsx** imports the all components from **src/_lib** and **src/pages**; and exports an array that maps routing events to components.
 
-Next, let's [Getting Started](#getting-started).
+The main entry point of the application, **src/index.tsx**, imports the event-component mapping from **src/_lib/index.tsx**. Then it creates the pages, and sets the routing events.
+
+Next, let's [Getting Started](#getting-started) to see it in action.
 

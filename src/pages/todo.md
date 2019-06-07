@@ -1,5 +1,5 @@
 # Todo
 
-* a
-* b
-* c
+* Plugin Support
+* Site Search
+* GraphQL
