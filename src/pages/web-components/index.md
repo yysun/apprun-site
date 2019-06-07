@@ -19,4 +19,4 @@ And then use it in [HTML page](#web-components_html), or in [JSX view](#web-comp
 
 This page is a markdown page. It should display the web component.
 
-<my-img src='/logo.png'></my-img>
+<my-img src='logo.png'></my-img>

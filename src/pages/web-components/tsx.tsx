@@ -5,7 +5,7 @@ export default class extends Component {
     <h1>Web Component - tsx</h1>
     <div>You can use web components in the component's jsx view</div>
     <pre>
-      view = (state) => &lt;my-img src='/logo.png'&gt;&lt;/my-img&gt;
+      view = (state) => &lt;my-img src='logo.png'&gt;&lt;/my-img&gt;
     </pre>
     <div><my-img src='logo.png'></my-img></div>
   </>
