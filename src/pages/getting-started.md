@@ -14,9 +14,6 @@ The **init** command creates a project structure.
 public/
 src/
   layouts/
-  layouts-bootstrap/
-  layouts-coreui/
-  layouts-material/
   pages/
     home.tsx
     contact.tsx
