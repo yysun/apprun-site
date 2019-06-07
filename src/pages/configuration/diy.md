@@ -1,6 +1,6 @@
 # Do It Youself
 
-Instead of following some configuration schema, you can create the **src/index.tsx** and forget the out-of-box configuration.
+Instead of following the out-of-box configuration schema, you can create the **src/index.tsx** of your own without using the **app.start** function.
 
 In this case, you will need to know how to create the layout, pages, and components, which is easy to do.
 

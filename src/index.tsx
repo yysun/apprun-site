@@ -14,11 +14,13 @@ const links = [
   { "link": "#components", "text": "Components" },
   { "link": "#web-components", "text": "Web-components" },
   { "link": "#wpa", "text": "WPA *" },
+  { "link": "#fetch", "text": "Async Fetch *" },
   { "link": "#esm", "text": "ES Modules *" },
   { "link": "#deploy", "text": "Deploy *" },
   { "link": "#deploy_firebase", "text": "Deploy/firebase *" },
   { "link": "#deploy_github", "text": "Deploy/github *" },
   { "link": "#todo", "text": "Todo *" },
+  { "link": "#references", "text": "References *" },
   { "link": "", "text": "* working on docs" }
 ];
 

@@ -23,7 +23,7 @@ cli
 
 cli
   .command('init [targetDir]', 'initialize project')
-  .option('-r, --repo [repo]', 'source directory')
+  .option('-r, --repo [repo]', 'repository, default: apprunjs/apprun-starter')
   .action((targetDir = '.', options) => {
     const repo = options.repo || 'apprunjs/apprun-starter';
     const emitter = degit(repo, {
