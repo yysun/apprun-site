@@ -13,7 +13,7 @@
     "build:pages": "node apprun-site-cli build --target docs --root '#'",
     "build:js": "webpack -p --mode production",
     "build:esm": "run-s build:esm:*",
-    "build:esm:ts": "tsc -d -p src",
+    "build:esm:ts": "tsc -p src",
     "-build:esm:fix": "node apprun-site-cli fix-esm --source esm/"
   },
   "keywords": [
@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "acorn": "^6.1.1",
+    "acorn-dynamic-import": "^4.0.0",
     "apprun": "^2.20.6",
     "cac": "^6.5.1",
     "chalk": "^2.4.2",
@@ -52,7 +53,8 @@
     "markdown-it": "^8.4.2",
     "markdown-it-anchor": "^5.2.3",
     "markdown-it-table-of-contents": "^0.4.4",
-    "read-pkg": "^5.1.1"
+    "read-pkg": "^5.1.1",
+    "rollup": "^1.14.4"
   },
   "jest": {
     "transform": {

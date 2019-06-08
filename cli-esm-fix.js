@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 const cli = require('cac')();
+const exec = require('child_process').exec;
 
-module.exports = function({ source, modules, verbose }) {
+module.exports = function ({ source, modules, verbose }) {
   const fs = require('fs');
   const path = require('path');
   const readPkg = require('read-pkg');
   const MagicString = require('magic-string');
-  const acorn = require('acorn');
+  const { Parser } = require("acorn")
+  const dynamicImport = require('acorn-dynamic-import').default;
   const walk = require('estree-walker').walk;
   const chalk = require('chalk');
   const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
@@ -29,14 +31,16 @@ module.exports = function({ source, modules, verbose }) {
   }
 
   const files = [];
-  walkDir(source, function(filePath) {
+  walkDir(source, function (filePath) {
     if (filePath.endsWith('.js')) files.push(filePath);
   });
 
   files.forEach(file => {
     try {
       let code = fs.readFileSync(file).toString();
-      const ast = acorn.parse(code, { sourceType: 'module', allowImportExportEverywhere: true });
+
+      const ast = Parser.extend(dynamicImport)
+        .parse(code, { sourceType: 'module', allowImportExportEverywhere: true });
       const magicString = new MagicString(code);
       let hasFix;
       verbose && console.log(green(`Checking: ${file}`));
@@ -58,20 +62,26 @@ module.exports = function({ source, modules, verbose }) {
         fs.writeFileSync(file + '.map', magicString.generateMap({ hires: true }));
       }
     } catch (e) {
-      console.log(red(`Error: ${file}: ${e.message}`));
+      console.log(red(`Error: ${file}: ${e.message}.`));
     }
   });
 
   function copy(module) {
     if (!cache[module]) {
       const cwd = `./node_modules/${module}`;
-      const pkg = readPkg.sync({ cwd });
-      const module_file = pkg.module || pkg.main;
-      const src = `${cwd}/${module_file}`;
-      const tgt = `${source}/${modules}${module}.js`;
-      ensure(path.dirname(tgt));
-      fs.copyFileSync(src, tgt);
-      verbose && console.log(yellow(`\tCopied: ${module} => ${tgt}`));
+      tgt = `${source}/${modules}${module}.js`;
+      if (!fs.existsSync(tgt)) {
+        let src = cwd + '.js';
+        if (!fs.existsSync(src)) {
+          const pkg = readPkg.sync({ cwd });
+          const module_file = pkg.module || pkg.main;
+          src = `${cwd}/${module_file}`;
+        }
+        exec(`npx rollup "${src}" --format esm --file "${tgt}"`),
+        verbose && console.log(yellow(`\tCopied: ${module} => ${tgt}`));
+      } else {
+        verbose && console.log(gray(`\tSkipped: ${module} => ${tgt}`));
+      }
       cache[module] = tgt;
     }
   }
