@@ -1,34 +1,9 @@
 import app from 'apprun';
 
-/*--- router ---*/
-const route = (url, e?) => {
-  e && e.preventDefault();
-  url = url.replace(/\/$/, "");
-  url = url || '/';
-  if (!app.run(url)) app.run('/_404');
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  window.onpopstate = () => route(location.pathname);
-  route(location.pathname);
-});
-
-window.onclick = e => linkClick(e);
-
-const linkClick = e => {
-  const menu = e.target as HTMLAnchorElement
-  let url = menu.href;
-  if (url && url.startsWith(document.location.origin)) {
-    e.preventDefault();
-    if (!url.endsWith('/')) url = url + '/';
-    history.pushState(null, "", menu.pathname)
-    route(menu.pathname);
-  }
-}
-/*--- ------ ---*/
-
+import router from './router';
 
 export default (config) => {
+  router(config.eventRoot);
   app.render(document.body, <config.layout {...config} />);
   const element = document.getElementById(config.element);
   config.pages.forEach(def => {

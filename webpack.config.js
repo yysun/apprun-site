@@ -24,7 +24,7 @@ module.exports = {
     contentBase: path.join(__dirname, public),
     open: true,
     historyApiFallback: {
-      index: 'local.html'
+      index: 'index.html'
     }
   },
   devtool: 'source-map'
