@@ -9,13 +9,12 @@
 
 ## Features
 
-* Progressive Web App (PWA)
-* Single Page App (SPA)
-* Flexible layouts: 4 built-in and bring your own
-* Auto generate the index of pages
-* Routing using / or #
+* Progressive Web App (PWA) - support offline
+* Single Page App (SPA) - routing using / or #
+* 4 built-in layouts and bring your own
 * Compile html, markdown pages to AppRun components
-* Build app logic using Web components and embed in markdown pages
+* Auto generate the index of pages
+* Build app logic using AppRun/Web components
 * Targets ES5 or ES Module
 * Extensible through plugins (WIP)
 

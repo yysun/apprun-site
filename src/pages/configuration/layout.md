@@ -1,34 +1,23 @@
-# Use and Switch Layouts
+# Layouts
 
 There are four layouts included.
 
-* Default
-* Bootstrap
-* CoreUI
-* Material Design
-
-![](https://github.com/apprunjs/apprun-starter/raw/master/p1.png)
-![](https://github.com/apprunjs/apprun-starter/raw/master/p2.png)
-![](https://github.com/apprunjs/apprun-starter/raw/master/p3.png)
-![](https://github.com/apprunjs/apprun-starter/raw/master/p4.png)
+* Default - best for documentation site
+* Bootstrap - start point of bootstrap
+* CoreUI - best for admin UI / business apps
+* Material Design - best for mobile web app
 
 You can rename the layout folder to choose layout.
 
-### To use the bootstrap layout
+### Switch Layouts
 
-* copy **index.html** from _layout-bootstrap_ to _public_
-* rename _layout-bootstrap_ to _layout_
+You can rename the layout directory to switch the layouts.
 
-### To use the coreUI layout
+* To use the bootstrap layout, rename _layout-bootstrap_ to _layout_
 
-* copy **index.html** from _layout-coreui_ to _public_
-* rename _layout-coreui_ to _layout_
+* To use the coreUI layout, rename _layout-coreui_ to _layout_
 
-
-### To use the material layout
-
-* copy **index.html** and **style.css** from _layout-material_ to _public_
-* rename _layout-material_ to _layout_
+* To use the material layout, rename _layout-material_ to _layout_
 
 
 ## Don't Like Any of Them?
