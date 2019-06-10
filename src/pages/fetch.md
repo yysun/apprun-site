@@ -42,4 +42,4 @@ Using the async fetch, you can bring in data from other systems in to AppRun Sit
 
 AppRun Site apps also have a service worker include to cache the fetch requests. The tool can be used to build a lightening fast app (even for dynamic content) that works offline.
 
-Learn how to make a [Progress Web App](#wpa).
+Learn how to make a [Progress Web App](#pwa).

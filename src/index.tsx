@@ -19,7 +19,7 @@ const links = [
   { "link": "#components", "text": "Components" },
   { "link": "#web-components", "text": "Web-components" },
   { "link": "#fetch", "text": "Async Fetch" },
-  { "link": "#wpa", "text": "WPA" },
+  { "link": "#pwa", "text": "PWA" },
   { "link": "#esm", "text": "ES Modules *" },
   { "link": "#deploy", "text": "Deploy *" },
   { "link": "#deploy_firebase", "text": "Deploy/firebase *" },
