@@ -1,6 +1,6 @@
 # Getting Start
 
-To create an AppRun Site:
+To create an AppRun Site app:
 
 ```sh
 npx apprun-site init my-apprun-site
@@ -27,7 +27,7 @@ webpack.config.js
 
 Use _npm start_ to start the dev server and run the app in browser http://localhost:8080
 
-You can modify the home, contact and about components. Or add a few pages your own. The dev server will refresh to show your changes on the fly.
+> You can modify the home, contact and about components. Or add a few pages your own. The dev server will refresh to show your changes on the fly.
 
 The main entry point of the app is the **src/index.tsx**. It looks like:
 

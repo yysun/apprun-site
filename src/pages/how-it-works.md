@@ -1,6 +1,8 @@
 # How It Works
 
-You put your AppRun components in the _pages_ directory structure as following:
+AppRun Site apps are Single Page Applications (SPA). You develop the pages using AppRun components, HTML files and markdown files.
+
+You put AppRun components in the _pages_ directory as following:
 
 ```
 src/
@@ -22,6 +24,9 @@ You can also run the _build_ script in the watch mode.
 npx apprun-site build -w
 ```
 
+> If you have HTML files and markdown files in the _pages_ directory, the _build_ scripts converts them into AppRun components and saves to the **src/_lib** directory.
+
+
 The _build_ scripts creates the **src/_lib/index.tsx** file that contains the routing events and the components.
 
 ```javascript
@@ -36,11 +41,10 @@ export default [
 ] as (readonly [string, any])[];
 ```
 
-In addition to having AppRun components as pages, you can also add HTML files and markdown files in the _pages_ directory. The _build_ scripts converts them into AppRun components and saves to the **src/_lib** directory.
 
 The generated **src/_lib/index.tsx** imports the all components from **src/_lib** and **src/pages**; and exports an array that maps routing events to components.
 
-The main entry point of the application, **src/index.tsx**, imports the event-component mapping from **src/_lib/index.tsx**. Then it creates the pages, and sets the routing events.
+The event-component mapping from **src/_lib/index.tsx** is used to creates the pages, and sets the routing events in the main entry point of the application, **src/index.tsx**,
 
-Next, let's [Getting Started](#getting-started) to see it in action.
+Let's [Getting Started](#getting-started) to see it in action.
 

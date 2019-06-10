@@ -50,6 +50,9 @@ class Parent extends Component {
 }
 ```
 
-Using components is a technique to decompose the large system into smaller, manageable, and reusable pieces.
+Using components is a technique to decompose the large system into smaller, manageable, and reusable pieces. Pages are components in the **src/pages** directory. They are auto indexed and built into the application.
+
+You can put non-page components in the **src/components** directory. And import them where needed.
 
 Components can be easily turned into [web components](#web-components) and use in the HTML pages and markdown pages.
+

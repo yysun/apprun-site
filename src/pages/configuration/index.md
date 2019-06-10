@@ -1,6 +1,6 @@
 # Configuration
 
-Apps built with AppRun Site are single page applications (SPA). SPA usually has a layout, which includes a header, a top nav, a sidebar, a footer, and the main area for displaying the pages.
+An SPA usually has a layout, which includes a header, a top nav, a sidebar, a footer, and the main area for displaying the pages.
 
 You can pass a configuration object to the **app.start** function to
 
@@ -12,6 +12,14 @@ You can pass a configuration object to the **app.start** function to
 * Set the pages, which is the auto-generated event-component mapping
 
 ```javascript
+import app from 'apprun-site';
+import layout from './layout';
+import pages from './_lib';
+const nav = [
+  { "text": "Home", "link": "/" },
+  { "text": "Contact", "link": "/contact" },
+  { "text": "About", "link": "/about" }
+];
 const config = {
   title: 'My AppRun Site',
   element: 'main',
@@ -24,12 +32,12 @@ const config = {
 app.start(site);
 ```
 
-In the project created by using the _npx apprun-site init_ command there are out-of-box four layouts included.
+The _npx apprun-site init_ command creates four out-of-box layouts.
 
-* Default
-* Bootstrap
-* CoreUI
-* Material Design
+* Default - best for documentation site
+* Bootstrap - start point of bootstrap
+* CoreUI - best for admin UI / business apps
+* Material Design - best for mobile web app
 
 They all follow the configuration schema to render the page accordingly.
 
