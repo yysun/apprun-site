@@ -16,7 +16,7 @@ cli
 
 cli
   .command('fix-esm', 'fix es modules')
-  .option('-m --modules <modules>', 'Choose a directory for global modules', { default: '_modules' })
+  .option('-m, --modules <modules>', 'Choose a directory for global modules', { default: '_modules' })
   .option('-V, --verbose', 'show verbose diagnostic information')
   .option('-s, --source [sourceDir]', 'source directory')
   .action(options => fix(options));

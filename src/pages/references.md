@@ -35,7 +35,7 @@ Usage:
   $ npx apprun-site fix-esm
 
 Options:
-  -m --modules <modules>    Choose a directory for global modules (default: _modules)
+  -m, --modules <modules>    Choose a directory for global modules (default: _modules)
   -V, --verbose             show verbose diagnostic information
   -s, --source [sourceDir]  source directory
   -h, --help                Display this message

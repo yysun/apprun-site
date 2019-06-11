@@ -1,11 +1,12 @@
 # Async Fetch
 
-AppRun supports asynchronous operations in the AppRun event handlers. We only need to add the async keyword in front of the event handler. The event handler can call the functions that return a Promise object using the await keyword.
+AppRun supports asynchronous operations in the AppRun event handlers. We only need to add the async keyword in front of the event handlers. The event handlers can call the functions that return _Promise_ with the await keyword.
 
-See a component that displays random XKCD pictures using async fetch.
+Using the async fetch, you can bring in data from other systems in to AppRun Site apps.
+
+See a component that displays the random XKCD pictures using async fetch from the **src/components** directory.
 
 <my-xkcd></my-xkcd>
-
 
 The code of the component is listed below.
 
@@ -31,15 +32,12 @@ export default class extends Component {
       this.run('loading', true);
       const response = await fetch('https://xkcd-imgs.herokuapp.com/');
       const comic = await response.json();
-      this.run('loading', false);
       return { comic };
     }
   };
 }
 ```
 
-Using the async fetch, you can bring in data from other systems in to AppRun Site apps as easy as the example above.
-
-AppRun Site apps also have a service worker include to cache the fetch requests. The tool can be used to build a lightening fast app (even for dynamic content) that works offline.
+The fetch results can be cached by the service worker so that you can build a lightening fast app (even for dynamic content) that works offline.
 
 Learn how to make a [Progress Web App](#pwa).

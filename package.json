@@ -1,7 +1,7 @@
 {
   "name": "apprun-site",
   "version": "0.5.5",
-  "description": "AppRun Static Site Tool",
+  "description": "AppRun Site is a framework for building AppRun applications.",
   "main": "dist/index.js",
   "bin": "apprun-site-cli.js",
   "scripts": {
@@ -18,6 +18,7 @@
   },
   "keywords": [
     "AppRun",
+    "AppRun Site",
     "Application Framework"
   ],
   "author": "Yiyi Sun <yiyisun@gmail.com>",

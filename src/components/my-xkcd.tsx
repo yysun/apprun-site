@@ -19,7 +19,6 @@ export default class extends Component {
       this.run('loading', true);
       const response = await fetch('https://xkcd-imgs.herokuapp.com/');
       const comic = await response.json();
-      this.run('loading', false);
       return { comic };
     }
   };
