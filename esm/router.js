@@ -1,5 +1,5 @@
 import app from 'apprun';
-export default (root = '#') => {
+export default (root = '/') => {
     const route = (url, e) => {
         e && e.preventDefault();
         url = url.replace(/\/$/, "");
