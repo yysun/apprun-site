@@ -20,12 +20,10 @@ const links = [
   { "link": "#web-components", "text": "Web-components" },
   { "link": "#fetch", "text": "Async Fetch" },
   { "link": "#pwa", "text": "PWA" },
-  { "link": "#esm", "text": "ES Modules *" },
-  { "link": "#deploy", "text": "Deploy *" },
-  { "link": "#deploy_firebase", "text": "Deploy/firebase *" },
-  { "link": "#deploy_github", "text": "Deploy/github *" },
+  { "link": "#esm", "text": "Dynamic Modules" },
+  { "link": "#deploy", "text": "Build and Deploy" },
   { "link": "#todo", "text": "Todo *" },
-  { "link": "#references", "text": "References *" },
+  { "link": "#references", "text": "References" },
   { "link": "", "text": "* working on docs" }
 ];
 

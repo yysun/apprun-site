@@ -1,8 +1,8 @@
-# JavaScript/ECMAScript Module
+# JavaScript Modules
 
 AppRun Site apps use components. Components are build and exported as modules. They are imported and bundled into the **app.js**.
 
-JavaScript/ECMAScript modules are now supported in all major browsers! We can serve the modules without bundling.
+JavaScript/ECMAScript modules are now supported in all major browsers! You can serve the modules without bundling.
 
 ## Import ES Module in Browser
 
@@ -17,7 +17,7 @@ The **index.html** below is pattern to serve both bundled JS file and the module
 </head>
 <body>
   <script nomodule src="/app.js"></script>
-  <script type="module" src="/esm/index.esm.js"></script></body>
+  <script type="module" src="/esm/index-esm.js"></script></body>
 </html>
 ```
 
@@ -31,7 +31,7 @@ tsc -p src --outDir public/esm
 
 ## Fix the Global Imports
 
-However, there is still a problem. The browser how to import the global modules. E.g. All components import the global module _apprun_.
+However, there is still a problem. The browser does not how to import the global modules. E.g. All components import the global module _apprun_.
 
 ```javascript
 import { app, Component } from 'apprun';
@@ -67,23 +67,26 @@ Problem solved!
 
 ## Dynamic Module Loading
 
-ES module can be statically imported or dynamically imported. The main reason to use ES module is to dynamically import the modules.
+ES module can be statically imported or dynamically imported. The main reason to use ES module in AppRun Site is to dynamically import the modules.
 
-Dynamic import is a JavaScript language feature that enables lazy-loading of modules. It introduces a new function-like form of import returns a promise of the requested modules. You can use dynamic import without bundling magic or code splitting magic.
+Dynamic import is a JavaScript language feature that enables lazy-loading of modules. It introduces a new function-like form of import returns a promise of the requested modules that you can use to import modules when they are needed.
+
+E.g., the _about_ component is only loaded when the _/about_ routing event is published.
 
 ```javascript
-import('/esm/_lib/about_md.js').then((module) => {
-  const component = new module.default().mount('main');
-  component.run('.', ...p);
+app.on('/about', (...p) => {
+  import('/esm/_lib/about_md.js').then((module) => {
+    const component = new module.default().mount('main');
+    component.run('.', ...p);
+  });
 });
-
 ```
 
 ### Event-Component Mapping for Dynamic Import
 
 Remember the AppRun Site _build_ command scans the **src/pages** directly and creates the **src/_lib/index.tsx** file that statically imports all the components and exports a mapping of events and components.
 
-the AppRun Site _build_ command also creates the **src/_lib/index-esm.tsx** file for dynamic imports.
+the AppRun Site _build_ command also creates the **src/_lib/index-esm.tsx** file, which includes the mapping between the routing events with the component and modules.
 
 ```javascript
 // this file is auto-generated
@@ -97,7 +100,7 @@ export default [
 ]
 ```
 
-You can use this mapping to link the routing events with dynamically imported modules.
+You can use this mapping file to load component modules dynamically on demand.
 
 ```javascript
 import pages from './_lib/index-esm';
@@ -112,5 +115,7 @@ pages.forEach(def => {
 });
 ```
 
-The modules are now dynamically loaded on demand.
+Now, you have got the [code-splitting](https://developers.google.com/web/fundamentals/performance/optimizing-javascript/code-splitting/) feature to improve page-load times.
 
+
+You have both bundled and modularized app. Next, you will learn how to [deploy](#deploy) the app.
