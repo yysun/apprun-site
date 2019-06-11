@@ -6,7 +6,7 @@ JavaScript/ECMAScript modules are now supported in all major browsers! You can s
 
 ## Import ES Module in Browser
 
-The **index.html** below is pattern to serve both bundled JS file and the module files.
+The **index.html** below is a pattern to serve both bundled JS file and the module files.
 
 ```javascript
 <!doctype html>
@@ -31,7 +31,7 @@ tsc -p src --outDir public/esm
 
 ## Fix the Global Imports
 
-However, there is still a problem. The browser does not how to import the global modules. E.g. All components import the global module _apprun_.
+However, there is still a problem. The browser does not how to import global modules. E.g., All components import the global module _apprun_.
 
 ```javascript
 import { app, Component } from 'apprun';
@@ -67,9 +67,9 @@ Problem solved!
 
 ## Dynamic Module Loading
 
-ES module can be statically imported or dynamically imported. The main reason to use ES module in AppRun Site is to dynamically import the modules.
+ES module can be statically imported or dynamically imported. The main reason to use the ES module in AppRun Site is to import the modules dynamically.
 
-Dynamic import is a JavaScript language feature that enables lazy-loading of modules. It introduces a new function-like form of import returns a promise of the requested modules that you can use to import modules when they are needed.
+Dynamic import is a JavaScript language feature that enables the lazy-loading of modules. It introduces a new function-like form of import returns a promise of the requested modules that you can use to import modules when they are needed.
 
 E.g., the _about_ component is only loaded when the _/about_ routing event is published.
 
@@ -119,3 +119,4 @@ Now, you have got the [code-splitting](https://developers.google.com/web/fundame
 
 
 You have both bundled and modularized app. Next, you will learn how to [deploy](#deploy) the app.
+

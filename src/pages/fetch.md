@@ -2,7 +2,7 @@
 
 AppRun supports asynchronous operations in the AppRun event handlers. We only need to add the async keyword in front of the event handlers. The event handlers can call the functions that return _Promise_ with the await keyword.
 
-Using the async fetch, you can bring in data from other systems in to AppRun Site apps.
+Using the async fetch, you can bring in data from other systems into AppRun Site apps.
 
 See a component that displays the random XKCD pictures using async fetch from the **src/components** directory.
 
@@ -38,6 +38,6 @@ export default class extends Component {
 }
 ```
 
-The fetch results can be cached by the service worker so that you can build a lightening fast app (even for dynamic content) that works offline.
+The fetch results can be cached by the service worker so that you can build a lightning fast app (even for dynamic content) that works offline.
 
 Learn how to make a [Progress Web App](#pwa).

@@ -11,7 +11,7 @@
 * Progressive Web App (PWA) - support offline
 * Single Page App (SPA) - routing using / or #
 * 4 built-in layouts and bring your own
-* Compile html, markdown pages to AppRun components
+* Compile HTML, markdown pages to AppRun components
 * Auto generate the index of pages
 * Build app logic using AppRun/Web components
 * Targets ES5 or ES Module
@@ -36,5 +36,4 @@ Then, you can use:
 ## Ready for More Information
 
 * You can find out [how it works](#how-it-works).
-
 

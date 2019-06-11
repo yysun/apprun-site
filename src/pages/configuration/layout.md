@@ -2,12 +2,12 @@
 
 There are four layouts included.
 
-* Default - best for documentation site
+* Default - best for the documentation site
 * Bootstrap - start point of bootstrap
 * CoreUI - best for admin UI / business apps
 * Material Design - best for mobile web app
 
-You can rename the layout folder to choose layout.
+You can rename the layout folder to choose a layout.
 
 ### Switch Layouts
 
@@ -20,6 +20,6 @@ You can rename the layout directory to switch the layouts.
 * To use the material layout, rename _layout-material_ to _layout_
 
 
-## Don't Like Any of Them?
+## Don't Like Any of them?
 
 Understand, you can [do it yourself](#configuration_diy) easily.

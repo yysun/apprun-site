@@ -1,6 +1,6 @@
 # How It Works
 
-AppRun Site apps are Single Page Applications (SPA). You develop the pages using AppRun components, HTML files and markdown files.
+AppRun Site apps are Single Page Applications (SPA). You develop the pages using AppRun components, HTML files, and markdown files.
 
 You put AppRun components in the _pages_ directory as following:
 
@@ -46,5 +46,5 @@ The generated **src/_lib/index.tsx** imports the all components from **src/_lib*
 
 The event-component mapping from **src/_lib/index.tsx** is used to creates the pages, and sets the routing events in the main entry point of the application, **src/index.tsx**,
 
-Let's [Getting Started](#getting-started) to see it in action.
+Let's [Getting Started](#getting-started) see it in action.
 

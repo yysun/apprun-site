@@ -1,12 +1,14 @@
-# Do It Youself
+# Layout - Do It Yourself
 
-Instead of following the out-of-box configuration schema, you can create the **src/index.tsx** of your own without using the **app.start** function.
+Instead of asking you to follow the configuration or convention, sometimes it is easier to create your own layout.
 
-In this case, you will need to know how to create the layout, pages, and components, which is easy to do.
+You can create the **src/index.tsx** of your own without using the **app.start** function.
+
+In this case, you will need to know how to create the layout and pages in the **src/index.tsx** page.
 
 ## Create Layout
 
-You can create the layout as a regular [component](#component) and render it before rendering pages. You can set up title, menus and nav whatever you want freely. A layout template looks like:
+You can create the layout as a regular [component](#component) and render it before rendering pages. You can set up title, menus, and nav whatever you want freely. A layout template looks like:
 
 ```javascript
 import app from 'apprun';
@@ -18,7 +20,7 @@ export default ({ title, element, nav, sidebar }) => <>
 
 ## Create Pages
 
-The auto generated event-component mapping in **src/_lib/index.tsx** makes it very easy to create the pages, and sets the routing events to the pages in a generic way.
+The auto-generated event-component mapping in **src/_lib/index.tsx** makes it very easy to create the pages, and sets the routing events to the pages in a generic way.
 
 ```javascript
 const element = 'main';
@@ -32,9 +34,9 @@ pages.forEach(def => {
 > Note: the . event is the _refresh_ event built-in every AppRun component. It makes components render themselves.
 
 
-## Your Own Index Page
+## Your Own Index File
 
-A simple index page looks like:
+Put them together a simple index page looks like:
 
 ```javascript
 import app from 'apprun';
@@ -50,7 +52,4 @@ pages.forEach(def => {
 });
 ```
 
-
-Next, you can learn how to create pages using [components](#components).
-
-
+Next, you can learn more about the [pages](#pages).

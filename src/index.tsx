@@ -14,17 +14,18 @@ const links = [
   { "link": "#how-it-works", "text": "How It Works" },
   { "link": "#getting-started", "text": "Getting Started" },
   { "link": "#configuration", "text": "Configuration" },
-  { "link": "#configuration_layout", "text": "Switch Layout" },
-  { "link": "#configuration_diy", "text": "Do It Yourself" },
+  { "link": "#configuration_layout", "text": "Layout" },
+  { "link": "#configuration_diy", "text": "Layout DIY" },
+  { "link": "#pages", "text": "Pages" },
+  { "link": "#routing", "text": "Routing" },
   { "link": "#components", "text": "Components" },
-  { "link": "#web-components", "text": "Web-components" },
+  { "link": "#web-components", "text": "Web Components" },
   { "link": "#fetch", "text": "Async Fetch" },
   { "link": "#pwa", "text": "PWA" },
   { "link": "#esm", "text": "Dynamic Modules" },
   { "link": "#deploy", "text": "Build and Deploy" },
-  { "link": "#todo", "text": "Todo *" },
   { "link": "#references", "text": "References" },
-  { "link": "", "text": "* working on docs" }
+  { "link": "#todo", "text": "Todo (WIP)" }
 ];
 
 const config = {
@@ -33,7 +34,8 @@ const config = {
   nav,
   sidebar: links,
   layout,
-  pages
+  pages,
+  eventRoot: '#'
 };
 
 app.start(config);
