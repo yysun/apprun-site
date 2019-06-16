@@ -1,8 +1,6 @@
 # Components
 
-Components are the application building blocks in AppRun applications.
-
-AppRun Site pages are components inside the **src/pages** directory. They are auto indexed and built into the application. You can put non-page components inside the **src/components** directory. And import them where needed.
+Components are the application building blocks in AppRun applications. Using components is a technique to decompose the large system into smaller, manageable and reusable pieces. 
 
 ## Create Components
 
@@ -11,9 +9,9 @@ Components provide a local scope to the elm like architecture, which means insid
 ```javascript
 import {app, Component} from 'apprun';
 
-class Counter extends Component {
+export default class extends Component {
   state = '';
-  view = state => <div/>;
+  view = state => <div>{state}</div>;
   update = {};
 }
 ```
@@ -21,9 +19,19 @@ class Counter extends Component {
 The _state_, _view_, and _update_ are provided to AppRun, AppRun registers the event handlers defined in the update and waits for AppRun events to start the [event life cycle](https://apprun.js.org/docs/index.html#/04-architecture#apprun-event-life-cycle).
 
 
-## Components Composition
+The three parts are all optional. Components can be as simple as only have the _view_ function.
 
-You can include components inside components to compose your app.
+```javascript
+import {app, Component} from 'apprun';
+
+export default class extends Component {
+  view = state => <div>{state}</div>
+}
+```
+
+## Component Composition
+
+You can create page components out of other non-page components.
 
 ```javascript
 class Child extends Component {
@@ -32,7 +40,7 @@ class Child extends Component {
   update = {}
 }
 
-class Parent extends Component {
+class Page extends Component {
   state = {}
   view = state => <div>
     <Child />
@@ -41,7 +49,7 @@ class Parent extends Component {
 }
 ```
 
-You can create page components out of other non-page components.
+Usually non-page components are under the **src/components** directory. You import them where needed to compose your pages.
 
 ## Web Components
 

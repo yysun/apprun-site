@@ -1,12 +1,34 @@
 # Routing
 
-AppRun router detects the hash changes in URL (by listening to the window's _onpopstate_ event) and publishes the AppRun events using the hash as the event name.
+AppRun Site router detects the hash/path changes in URL (by listening to the window's _onpopstate_ event) and publishes the routing events.
 
-E.g., when URL in the browser address bar becomes http://..../about, AppRun publishes the _/about_ event. The About component reacts to the _/about_ and renders itself to the screen.
+AppRun Site **app.start** function maps the routing events to the page components.
 
-Pages components subscribe to the routing events.  There is no other code needed for routing.
+## Routing Events
 
-Each component also has a built-in _. event_ that to display itself to the mounted elements. It provides the opportunity to scan the **src/pages** directory and create the event-component mapping, and to have a centralized place to map routing events to the page components in AppRun Site apps.
+Pages are components inside the **src/pages** directory. Each component has a built-in _refresh_ event, the **.** event to display itself to the mounted element.
+
+E.g. if you have an _Item_ component (**src/pages/item.tsx**). AppRun Site maps the routing event _/item_ to the component's built-in _refresh_ event.
+
+```javascript
+import _item from '_lib/item.tsx'
+app.on('/item', (...p) => _item.run('.', ...p))
+```
+
+When users navigate to http://.../item/a/b/c, the _/item_ event is published and sent to the __item_ component to display along with 'a', 'b', 'c' as the event parameters.
+
+You can override it to accept routing parameters.
+
+```javascript
+import { app, Component } from 'apprun';
+
+export default class extends Component {
+  view = state => <div>{state}</div>
+  update = {
+    '.': (state, id) => id
+  }
+}
+```
 
 ## Routing with Pretty Links (/)
 
@@ -34,4 +56,4 @@ You also need to set the --root options to be '#' when running the _npx apprun-s
 npx apprun-site build --root '#'
 ```
 
-Using components is a technique to decompose the large system into smaller, manageable and reusable pieces. Next, you can learn more about components(#component).
+ Next, you can learn more about how [components](#components).
