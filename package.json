@@ -32,8 +32,11 @@
   },
   "homepage": "https://github.com/yysun/apprun-site#readme",
   "devDependencies": {
+    "@types/jest": "^24.0.15",
+    "jest": "^24.8.0",
     "npm-run-all": "^4.1.5",
     "source-map-loader": "^0.2.4",
+    "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.1",
     "typescript": "^3.5.1",
     "webpack": "^4.32.2",

@@ -3,7 +3,8 @@ import app from 'apprun';
 import router from './router';
 
 export default (config) => {
-  router(config.eventRoot);
+  if (!config) config = { nav: [], pages: [], eventRoot: '/' };
+  router(config);
   app.render(document.body, <config.layout {...config} />);
   const element = document.getElementById(config.element);
   config.pages.forEach(def => {
