@@ -41,6 +41,6 @@ The _npx apprun-site init_ command creates four out-of-box layouts.
 
 They all follow the configuration schema to render the page accordingly.
 
-You can learn how to [use and switch layouts](#configuration_layout).
+You can learn how to [use and switch layouts](#configuration/layout).
 
-If you want to use your own layout, you can use the [do it yourself](#configuration_diy) approach.
+If you want to use your own layout, you can use the [do it yourself](#configuration/diy) approach.
