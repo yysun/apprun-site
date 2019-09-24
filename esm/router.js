@@ -1,4 +1,4 @@
-import app from 'apprun';
+import app from '/esm/_modules/apprun.js';
 export default ({ eventRoot, pages }) => {
     const root = eventRoot || '/';
     const events = pages.map(p => {

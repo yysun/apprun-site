@@ -1,5 +1,5 @@
-import app from 'apprun';
-import router from './router';
+import app from '/esm/_modules/apprun.js';
+import router from '/esm/router.js';
 export default {
     start: (config) => {
         if (!config)
