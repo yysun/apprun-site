@@ -22,7 +22,7 @@ const links = [
   { "link": "#web-components", "text": "Web Components" },
   { "link": "#fetch", "text": "Async Fetch" },
   { "link": "#pwa", "text": "PWA" },
-  { "link": "#esm", "text": "Dynamic Modules" },
+  { "link": "#esm", "text": "Modules" },
   { "link": "#deploy", "text": "Build and Deploy" },
   { "link": "#references", "text": "References" },
   { "link": "#todo", "text": "Todo (WIP)" }
