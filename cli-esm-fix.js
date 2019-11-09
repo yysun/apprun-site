@@ -7,8 +7,7 @@ module.exports = function ({ source, modules, verbose }) {
   const path = require('path');
   const readPkg = require('read-pkg');
   const MagicString = require('magic-string');
-  const { Parser } = require("acorn")
-  const dynamicImport = require('acorn-dynamic-import').default;
+  const { Parser } = require('acorn');
   const walk = require('estree-walker').walk;
   const chalk = require('chalk');
   const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
@@ -20,6 +19,9 @@ module.exports = function ({ source, modules, verbose }) {
 
   source = source || '.';
   modules = modules || '_modules/';
+  if (!modules.endsWith('/')) modules += '/';
+  ensure(`${source}/${modules}`);
+
   let root = `/${path.basename(source)}/`;
 
   function walkDir(dir, callback) {
@@ -39,8 +41,7 @@ module.exports = function ({ source, modules, verbose }) {
     try {
       let code = fs.readFileSync(file).toString();
 
-      const ast = Parser.extend(dynamicImport)
-        .parse(code, { sourceType: 'module', allowImportExportEverywhere: true });
+      const ast = Parser.parse(code, { sourceType: 'module', ecmaVersion: 11 });
       const magicString = new MagicString(code);
       let hasFix;
       verbose && console.log(green(`Checking: ${file}`));
@@ -49,7 +50,9 @@ module.exports = function ({ source, modules, verbose }) {
           if (node.type === 'Literal' && parent.type === 'ImportDeclaration') {
             const esm = fix(node.value);
             if (esm) {
-              magicString.overwrite(node.start, node.end, esm, { storeName: false });
+              magicString.overwrite(node.start, node.end, esm, {
+                storeName: false
+              });
               hasFix = true;
             }
             return node;
@@ -59,7 +62,14 @@ module.exports = function ({ source, modules, verbose }) {
 
       if (hasFix) {
         fs.writeFileSync(file, magicString.toString());
-        fs.writeFileSync(file + '.map', magicString.generateMap({ hires: true }));
+        // fs.writeFileSync(
+        //   file + '.map',
+        //   magicString.generateMap({
+        //     file,
+        //     includeContent: true,
+        //     hires: true
+        //   })
+        // );
       }
     } catch (e) {
       console.log(red(`Error: ${file}: ${e.message}.`));
@@ -78,7 +88,7 @@ module.exports = function ({ source, modules, verbose }) {
           src = `${cwd}/${module_file}`;
         }
         exec(`npx rollup "${src}" --format esm --file "${tgt}"`),
-        verbose && console.log(yellow(`\tCopied: ${module} => ${tgt}`));
+          verbose && console.log(yellow(`\tCopied: ${module} => ${tgt}`));
       } else {
         verbose && console.log(gray(`\tSkipped: ${module} => ${tgt}`));
       }
@@ -87,9 +97,13 @@ module.exports = function ({ source, modules, verbose }) {
   }
 
   function fix(module) {
-    let esm;
-    if (module.startsWith('/') || module.startsWith('./') || module.startsWith('../')) {
-      esm = module.replace('./', root);
+    let esm = module;
+    if (
+      module.startsWith('/') ||
+      module.startsWith('./') ||
+      module.startsWith('../')
+    ) {
+      // esm = module.replace('./', root);
       verbose && console.log(gray(`\t${module} => ${esm}`));
     } else {
       esm = `${root}${modules}${module}`;
