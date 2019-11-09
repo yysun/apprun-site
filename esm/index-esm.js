@@ -1,5 +1,5 @@
 import app from '/esm/_modules/apprun.js';
-import router from '/esm/router.js';
+import router from './router.js';
 export default (config) => {
     if (!config)
         config = { nav: [], pages: [], eventRoot: '/' };
