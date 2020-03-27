@@ -8,11 +8,13 @@ cd my-apprun-site
 npm install
 ```
 
-The **init** command creates a project structure.
+The **init** command creates a project structure. The main entry of the app is **src/index.tsx**.
 
 ```
 public/
 src/
+  _lib/
+  _site/
   layouts/
   pages/
     home.tsx
@@ -32,7 +34,7 @@ Use _npm start_ to start the dev server and run the app in browser http://localh
 The main entry point of the app is the **src/index.tsx**. It looks like:
 
 ```javascript
-import app from 'apprun-site';
+import site from './_site';
 import layout from './layout';
 import pages from './_lib';
 const nav = [
@@ -50,10 +52,16 @@ const config = {
   pages
 };
 
-app.start(site);
+site.start(config);
 ```
 
-**src/index.tsx** imports the _app_ object from _apprun.site_ and calls the _app.start_ function to start the app with the configuration options.
+**src/index.tsx** imports
+ * the _site_ object from _./site_
+ * the layout from _./layout_
+ * the pages from _./lib_
+
+
+ **src/index.tsx** calls the _site.start_ function to start the app with the configuration options.
 
 Next, let's see how to [configure](#configuration).
 

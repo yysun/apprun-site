@@ -20,3 +20,10 @@ And then use it in [HTML page](#web-components_html), or in [JSX view](#web-comp
 This page is a markdown page. It should display the web component.
 
 <my-img src='logo.png'></my-img>
+
+
+Next, you can learn
+
+* How to [fetch resource (call APIs)](#fetch).
+* How to make a [Progress Web App](#pwa).
+* How to build and deploy [Progress Web App](#deploy).

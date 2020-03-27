@@ -2,7 +2,7 @@
 
 A SPA usually has a layout, which includes a header, a top nav, a sidebar, a footer, and the main area for displaying the pages.
 
-You can pass a configuration object to the **app.start** function to
+You can pass a configuration object to the **site.start** function to
 
 * Set page title in the layout
 * Set the main element Id for displaying the pages
@@ -41,6 +41,24 @@ The _npx apprun-site init_ command creates four out-of-box layouts.
 
 They all follow the configuration schema to render the page accordingly.
 
-You can learn how to [use and switch layouts](#configuration/layout).
+You can rename the layout directory to switch the layouts.
 
-If you want to use your own layout, you can use the [do it yourself](#configuration/diy) approach.
+* To use the bootstrap layout, rename _layout-bootstrap_ to _layout_
+
+* To use the coreUI layout, rename _layout-coreui_ to _layout_
+
+* To use the material layout, rename _layout-material_ to _layout_
+
+## Create Layout
+
+You can create your own layout as a regular [component](#component). A layout template looks like:
+
+```javascript
+import app from 'apprun';
+
+export default ({ title, element, nav, sidebar }) => <>
+  <div id="main"><div>
+</>
+```
+
+Next, you can learn more about the [pages](#pages).

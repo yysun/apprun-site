@@ -40,4 +40,3 @@ export default class extends Component {
 
 The fetch results can be cached by the service worker so that you can build a lightning fast app (even for dynamic content) that works offline.
 
-Learn how to make a [Progress Web App](#pwa).

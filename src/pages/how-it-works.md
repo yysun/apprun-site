@@ -12,22 +12,9 @@ src/
     about.tsx
 ```
 
-You then run the _build_ script.
+If you have HTML files and markdown files in the _pages_ directory, the _npm build_ scripts calls the _apprun-site CLI_ to convert them into AppRun components and saves to the **src/_lib** directory.
 
-```sh
-npx apprun-site build
-```
-
-You can also run the _build_ script in the watch mode.
-
-```sh
-npx apprun-site build -w
-```
-
-> If you have HTML files and markdown files in the _pages_ directory, the _build_ scripts converts them into AppRun components and saves to the **src/_lib** directory.
-
-
-The _build_ scripts creates the **src/_lib/index.tsx** file that contains the routing events and the components.
+The _npm build_ scripts creates the **src/_lib/index.tsx** file that contains the routing events and all the components from **src/_lib** and **src/pages**.
 
 ```javascript
 // this file is auto-generated
@@ -42,7 +29,7 @@ export default [
 ```
 
 
-The generated **src/_lib/index.tsx** imports the all components from **src/_lib** and **src/pages**; and exports an array that maps routing events to components.
+The generated **src/_lib/index.tsx** exports an array that maps routing events to components.
 
 The event-component mapping from **src/_lib/index.tsx** is used to creates the pages, and sets the routing events in the main entry point of the application, **src/index.tsx**,
 
