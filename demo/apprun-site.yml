@@ -1,16 +1,12 @@
-site_name: AppRun Docs
+site_name: AppRun Site
 favicon: assets/favicon.ico
 logo: assets/logo.png
+copyright: Copyright &copy; 2021 Yiyi Sun
 
 theme:
   name: material
-  icon:
-    repo: fontawesome/brands/github
-  features:
-    - navigation.sections
-
-copyright: Copyright &copy; 2016 - 2021 Yiyi Sun
-
-
 modules:
-  - module1.js
+  - build
+
+plugins:
+#  - my-plugin.js
