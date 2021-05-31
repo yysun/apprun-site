@@ -1,40 +1,50 @@
 #!/usr/bin/env node
 
-const cli = require('cac')();
-const degit = require('degit');
-const build = require('./cli-build');
-const fix = require('./cli-esm-fix');
+const program = require('commander');
+const startup = require('./index');
 
-cli
-  .command('build', 'build pages')
-  .option('-r, --root [root]', 'event root, default /, you can make it #')
-  .option('-s, --source [sourceDir]', 'source directory')
-  .option('-t, --target [targetDir]', 'target directory')
+program
+  .command('build <source>')
+  .description('build site')
   .option('-w, --watch', 'watch the folder')
-  .option('-V, --verbose', 'show verbose diagnostic information')
-  .action(options => build(options));
+  .action(source => startup(source));
 
-cli
-  .command('fix-esm', 'fix es modules')
-  .option('-m, --modules <modules>', 'Choose a directory for global modules', { default: '_modules' })
-  .option('-V, --verbose', 'show verbose diagnostic information')
-  .option('-s, --source [sourceDir]', 'source directory')
-  .action(options => fix(options));
+program.parse(process.args);
 
-cli
-  .command('init [targetDir]', 'initialize project')
-  .option('-r, --repo [repo]', 'repository, default: apprunjs/apprun-starter')
-  .action((targetDir = '.', options) => {
-    const repo = options.repo || 'apprunjs/apprun-starter';
-    const emitter = degit(repo, {
-      cache: false,
-      force: false,
-      verbose: true
-    });
-    emitter.on('info', info => console.log(info.message));
-    emitter.clone(targetDir || '').then(() => console.log('done'));
-  });
+// const cli = require('commander');
+// const degit = require('degit');
+// const build = require('./cli-build');
+// const fix = require('./cli-esm-fix');
+// cli
+//   .command('build', 'build pages')
+//   .option('-r, --root [root]', 'event root, default /, you can make it #')
+//   .option('-s, --source [sourceDir]', 'source directory')
+//   .option('-t, --target [targetDir]', 'target directory')
+//   .option('-w, --watch', 'watch the folder')
+//   .option('-V, --verbose', 'show verbose diagnostic information')
+//   .action(options => build(options));
 
-cli.help();
-cli.version('0.5.0');
-cli.parse();
+// cli
+//   .command('fix-esm', 'fix es modules')
+//   .option('-m, --modules <modules>', 'Choose a directory for global modules', { default: '_modules' })
+//   .option('-V, --verbose', 'show verbose diagnostic information')
+//   .option('-s, --source [sourceDir]', 'source directory')
+//   .action(options => fix(options));
+
+// cli
+//   .command('init [targetDir]', 'initialize project')
+//   .option('-r, --repo [repo]', 'repository, default: apprunjs/apprun-starter')
+//   .action((targetDir = '.', options) => {
+//     const repo = options.repo || 'apprunjs/apprun-starter';
+//     const emitter = degit(repo, {
+//       cache: false,
+//       force: false,
+//       verbose: true
+//     });
+//     emitter.on('info', info => console.log(info.message));
+//     emitter.clone(targetDir || '').then(() => console.log('done'));
+//   });
+
+// cli.help();
+// cli.version('0.5.0');
+// cli.parse();
