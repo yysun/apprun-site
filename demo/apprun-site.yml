@@ -5,8 +5,16 @@ copyright: Copyright &copy; 2021 Yiyi Sun
 
 theme:
   name: material
+
 modules:
   - build
+  - build-md
 
-plugins:
+# plugins:
 #  - my-plugin.js
+
+#
+#content_types:
+#  .md: markdown
+#  .html: html
+
