@@ -11,7 +11,8 @@ const events = require('./events');
 app.on(events.PRE_BUILD, () => console.log('Build started'))
 app.on(events.POST_BUILD, () => console.log('Build done.'))
 
-app.on(events.BUILD, async ({ pages, public, content_types = {} }) => {
+app.on(events.BUILD, async () => {
+  const { pages, public, content_types, themePath } = app['config'];
   console.log('Building', public);
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
@@ -25,15 +26,20 @@ app.on(events.BUILD, async ({ pages, public, content_types = {} }) => {
     const name = path.basename(file).replace(/\.[^/.]+$/, '');
     const target = path.join(public, dir, name) + '.html';
     const ext = path.extname(file);
-    const type = content_types[ext] || ext.substr(1);
-    const template = name.split('.')[1] || '';
+    const type = content_types?.[ext] || ext.substr(1);
+    const view = name.split('.')[1] || 'index';
+
     console.log('Page: ', file, '=>', type);
     const text = (await app.query(`${events.BUILD_CONTENT}:${type}`, file))[0];
     if (!text) {
       console.log(red('Content load failed'));
       return;
     }
-    const html = (await app.query(events.BUILD_PAGE, text, template))[0];
+    // const html = (await app.query(events.BUILD_PAGE, text, view))[0];
+
+    const viewModule = require(`${themePath}/${view}`);
+    const html = viewModule(text);
+
     if (html) {
       fs.writeFileSync(target, html);
       console.log(green(target));

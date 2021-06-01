@@ -4,14 +4,14 @@ logo: assets/logo.png
 copyright: Copyright &copy; 2021 Yiyi Sun
 
 theme:
-  name: material
+  name: bootstrap
 
 modules:
   - build
   - build-md
 
-# plugins:
-#  - my-plugin.js
+plugins:
+  - my-plugin.js
 
 #
 #content_types:

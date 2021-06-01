@@ -8,6 +8,7 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 
 const events = require('./events');
 
-app.on(events.BUILD_PAGE, (text, template) => {
+app.on(events.BUILD_PAGE, (text, view) => {
+  view = view || 'home'
   return text;
 })
