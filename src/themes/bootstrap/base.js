@@ -1,11 +1,11 @@
 const { site_name, extra_css, extra_javascript, extra_module } = app['config'];
 
-module.exports = body => `
+module.exports = page => `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>${site_name}</title>
+  <title>${page.title ? page.title + ' | ' : ''}${site_name}</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
   <link href="https://unpkg.com/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,8 +16,8 @@ module.exports = body => `
   ${extra_javascript && extra_javascript.map(js => `<script src="${js}"></script>`).join('\n')}
 </head>
 <body>
-${body}
+${page.body}
 ${extra_module && extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n')}
 </body>
 </html>
-`;
+`

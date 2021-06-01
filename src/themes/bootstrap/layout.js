@@ -1,7 +1,7 @@
 
 const { title, element, nav } = app['config'];
 
-module.exports = (page_content) => `<div class="container">
+module.exports = (page) => `<div class="container">
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="/">${title}</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse"
@@ -19,6 +19,6 @@ module.exports = (page_content) => `<div class="container">
     </div>
   </nav>
   <div class="container" id=${element}>
-  ${page_content}
+  ${page.content}
   </div>
 </div>`;

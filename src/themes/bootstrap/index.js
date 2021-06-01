@@ -1,4 +1,11 @@
 const Base = require('./base');
-const Layout = require('./layout');
+module.exports = (page, view) => {
 
-module.exports = (page_content) => Base(Layout(page_content));
+  switch (view) {
+    case '':
+
+    default:
+      page.body = require('./layout')(page);
+  }
+  return Base(page);
+}

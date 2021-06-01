@@ -27,18 +27,17 @@ app.on(events.BUILD, async () => {
     const target = path.join(public, dir, name) + '.html';
     const ext = path.extname(file);
     const type = content_types?.[ext] || ext.substr(1);
-    const view = name.split('.')[1] || 'index';
+    const view = name.split('.')[1];
 
     console.log('Page: ', file, '=>', type);
-    const text = (await app.query(`${events.BUILD_CONTENT}:${type}`, file))[0];
-    if (!text) {
+    const content = (await app.query(`${events.BUILD_CONTENT}:${type}`, file))[0];
+    if (!content) {
       console.log(red('Content load failed'));
       return;
     }
-    // const html = (await app.query(events.BUILD_PAGE, text, view))[0];
 
-    const viewModule = require(`${themePath}/${view}`);
-    const html = viewModule(text);
+    const viewModule = require(themePath);
+    const html = viewModule(content, view);
 
     if (html) {
       fs.writeFileSync(target, html);
