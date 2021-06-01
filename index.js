@@ -5,14 +5,17 @@ const app = require('apprun').app;
 
 const events = require('./src/events');
 
+// modules?.forEach(module => require(`${__dirname}/src/${module}`));
+require('./src/build');
+require('./src/build-md');
+
 module.exports = async function (source) {
   const config = yaml.load(fs.readFileSync(`${source}/apprun-site.yml`));
   config.pages = `${process.cwd()}/${source}/${config.pages || 'pages'}`;
   config.public = `${process.cwd()}/${source}/${config.public || 'public'}`;
 
-  const { modules, plugins, start, theme } = config;
-  modules?.forEach(module => require(`${__dirname}/src/${module}`));
-  plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
+  const { plugins, start, theme } = config;
+plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
   const themePath = `${process.cwd()}/${source}/themes/${theme.name}/index.js`;
   config.themePath = fs.existsSync(themePath) ? themePath : `${__dirname}/src/themes/${theme.name}`
 

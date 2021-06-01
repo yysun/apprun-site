@@ -6,15 +6,17 @@ copyright: Copyright &copy; 2021 Yiyi Sun
 theme:
   name: bootstrap
 
-modules:
-  - build
-  - build-md
-
 plugins:
   - my-plugin.js
 
-#
-#content_types:
-#  .md: markdown
-#  .html: html
+extra_css:
+  - assets/vendor/codemirror/codemirror.css
 
+extra_javascript:
+  - assets/vendor/codemirror/codemirror.js
+  - assets/vendor/codemirror/mode/javascript/javascript.js
+  - assets/vendor/codemirror/mode/xml/xml.js
+  - assets/vendor/codemirror/mode/jsx/jsx.js
+
+extra_module:
+  - assets/apprun-play.js
