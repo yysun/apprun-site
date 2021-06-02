@@ -18,7 +18,7 @@ module.exports = (page) => `<div class="container">
       </ul>
     </div>
   </nav>
-  <div class="container" id=${element}>
+  <div class="container">
   ${page.content}
   </div>
 </div>`;

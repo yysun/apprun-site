@@ -9,6 +9,7 @@ const events = require('./src/events');
 require('./src/build');
 require('./src/build-md');
 require('./src/build-html');
+require('./src/build-ts');
 
 module.exports = async function (source) {
   const config = yaml.load(fs.readFileSync(`${source}/apprun-site.yml`));

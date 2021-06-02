@@ -33,21 +33,25 @@ app.on(events.BUILD, async () => {
     const view = name.split('.')[1];
 
     console.log('Page: ', file, '=>', type);
-    const content = (await app.query(`${events.BUILD_CONTENT}:${type}`, file))[0];
-    if (!content) {
-      console.log(red('Content load failed'));
-      return;
-    }
-
-    const viewModule = require(themePath);
-    const html = viewModule(content, view);
-
-    if (html) {
-      ensure(path.dirname(target));
-      fs.writeFileSync(target, html);
-      console.log(green(target));
+    const text = fs.readFileSync(file).toString();
+    if (['.md', '.html'].indexOf(ext) >= 0) {
+      const content = (await app.query(`${events.BUILD}:${type}`, text))[0];
+      if (!content) {
+        console.log(red('Content load failed'));
+        return;
+      }
+      // console.log(content);
+      const viewModule = require(themePath);
+      const html = viewModule(content, view);
+      if (html) {
+        ensure(path.dirname(target));
+        fs.writeFileSync(target, html);
+        console.log(green(target));
+      } else {
+        console.log(red('Page creation failed '));
+      }
     } else {
-      console.log(red('Page creation failed '));
+      await app.query(`${events.BUILD}:${type}`, file, path.join(public, dir))
     }
   });
 
