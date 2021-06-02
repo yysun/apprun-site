@@ -19,7 +19,7 @@ program
   });
 
 program
-  .command('build <source>')
+  .command('build [source]')
   .description('build site')
   .option('-c, --clean', 'clean the output directory', false)
   .option('-w, --watch', 'watch the directory', false)

@@ -13,12 +13,20 @@ app.on(`${events.BUILD}:esm`, (file, modules_dir, verbose = false) => {
 
   function copy(module) {
     if (!cache[module]) {
-      const jsonfile = require('jsonfile')
-      const pkg = jsonfile.readFileSync(`./node_modules/${module}/package.json`)
-      const source = pkg['module'] || pkg['main'];
-      const esm = `${module}/${source}`;
+      const jsonfile = require('jsonfile');
+
+      const source = app.config.source;
+      let pkg_json = `${source}/node_modules/${module}/package.json`;
+      if (!fs.existsSync(pkg_json))
+        pkg_json = `${source}/../node_modules/${module}/package.json`;
+      if (!fs.existsSync(pkg_json)) {
+        console.log(red('Cannot find module', `${module}/package.json`));
+      }
+      const pkg = jsonfile.readFileSync(pkg_json);
+      const main = pkg['module'] || pkg['main'];
+      const esm = `${module}/${main}`;
       require('esbuild').buildSync({
-        entryPoints: [`./node_modules/${module}/${source}`],
+        entryPoints: [`${path.dirname(pkg_json)}/${main}`],
         outfile: `${modules_dir}/${esm}`,
         bundle: true,
         format: 'esm'

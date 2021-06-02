@@ -7,10 +7,17 @@ const app = require('apprun').app;
 const events = require('./src/events');
 
 module.exports = async function ({ source, clean, watch, pages, public }) {
-  const config = yaml.load(fs.readFileSync(`${source}/apprun-site.yml`));
-  config.source = `${process.cwd()}/${source}/`;
-  config.pages = `${process.cwd()}/${source}/${pages || 'pages'}`;
-  config.public = `${process.cwd()}/${source}/${public || 'public'}`;
+  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
+
+  const conf = `${source}/apprun-site.yml`;
+  if (!fs.existsSync(conf)) {
+    console.log(red('Cannot read ', conf));
+    return;
+  }
+  const config = yaml.load(fs.readFileSync(conf));
+  config.source = source;
+  config.pages = `${source}/${pages || 'pages'}`;
+  config.public = `${source}/${public || 'public'}`;
   config.clean = clean;
   config.watch = watch;
   const { plugins, start, theme, site_url, tabs } = config;
@@ -32,13 +39,13 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
   require('./src/build-html');
   require('./src/build-ts');
   require('./src/build-esm');
-  
+
   // plugins
-  plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
+  plugins?.forEach(module => require(`${source}/plugins/${module}`));
 
   // theme
   app.get_theme_view = name => {
-    const cust_themeView = `${process.cwd()}/${source}/themes/${theme.name}/${name}.js`;
+    const cust_themeView = `${source}/themes/${theme.name}/${name}.js`;
     const sys_themeView = `${__dirname}/src/themes/${theme.name}/${name}.js`
     if (fs.existsSync(cust_themeView)) {
       console.log(yellow('Using custom view', cust_themeView));
