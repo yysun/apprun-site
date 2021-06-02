@@ -18,14 +18,26 @@ const ensure = dir => {
 const relative = fname => fname.replace(source, '');
 
 app.on(events.PRE_BUILD, () => {
-  console.log(cyan('Build started'), relative(public));
   if (clean) {
     fs.rmSync(public, { recursive: true, force: true });
-    console.log(yellow('Clean'), relative(public));
+    console.log(cyan('Clean'), relative(public));
   }
 });
 
-app.on(events.POST_BUILD, () => console.log(cyan('Build done.')))
+app.on(events.POST_BUILD, () => {
+  if (watch) {
+    console.log(cyan('Watching ...'));
+    const chokidar = require('chokidar');
+    chokidar.watch(pages).on('all', (event, path) => {
+      if (event === 'change') {
+        // console.log(cyan('Change detected'), relative(path));
+        process_file(path);
+      }
+    });
+  } else {
+    console.log(cyan('Build done.'))
+  }
+})
 
 app.on(events.BUILD, async () => {
   const { pages } = app['config'];
@@ -43,7 +55,6 @@ app.on(events.BUILD, async () => {
   }
   walkDir(pages, file => process_file(file));
 });
-
 
 async function process_file(file) {
   const dir = path.dirname(file).replace(pages, '');

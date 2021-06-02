@@ -25,6 +25,14 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
     : null;
   app.config = config;
 
+  // system modules
+  // modules?.forEach(module => require(`${__dirname}/src/${module}`));
+  require('./src/build');
+  require('./src/build-md');
+  require('./src/build-html');
+  require('./src/build-ts');
+  require('./src/build-esm');
+  
   // plugins
   plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
 
@@ -41,14 +49,6 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
       return require(sys_themeView);
     }
   }
-
-  // system modules
-  // modules?.forEach(module => require(`${__dirname}/src/${module}`));
-  require('./src/build');
-  require('./src/build-md');
-  require('./src/build-html');
-  require('./src/build-ts');
-  require('./src/build-esm');
 
   if (start) {
     await app.query(start);
