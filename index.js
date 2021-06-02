@@ -8,6 +8,7 @@ const events = require('./src/events');
 // modules?.forEach(module => require(`${__dirname}/src/${module}`));
 require('./src/build');
 require('./src/build-md');
+require('./src/build-html');
 
 module.exports = async function (source) {
   const config = yaml.load(fs.readFileSync(`${source}/apprun-site.yml`));
