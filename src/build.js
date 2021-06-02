@@ -9,12 +9,12 @@ const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Media_Types = ['.png', '.gif', '.json'];
 
+const { pages, public, content_events, source } = app['config'];
+
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
-
-const { pages, public, content_events, source } = app['config'];
 const relative = fname => fname.replace(source, '');
 
 app.on(events.PRE_BUILD, () => {
@@ -25,12 +25,16 @@ app.on(events.PRE_BUILD, () => {
 app.on(events.POST_BUILD, () => console.log(cyan('Build done.')))
 
 app.on(events.BUILD, async () => {
-  const { pages, public } = app['config'];
+  const { pages } = app['config'];
   console.log(cyan('Build from'), relative(pages));
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
       let isDirectory = fs.statSync(dirPath).isDirectory();
+      if (f.startsWith('_')) {
+        console.log(gray('Skip'), gray(relative(dirPath)));
+        return;
+      }
       isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
     });
   }
@@ -79,5 +83,7 @@ async function process_file(file) {
     const dest = path.join(pub_dir, name) + ext;
     fs.copyFileSync(file, dest);
     console.log(cyan('Created Media'), relative(dest));
+  } else {
+    console.log(magenta('Unknown file type'), relative(file));
   }
 }
