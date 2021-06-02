@@ -11,6 +11,7 @@ const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Media_Types = ['.png', '.gif'];
 
+const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
@@ -46,12 +47,15 @@ app.on(events.BUILD, async () => {
     // console.log('Page: ', file, '=>', event);
     const text = fs.readFileSync(file).toString();
     if (Content_Types.indexOf(ext) >= 0) {
-      const content = (await app.query(`${events.BUILD}${event}`, text))[0];
+      const all_content = await app.query(`${events.BUILD}${event}`, text);
+      const content = last(all_content);
+      console.log(content);
+
       if (!content) {
         console.log(red('Content load failed'));
         return;
       }
-      // console.log(content);
+
       const viewModule = require(themePath);
       const html = viewModule(content, view);
       if (html) {
