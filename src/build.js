@@ -15,12 +15,17 @@ const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
 
-app.on(events.PRE_BUILD, () => console.log('Build started'))
+app.on(events.PRE_BUILD, () => {
+  console.log('Build started, clean up ...');
+  const { public } = app['config'];
+  fs.rmSync(public, { recursive: true, force: true });
+});
+
 app.on(events.POST_BUILD, () => console.log('Build done.'))
 
 app.on(events.BUILD, async () => {
   const { pages, public, content_events, themePath } = app['config'];
-  console.log('Building', public);
+  console.log('Building:', public);
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
