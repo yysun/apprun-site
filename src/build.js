@@ -5,8 +5,11 @@ const path = require('path');
 const app = require('apprun').app;
 const chalk = require('chalk');
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-
 const events = require('./events');
+
+const ensure = dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+};
 
 app.on(events.PRE_BUILD, () => console.log('Build started'))
 app.on(events.POST_BUILD, () => console.log('Build done.'))
@@ -40,6 +43,7 @@ app.on(events.BUILD, async () => {
     const html = viewModule(content, view);
 
     if (html) {
+      ensure(path.dirname(target));
       fs.writeFileSync(target, html);
       console.log(green(target));
     } else {
