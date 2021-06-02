@@ -12,12 +12,12 @@ module.exports = page => `<!DOCTYPE html>
   <script src="https://unpkg.com/jquery@3.4.1/dist/jquery.slim.min.js"></script>
   <script src="https://unpkg.com/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://unpkg.com/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
-  ${extra_css && extra_css.map(css => `<link rel="stylesheet" href="${css}">`).join('\n')}
-  ${extra_javascript && extra_javascript.map(js => `<script src="${js}"></script>`).join('\n')}
+  ${extra_css ? extra_css.map(css => `<link rel="stylesheet" href="${css}">`).join('\n') : ''}
+  ${extra_javascript ? extra_javascript.map(js => `<script src="${js}"></script>`).join('\n'): ''}
+  ${extra_module ? extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n') : ''}
 </head>
 <body>
 ${page.body}
-${extra_module && extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n')}
 </body>
 </html>
 `

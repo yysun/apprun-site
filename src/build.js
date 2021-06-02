@@ -16,17 +16,19 @@ const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
 
+const { pages, public, content_events, source } = app['config'];
+const relative = fname => fname.replace(source, '');
+
 app.on(events.PRE_BUILD, () => {
-  console.log('Build started, clean up ...');
-  const { public } = app['config'];
+  console.log(cyan('Build started'), relative(public));
   fs.rmSync(public, { recursive: true, force: true });
 });
 
-app.on(events.POST_BUILD, () => console.log('Build done.'))
+app.on(events.POST_BUILD, () => console.log(cyan('Build done.')))
 
 app.on(events.BUILD, async () => {
   const { pages, public } = app['config'];
-  console.log('Building:', public, pages);
+  console.log(cyan('Build from'), relative(pages));
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
@@ -39,13 +41,11 @@ app.on(events.BUILD, async () => {
 
 
 async function process_file(file) {
-  const { pages, public, content_events, themePath } = app['config'];
   const dir = path.dirname(file).replace(pages, '');
   const name = path.basename(file).replace(/\.[^/.]+$/, '');
   const pub_dir = path.join(public, dir);
   const ext = path.extname(file);
   const event = content_events?.[ext] || ext;
-  const view = name.split('.')[1];
 
   ensure(pub_dir);
 
@@ -60,23 +60,25 @@ async function process_file(file) {
       return;
     }
 
-    const viewModule = require(themePath);
-    const html = viewModule(content, view);
+    const ss = name.split('.');
+    const viewName = ss.length > 2 ? ss[1] : 'index';
+    const view = app['get_theme_view'](viewName);
+    const html = view && view(content);
     if (html) {
-      const target = path.join(pub_dir, name) + '.html';
+      const target = path.join(pub_dir, ss[0]) + '.html';
       fs.writeFileSync(target, html);
-      console.log(green(target));
+      console.log(cyan('Created Content'), relative(target));
     } else {
-      console.log(red('Page creation failed '));
+      console.log(red('Err: Page creation failed for', file));
     }
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     const result = (await app.query(`${events.BUILD}.esbuild`, file, pub_dir))[0];
     result.errors.length && console.log(red(result.errors));
     result.warnings.length && console.log(red(result.warnings));
-    console.log(green(path.join(public, dir, name) + '.js'));
+    console.log(cyan('Created JavaSript'), relative(path.join(public, dir, name) + '.js'));
   } else if (Media_Types.indexOf(ext) >= 0) {
     const dest = path.join(pub_dir, name) + ext;
     fs.copyFileSync(file, dest);
-    console.log(green(dest));
+    console.log(cyan('Created Media'), relative(dest));
   }
 }

@@ -13,4 +13,5 @@ plugins:
 
 # extra_javascript:
 
-# extra_module:
+extra_module:
+  - https://unpkg.com/apprun/dist/apprun.esm.js

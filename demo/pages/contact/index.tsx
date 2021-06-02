@@ -12,3 +12,5 @@ export default class Contact extends Component {
   update = {
   }
 }
+
+app.webComponent('my-contact', Contact);
