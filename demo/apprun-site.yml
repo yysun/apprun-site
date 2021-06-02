@@ -9,14 +9,8 @@ theme:
 plugins:
   - my-plugin.js
 
-extra_css:
-  - assets/vendor/codemirror/codemirror.css
+# extra_css:
 
-extra_javascript:
-  - assets/vendor/codemirror/codemirror.js
-  - assets/vendor/codemirror/mode/javascript/javascript.js
-  - assets/vendor/codemirror/mode/xml/xml.js
-  - assets/vendor/codemirror/mode/jsx/jsx.js
+# extra_javascript:
 
-extra_module:
-  - assets/apprun-play.js
+# extra_module:

@@ -7,7 +7,7 @@ md.use(require('markdown-it-table-of-contents'));
 const yaml = require('js-yaml');
 
 const events = require('./events');
-app.on(`${events.BUILD}:md`, text => {
+app.on(`${events.BUILD}.md`, text => {
 
   let page = {};
   md.use(require('markdown-it-front-matter'), function (fm) {

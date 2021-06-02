@@ -7,6 +7,10 @@ const chalk = require('chalk');
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 const events = require('./events');
 
+const Content_Types = ['.md', '.html'];
+const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
+const Media_Types = ['.png', '.gif'];
+
 const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
@@ -15,7 +19,7 @@ app.on(events.PRE_BUILD, () => console.log('Build started'))
 app.on(events.POST_BUILD, () => console.log('Build done.'))
 
 app.on(events.BUILD, async () => {
-  const { pages, public, content_types, themePath } = app['config'];
+  const { pages, public, content_events, themePath } = app['config'];
   console.log('Building', public);
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
@@ -27,15 +31,17 @@ app.on(events.BUILD, async () => {
   walkDir(pages, async function (file) {
     const dir = path.dirname(file).replace(pages, '');
     const name = path.basename(file).replace(/\.[^/.]+$/, '');
-    const target = path.join(public, dir, name) + '.html';
+    const pub_dir = path.join(public, dir);
     const ext = path.extname(file);
-    const type = content_types?.[ext] || ext.substr(1);
+    const event = content_events?.[ext] || ext;
     const view = name.split('.')[1];
 
-    console.log('Page: ', file, '=>', type);
+    ensure(pub_dir);
+
+    // console.log('Page: ', file, '=>', event);
     const text = fs.readFileSync(file).toString();
-    if (['.md', '.html'].indexOf(ext) >= 0) {
-      const content = (await app.query(`${events.BUILD}:${type}`, text))[0];
+    if (Content_Types.indexOf(ext) >= 0) {
+      const content = (await app.query(`${events.BUILD}${event}`, text))[0];
       if (!content) {
         console.log(red('Content load failed'));
         return;
@@ -44,14 +50,21 @@ app.on(events.BUILD, async () => {
       const viewModule = require(themePath);
       const html = viewModule(content, view);
       if (html) {
-        ensure(path.dirname(target));
+        const target = path.join(pub_dir, name) + '.html';
         fs.writeFileSync(target, html);
         console.log(green(target));
       } else {
         console.log(red('Page creation failed '));
       }
-    } else {
-      await app.query(`${events.BUILD}:${type}`, file, path.join(public, dir))
+    } else if (Esbuild_Types.indexOf(ext) >= 0) {
+      const result = (await app.query(`${events.BUILD}.esbuild`, file, pub_dir))[0];
+      result.errors.length && console.log(red(result.errors));
+      result.warnings.length && console.log(red(result.warnings));
+      console.log(green(path.join(public, dir, name) + '.js'));
+    } else if (Media_Types.indexOf(ext) >= 0) {
+      const dest = path.join(pub_dir, name) + ext;
+      fs.copyFileSync(file, dest);
+      console.log(green(dest));
     }
   });
 
