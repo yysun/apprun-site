@@ -11,10 +11,22 @@ module.exports = async function (source) {
   config.source = `${process.cwd()}/${source}/`;
   config.pages = `${process.cwd()}/${source}/${config.pages || 'pages'}`;
   config.public = `${process.cwd()}/${source}/${config.public || 'public'}`;
-  const { plugins, start, theme } = config;
+  const { plugins, start, theme, site_url, tabs } = config;
+
+  // nav
+  const base = site_url || '/';
+  config.nav = tabs ?
+    Object.keys(tabs).map(key => ({
+      link: `${base}${tabs[key] || ''}`,
+      text: key
+    }))
+    : null;
   app.config = config;
 
+  // plugins
   plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
+
+  // theme
   app.get_theme_view = name => {
     const cust_themeView = `${process.cwd()}/${source}/themes/${theme.name}/${name}.js`;
     const sys_themeView = `${__dirname}/src/themes/${theme.name}/${name}.js`
@@ -27,6 +39,8 @@ module.exports = async function (source) {
       return require(sys_themeView);
     }
   }
+
+  // system modules
   // modules?.forEach(module => require(`${__dirname}/src/${module}`));
   require('./src/build');
   require('./src/build-md');

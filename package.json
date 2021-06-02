@@ -31,18 +31,7 @@
     "url": "https://github.com/yysun/apprun-site/issues"
   },
   "homepage": "https://github.com/yysun/apprun-site#readme",
-  "devDependencies": {
-    "@types/jest": "^26.0.23",
-    "jest": "^26.6.3",
-    "npm-run-all": "^4.1.5",
-    "source-map-loader": "^3.0.0",
-    "ts-jest": "^26.5.6",
-    "ts-loader": "^9.2.2",
-    "typescript": "^4.3.2",
-    "webpack": "^5.38.1",
-    "webpack-cli": "^4.7.0",
-    "webpack-dev-server": "^3.11.2"
-  },
+  "devDependencies": {},
   "dependencies": {
     "acorn": "^8.3.0",
     "apprun": "^3.28.6",
@@ -51,15 +40,15 @@
     "commander": "^7.2.0",
     "degit": "^2.8.4",
     "esbuild": "^0.12.5",
-    "estree-walker": "^3.0.0",
-    "fs-extra": "^10.0.0",
-    "js-yaml": "^3.14.1",
+    "esm": "^3.2.25",
+    "estree-walker": "^2.0.2",
+    "js-yaml": "^4.1.0",
+    "jsonfile": "^6.1.0",
     "magic-string": "^0.25.7",
     "markdown-it": "^12.0.6",
     "markdown-it-anchor": "^7.1.0",
     "markdown-it-front-matter": "^0.2.3",
-    "markdown-it-table-of-contents": "^0.5.2",
-    "read-pkg": "^6.0.0"
+    "markdown-it-table-of-contents": "^0.5.2"
   },
   "jest": {
     "transform": {

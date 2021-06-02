@@ -1,0 +1,11 @@
+{
+  "name": "My AppRun Site",
+  "scope": "/",
+  "display": "standalone",
+  "start_url": "https://apprun-demo.web.app",
+  "short_name": "AppRun Site",
+  "theme_color": "#000000",
+  "description": "An qpp build with AppRun Site framework",
+  "orientation": "any",
+  "background_color": "#ffffff"
+}

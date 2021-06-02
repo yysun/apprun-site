@@ -7,7 +7,7 @@ const events = require('./events');
 
 const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
-const Media_Types = ['.png', '.gif'];
+const Media_Types = ['.png', '.gif', '.json'];
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
@@ -41,10 +41,11 @@ app.on(events.BUILD, async () => {
 async function process_file(file) {
   const dir = path.dirname(file).replace(pages, '');
   const name = path.basename(file).replace(/\.[^/.]+$/, '');
-  const pub_dir = path.join(public, dir);
   const ext = path.extname(file);
   const event = content_events?.[ext] || ext;
-
+  const modules_dir = `${public}/_modules`;
+  const pub_dir = path.join(public, dir);
+  ensure(modules_dir);
   ensure(pub_dir);
 
   // console.log('Page: ', file, '=>', event);
@@ -72,7 +73,7 @@ async function process_file(file) {
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     const js = path.join(public, dir, name) + '.js';
     app.run(`${events.BUILD}:esbuild`, file, js);
-    app.run(`${events.BUILD}:esm`, js);
+    app.run(`${events.BUILD}:esm`, js, modules_dir);
     console.log(cyan('Created JavaSript'), relative(js));
   } else if (Media_Types.indexOf(ext) >= 0) {
     const dest = path.join(pub_dir, name) + ext;
