@@ -17,7 +17,7 @@ module.exports = async function (source) {
   config.public = `${process.cwd()}/${source}/${config.public || 'public'}`;
 
   const { plugins, start, theme } = config;
-plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
+  plugins?.forEach(module => require(`${process.cwd()}/${source}/plugins/${module}`));
   const themePath = `${process.cwd()}/${source}/themes/${theme.name}/index.js`;
   config.themePath = fs.existsSync(themePath) ? themePath : `${__dirname}/src/themes/${theme.name}`
 
