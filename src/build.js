@@ -9,7 +9,7 @@ const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Media_Types = ['.png', '.gif', '.json'];
 
-const { pages, public, content_events, source } = app['config'];
+const { pages, clean, watch, public, content_events, source } = app['config'];
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
@@ -19,7 +19,10 @@ const relative = fname => fname.replace(source, '');
 
 app.on(events.PRE_BUILD, () => {
   console.log(cyan('Build started'), relative(public));
-  fs.rmSync(public, { recursive: true, force: true });
+  if (clean) {
+    fs.rmSync(public, { recursive: true, force: true });
+    console.log(yellow('Clean'), relative(public));
+  }
 });
 
 app.on(events.POST_BUILD, () => console.log(cyan('Build done.')))

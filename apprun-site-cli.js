@@ -2,7 +2,7 @@
 
 const program = require('commander');
 const degit = require('degit');
-const startup = require('./index');
+const build = require('./index');
 
 program
   .command('init [targetDir]')
@@ -21,7 +21,10 @@ program
 program
   .command('build <source>')
   .description('build site')
-  .option('-w, --watch', 'watch the folder')
-  .action(source => startup(source));
+  .option('-c, --clean', 'clean the output directory', false)
+  .option('-w, --watch', 'watch the directory', false)
+  .option('-o, --public', 'output directory', 'public')
+  .option('-p, --pages', 'pages directory', 'pages')
+  .action((source, options) => build({source, ...options}));
 
 program.parse(process.args);

@@ -6,11 +6,13 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 const app = require('apprun').app;
 const events = require('./src/events');
 
-module.exports = async function (source) {
+module.exports = async function ({ source, clean, watch, pages, public }) {
   const config = yaml.load(fs.readFileSync(`${source}/apprun-site.yml`));
   config.source = `${process.cwd()}/${source}/`;
-  config.pages = `${process.cwd()}/${source}/${config.pages || 'pages'}`;
-  config.public = `${process.cwd()}/${source}/${config.public || 'public'}`;
+  config.pages = `${process.cwd()}/${source}/${pages || 'pages'}`;
+  config.public = `${process.cwd()}/${source}/${public || 'public'}`;
+  config.clean = clean;
+  config.watch = watch;
   const { plugins, start, theme, site_url, tabs } = config;
 
   // nav
@@ -51,7 +53,7 @@ module.exports = async function (source) {
   if (start) {
     await app.query(start);
   } else {
-    await app.query(events.PRE_BUILD);;
+    await app.query(events.PRE_BUILD);
     await app.query(events.BUILD);
     await app.query(events.POST_BUILD);
   }
