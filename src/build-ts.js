@@ -1,11 +1,11 @@
-// @ts-check
-const app = require('apprun').app;
 const events = require('./events');
 
-app.on(`${events.BUILD}.esbuild`, (file, target) => {
-  return require('esbuild').buildSync({
+app.on(`${events.BUILD}:esbuild`, (file, target) => {
+  const result = require('esbuild').buildSync({
     entryPoints: [file],
-    outdir: target
-  })
+    outfile: target
+  });
+  result.errors.length && console.log(red(result.errors));
+  result.warnings.length && console.log(red(result.warnings));
 });
 

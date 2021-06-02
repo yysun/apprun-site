@@ -1,4 +1,3 @@
-const app = require('apprun').app;
 const chalk = require('chalk');
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 

@@ -1,6 +1,3 @@
-// @ts-check
-const app = require('apprun').app;
-
 const md = require('markdown-it')({ html: true });
 md.use(require('markdown-it-anchor'));
 md.use(require('markdown-it-table-of-contents'));

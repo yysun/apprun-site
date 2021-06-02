@@ -1,8 +1,6 @@
-// @ts-check
 const fs = require('fs');
 const path = require('path');
 
-const app = require('apprun').app;
 const chalk = require('chalk');
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 const events = require('./events');
@@ -72,10 +70,10 @@ async function process_file(file) {
       console.log(red('Err: Page creation failed for', file));
     }
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    const result = (await app.query(`${events.BUILD}.esbuild`, file, pub_dir))[0];
-    result.errors.length && console.log(red(result.errors));
-    result.warnings.length && console.log(red(result.warnings));
-    console.log(cyan('Created JavaSript'), relative(path.join(public, dir, name) + '.js'));
+    const js = path.join(public, dir, name) + '.js';
+    app.run(`${events.BUILD}:esbuild`, file, js);
+    app.run(`${events.BUILD}:esm`, js);
+    console.log(cyan('Created JavaSript'), relative(js));
   } else if (Media_Types.indexOf(ext) >= 0) {
     const dest = path.join(pub_dir, name) + ext;
     fs.copyFileSync(file, dest);

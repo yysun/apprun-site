@@ -1,6 +1,4 @@
-// @ts-check
 const yaml = require('js-yaml');
-const app = require('apprun').app;
 const events = require('./events');
 
 const fm_flag = '---';

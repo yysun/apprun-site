@@ -32,6 +32,7 @@ module.exports = async function (source) {
   require('./src/build-md');
   require('./src/build-html');
   require('./src/build-ts');
+  require('./src/build-esm');
 
   if (start) {
     await app.query(start);
