@@ -18,18 +18,18 @@ async function build({ source, clean, watch, pages, public }) {
     return;
   }
   const config = yaml.load(fs.readFileSync(conf));
+  const { plugins, start, theme, site_url, tabs } = config;
   config.source = source;
   config.pages = path.join(source, pages || 'pages');
   config.public = path.join(source, public || 'public');
   config.clean = clean;
   config.watch = watch;
-  const { plugins, start, theme, site_url, tabs } = config;
-
+  config.site_url = site_url || '';
+  if (!config.site_url.endsWith('/')) config.site_url += '/';
   // nav
-  const base = site_url || '/';
   config.nav = tabs ?
     Object.keys(tabs).map(key => ({
-      link: `${base}${tabs[key] || ''}`,
+      link: `${config.site_url}${tabs[key] || ''}`,
       text: key
     }))
     : null;
@@ -38,10 +38,6 @@ async function build({ source, clean, watch, pages, public }) {
   // system modules
   // modules?.forEach(module => require(`${__dirname}/src/${module}`));
   require('./src/build');
-  require('./src/build-md');
-  require('./src/build-html');
-  require('./src/build-ts');
-  require('./src/build-esm');
 
   // plugins
   plugins?.forEach(module => require(`${source}/plugins/${module}`));

@@ -1,7 +1,7 @@
 import { app, Component } from 'apprun';
 
 export default class Contact extends Component {
-  state = {}
+  state = 'Contact'
 
   view = state => <>
     <div>
