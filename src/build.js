@@ -78,7 +78,7 @@ async function process_file(file) {
     }
 
     const ss = name.split('.');
-    const viewName = ss.length > 2 ? ss[1] : 'index';
+    const viewName = ss.length > 1 ? ss[1] : 'index';
     const view = app['get_theme_view'](viewName);
     const html = view && view(content);
     if (html) {

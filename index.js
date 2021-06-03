@@ -48,7 +48,7 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
     const cust_themeView = `${source}/themes/${theme.name}/${name}.js`;
     const sys_themeView = `${__dirname}/src/themes/${theme.name}/${name}.js`
     if (fs.existsSync(cust_themeView)) {
-      console.log(yellow('Using custom view', cust_themeView));
+      console.log(yellow('Using custom view'), cust_themeView.replace(`${process.cwd()}/`, ''));
       return require(cust_themeView);
     } else if (!fs.existsSync(sys_themeView)) {
       console.log(red(`Err: Cannot find theme view: ${theme.name}/${name}`));
