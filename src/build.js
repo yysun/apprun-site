@@ -15,7 +15,7 @@ const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
-const relative = fname => fname.replace(`${process.cwd()}/`, '');
+const relative = fname => fname.replace(process.cwd(), '').substr(1);
 
 app.on(events.PRE_BUILD, () => {
   if (clean) {

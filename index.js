@@ -2,7 +2,7 @@
 
 const program = require('commander');
 const degit = require('degit');
-const build = require('./cli');
+const build = require('./cli').build;
 
 program
   .command('init [targetDir]')
