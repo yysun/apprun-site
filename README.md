@@ -9,14 +9,11 @@
 
 ## Features
 
-* Progressive Web App (PWA) - support offline
-* Single Page App (SPA) - routing using / or #
-* Four built-in layouts and bring your own
-* Compile html, markdown pages to AppRun components
-* Auto generate the index of pages
-* Build app logic using AppRun/Web components
-* Targets ES5 or ES Module
-* Extensible through plugins (WIP)
+* Build static sites
+* Configure site through YML file
+* Extensible through plugins
+* Customizable themes
+* Customizable content type
 
 ## Quick Start
 
@@ -38,5 +35,10 @@ Then, you can use:
 
 Please visit the https://yysun.github.io/apprun-site
 
+## Development
+
+* Use _npm start_ to start the dev server
+* Use _npm run build_ to build for production
+* Use _npm run watch_ to build docs
 
 Have fun coding
