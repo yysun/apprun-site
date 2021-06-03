@@ -1,24 +1,18 @@
 
 const { site_name, site_url, nav } = app['config'];
 
-module.exports = (page) => `<div class="container">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="/">${site_name}</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse"
-      data-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        ${!nav ? '' : nav.map(item => `<li class="nav-item">
-          <a class="nav-link" href=${item.link}>${item.text}</a>
-        </li>`).join('')}
-      </ul>
+module.exports = (page) => `
+  <header class="p-3 mb-3 border-bottom">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+          <span class="fs=4">${site_name}</span>
+        </a>
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          ${!nav ? '' : nav.map(item => `<li class="nav-item">
+            <a class="nav-link" href=${item.link}>${item.text}</a>
+          </li>`).join('')}
+        </ul>
+      </div>
     </div>
-  </nav>
-  <div class="container">
-  ${page.content}
-  </div>
-</div>`;
+  </header>`;
