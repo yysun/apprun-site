@@ -23,8 +23,7 @@ program
   .description('build site')
   .option('-c, --clean', 'clean the output directory', false)
   .option('-w, --watch', 'watch the directory', false)
-  .option('-o, --public', 'output directory', 'public')
-  .option('-p, --pages', 'pages directory', 'pages')
+  .option('-p, --public [public]', 'public directory', 'public')
   .action((source, options) => build({source, ...options}));
 
 program.parse(process.args);
