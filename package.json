@@ -3,11 +3,11 @@
   "version": "0.7.0",
   "description": "AppRun Site is a framework for building AppRun applications.",
   "main": "index.js",
-  "bin": "index.js",
+  "bin": "cli.js",
   "scripts": {
     "start": "apprun-dev-server docs",
-    "build": "node index.js build demo -p ../docs",
-    "watch": "node index.js build demo -p ../docs -w"
+    "build": "node cli build demo -p ../docs",
+    "watch": "node cli build demo -p ../docs -w"
   },
   "keywords": [
     "AppRun",
