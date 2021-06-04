@@ -1,0 +1,14 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild src/main.tsx --outfile=pages/main.js --format=esm",
+    "start": "apprun-dev-serve public"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

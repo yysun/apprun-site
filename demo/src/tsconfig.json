@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "jsxFactory": "app.h",
+    "jsxFragmentFactory": "app.Fragment",
+    "lib": [ "dom" ],
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true
+  }
+}
