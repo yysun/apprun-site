@@ -10,6 +10,7 @@ require('./build-html');
 require('./build-ts');
 require('./build-esm');
 require('./build-component');
+require('./build-app');
 
 const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
@@ -33,7 +34,7 @@ app.on(events.PRE_BUILD, () => {
 
 app.on(events.POST_BUILD, () => {
 
-  console.log(components);
+  app.run(`${events.BUILD}:app`, components);
 
   if (watch) {
     console.log(cyan('Watching ...'));
@@ -95,10 +96,11 @@ async function process_file(file) {
     components.push({
       link: site_url + (dir ? `${dir}/${ss[0]}` : ss[0]).replace('index', ''),
       file: dir ? `${dir}/${name}${ext}` : `${name}${ext}`,
-      component: dir ? `${dir}/${name}.esm.js` : `${name}.esm.js`,
+      module: dir ? `${dir}/${name}.esm.js` : `${name}.esm.js`,
+      element: content.element
     });
 
-    app.run(`${events.BUILD}:component`, content, viewName, component);
+    app.run(`${events.BUILD}:component`, content, component);
     console.log(cyan('Created component'), relative(component));
 
     // create html file
