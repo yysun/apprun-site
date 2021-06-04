@@ -8,5 +8,5 @@ app.on('//', (route) => {
 });
 
 export default () => <div class="container">
-  
+
 </div>

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-
 const chalk = require('chalk');
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 const events = require('./events');
@@ -15,7 +14,9 @@ require('./build-app');
 const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Media_Types = ['.png', '.gif', '.json'];
-const { pages, clean, watch, public, content_events, site_url } = app['config'];
+const { content_events, site_url } = app['config'];
+const { pages, public, clean, watch, cust_theme } = app;
+
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
@@ -23,19 +24,18 @@ const ensure = dir => {
 };
 const relative = fname => fname.replace(process.cwd(), '').substr(1);
 
-const components = [];
-
 app.on(events.PRE_BUILD, () => {
   if (clean) {
     fs.rmSync(public, { recursive: true, force: true });
     console.log(cyan('Clean'), relative(public));
   }
+
+  ensure(cust_theme);
+  app.run(`${events.BUILD}:theme`);
 });
 
 app.on(events.POST_BUILD, () => {
-
-  app.run(`${events.BUILD}:app`, components);
-
+  app.run(`${events.BUILD}:app`);
   if (watch) {
     console.log(cyan('Watching ...'));
     const chokidar = require('chokidar');
@@ -51,14 +51,14 @@ app.on(events.POST_BUILD, () => {
 })
 
 app.on(events.BUILD, async () => {
-  const { pages } = app['config'];
   console.log(cyan('Build from'), relative(pages));
+  app.config.pages = [];
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
       let isDirectory = fs.statSync(dirPath).isDirectory();
       if (f.startsWith('_')) {
-        console.log(gray('Skip'), gray(relative(dirPath)));
+        console.log(gray('Ignored'), gray(relative(dirPath)));
         return;
       }
       isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
@@ -81,37 +81,40 @@ async function process_file(file) {
   const text = fs.readFileSync(file).toString();
   if (Content_Types.indexOf(ext) >= 0) {
     const all_content = await app.query(`${events.BUILD}${event}`, text);
-    const content = last(all_content);
+    const page = last(all_content);
     // console.log(content);
-    if (!content) {
+    if (!page) {
       console.log(red('Content load failed'));
       return;
     }
 
+    // create component
     const ss = name.split('.');
     const viewName = ss.length > 1 ? ss[1] : 'index';
     const pub_name = path.join(pub_dir, ss[0]);
     const component = `${path.join(pub_dir, name)}.esm.js`;
 
-    components.push({
+    app.run(`${events.BUILD}:component`, page, component);
+    console.log(cyan('Created component'), relative(component));
+
+    app.config.pages.push({
       link: site_url + (dir ? `${dir}/${ss[0]}` : ss[0]).replace('index', ''),
       file: dir ? `${dir}/${name}${ext}` : `${name}${ext}`,
       module: dir ? `${dir}/${name}.esm.js` : `${name}.esm.js`,
-      element: content.element
+      element: page.meta.element
     });
 
-    app.run(`${events.BUILD}:component`, content, component);
-    console.log(cyan('Created component'), relative(component));
-
     // create html file
-    const view = app['get_theme_view'](viewName);
-    const html = view && view(content);
-    if (html) {
+    const viewPath = path.join(cust_theme, viewName);
+    try {
+      const view = require(viewPath);
+      const html = view && view(page);
       const target = `${pub_name}.html`;
       fs.writeFileSync(target, html);
-      console.log(cyan('Created Content'), relative(target));
-    } else {
-      console.log(red('Err: Page creation failed for', file));
+      console.log(cyan('Created Page'), relative(target));
+    } catch (ex) {
+      console.log(red('Error: Page creation failed'), relative(file));
+      console.log(yellow(ex.code || ex), relative(viewPath));
     }
 
   } else if (Esbuild_Types.indexOf(ext) >= 0) {

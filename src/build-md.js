@@ -6,11 +6,11 @@ const yaml = require('js-yaml');
 const events = require('./events');
 app.on(`${events.BUILD}.md`, text => {
 
-  let page = {};
+  let meta = {};
   md.use(require('markdown-it-front-matter'), function (fm) {
-    page = fm ? yaml.load(fm) : {};
+    meta = fm ? yaml.load(fm) : {};
   });
 
   const content = md.render(text);
-  return { ...page, content };
+  return { meta, content };
 });

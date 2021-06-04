@@ -1,4 +1,3 @@
-// @ts-check
 const events = require('./events');
 app.on(`${events.BUILD}:esm`, (file, modules_dir, verbose = false) => {
 
@@ -15,7 +14,7 @@ app.on(`${events.BUILD}:esm`, (file, modules_dir, verbose = false) => {
     if (!cache[module]) {
       const jsonfile = require('jsonfile');
 
-      const source = app.config.source;
+      const source = app.source;
       let pkg_json = `${source}/node_modules/${module}/package.json`;
       if (!fs.existsSync(pkg_json))
         pkg_json = `${source}/../node_modules/${module}/package.json`;

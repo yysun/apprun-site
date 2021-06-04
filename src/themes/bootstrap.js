@@ -13,11 +13,11 @@ module.exports = page => `<!DOCTYPE html>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
   ${extra_css ? extra_css.map(css => `<link rel="stylesheet" href="${css}">`).join('\n') : ''}
-  ${extra_javascript ? extra_javascript.map(js => `<script src="${js}"></script>`).join('\n'): ''}
+  ${extra_javascript ? extra_javascript.map(js => `<script src="${js}"></script>`).join('\n') : ''}
   ${extra_module ? extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n') : ''}
 </head>
 <body>
-${page.body}
+${page.content}
 </body>
 </html>
 `

@@ -19,13 +19,18 @@ async function build({ source, clean, watch, pages, public }) {
   }
   const config = yaml.load(fs.readFileSync(conf));
   const { plugins, start, theme, site_url, tabs } = config;
-  config.source = source;
-  config.pages = path.join(source, pages || 'pages');
-  config.public = path.join(source, public || 'public');
-  config.clean = clean;
-  config.watch = watch;
+  app.source = source;
+  app.pages = path.join(source, pages || 'pages');
+  app.public = path.join(source, public || 'public');
+  app.clean = clean;
+  app.watch = watch;
+  app.cust_theme = path.join(source, "themes", theme.name);
+  app.sys_theme = path.join(__dirname, "src", "themes", theme.name);
+
+  config.root = config.root || '/';
   config.site_url = site_url || '';
   if (!config.site_url.endsWith('/')) config.site_url += '/';
+
   // nav
   config.nav = tabs ?
     Object.keys(tabs).map(key => ({
@@ -33,6 +38,7 @@ async function build({ source, clean, watch, pages, public }) {
       text: key
     }))
     : null;
+
   app.config = config;
 
   // system modules
@@ -41,20 +47,6 @@ async function build({ source, clean, watch, pages, public }) {
 
   // plugins
   plugins?.forEach(module => require(`${source}/plugins/${module}`));
-
-  // theme
-  app.get_theme_view = name => {
-    const cust_themeView = path.join(source, "themes", theme.name, `${name}.js`);
-    const sys_themeView = path.join(__dirname, "src", "themes", theme.name, `${name}.js`);
-    if (fs.existsSync(cust_themeView)) {
-      console.log(yellow('Use custom view'), cust_themeView.replace(process.cwd(), '').substr(1));
-      return require(cust_themeView);
-    } else if (!fs.existsSync(sys_themeView)) {
-      console.log(red(`Err: Cannot find theme view: ${theme.name}/${name}`));
-    } else {
-      return require(sys_themeView);
-    }
-  }
 
   if (start) {
     await app.query(start);

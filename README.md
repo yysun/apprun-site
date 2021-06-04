@@ -13,7 +13,8 @@
 * Configure site through YML file
 * Extensible through plugins
 * Customizable themes
-* Customizable content type
+* Customizable content types
+* Customizable views
 
 ## Quick Start
 
