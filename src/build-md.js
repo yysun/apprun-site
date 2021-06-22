@@ -3,14 +3,13 @@ md.use(require('markdown-it-anchor'));
 md.use(require('markdown-it-table-of-contents'));
 const yaml = require('js-yaml');
 
+const fm_flag = '---';
+
 const events = require('./events');
 app.on(`${events.BUILD}.md`, text => {
-
-  let meta = {};
-  md.use(require('markdown-it-front-matter'), function (fm) {
-    meta = fm ? yaml.load(fm) : {};
-  });
-
-  const content = md.render(text);
-  return { meta, content };
+  if (text.startsWith(fm_flag)) {
+    const ss = text.split('---');
+    if (ss.length > 2) return { meta: yaml.load(ss[1]), content: md.render(ss[2]) }
+  }
+  return { meta: {}, content: md.render(text) };
 });
