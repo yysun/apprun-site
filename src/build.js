@@ -14,7 +14,7 @@ require('./build-app');
 const Content_Types = ['.md', '.html'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Media_Types = ['.png', '.gif', '.json'];
-const { content_events, site_url } = app['config'];
+const { content_events, site_url, extra_css, extra_javascript, extra_module } = app['config'];
 const { pages, public, clean, watch, cust_theme } = app;
 
 
@@ -88,32 +88,37 @@ async function process_file(file) {
       return;
     }
 
+    // create page head
+    page.head = page.head || '';
+    if (extra_css) page.head += extra_css.map(css => `<link rel="stylesheet" href="${css}">`).join('\n');
+    if (extra_javascript) page.head += extra_javascript.map(js => `<script src="${js}"></script>`).join('\n');
+    if (extra_module) page.head += extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n');
+
     // create component
-    const ss = name.split('.');
-    const viewName = ss.length > 1 ? ss[1] : 'index';
-    const pub_name = path.join(pub_dir, ss[0]);
+    const layout = page.meta?.layout || '';
+    const pub_name = path.join(pub_dir, name);
     const component = `${path.join(pub_dir, name)}.esm.js`;
 
     app.run(`${events.BUILD}:component`, page, component);
     console.log(cyan('Created component'), relative(component));
 
     app.config.pages.push({
-      link: site_url + (dir ? `${dir}/${ss[0]}` : ss[0]).replace('index', ''),
+      link: site_url + (dir ? `${dir}/${name}` : name).replace('index', ''),
       file: dir ? `${dir}/${name}${ext}` : `${name}${ext}`,
       module: dir ? `${dir}/${name}.esm.js` : `${name}.esm.js`,
       element: page.meta.element
     });
 
     // create html file
-    const viewPath = path.join(cust_theme, viewName);
+    const viewPath = path.join(cust_theme, layout);
     try {
       const view = require(viewPath);
       const html = view && view(page);
       const target = `${pub_name}.html`;
       fs.writeFileSync(target, html);
-      console.log(cyan('Created Page'), relative(target));
+      console.log(cyan('Created Page'), relative(target), { layout });
     } catch (ex) {
-      console.log(red('Error: Page creation failed'), relative(file));
+      console.log(red('Error: Page creation failed'), relative(file), { layout });
       console.log(yellow(ex.code || ex), relative(viewPath));
     }
 
