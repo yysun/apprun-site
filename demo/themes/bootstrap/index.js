@@ -1,10 +1,10 @@
-const { site_name, extra_css, extra_javascript, extra_module } = app['config'];
+const { site_name, copyright } = app['config'];
 
-module.exports = page => `<!DOCTYPE html>
-<html>
+const index = page => `<!DOCTYPE html>
+<html class="h-100">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${page.title ? page.title + ' | ' : ''}${site_name}</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
@@ -12,12 +12,61 @@ module.exports = page => `<!DOCTYPE html>
     integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
-  ${extra_css ? extra_css.map(css => `<link rel="stylesheet" href="${css}">`).join('\n') : ''}
-  ${extra_javascript ? extra_javascript.map(js => `<script src="${js}"></script>`).join('\n') : ''}
-  ${extra_module ? extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n') : ''}
+  ${page.head || ''}
 </head>
-<body>
 ${page.content}
-</body>
-</html>
-`
+<script src="startup.js" type="module"></script>
+</html>`;
+
+const header = page => `<header>
+  <nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="/">${site_name}</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/Contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/About">About</a>
+          </li>
+          <li class="nav-item d-none">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+          </li>
+        </ul>
+        <form class="d-flex d-none">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+</header>`;
+
+const footer = page => `<footer class="footer mt-auto py-3 bg-light">
+  <div class="container">
+    <span class="text-muted">${copyright}</span>
+  </div>
+</footer>`;
+
+const main = page => {
+  page.content = `<body class="d-flex flex-column h-100">
+${header(page)}
+<main class="flex-shrink-0">
+  <div class="container">
+  ${page.content}
+  </div>
+</main>
+${footer(page)}
+</body>`;
+
+  return index(page);
+};
+
+module.exports = { index, header, footer, main, default: main }
