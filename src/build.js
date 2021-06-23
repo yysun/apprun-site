@@ -35,7 +35,27 @@ app.on(events.PRE_BUILD, () => {
 });
 
 app.on(events.POST_BUILD, () => {
-  app.run(`${events.BUILD}:app`);
+  // app.run(`${events.BUILD}:app`);
+
+  const statup = ` // Auto generated file - DON'T modify
+import app from 'apprun';
+const pages = ${JSON.stringify(app.config.components, null, 2)}
+pages.forEach(def => {
+  console.log(def);
+  let { link, module, element } = def;
+  app.on(link, (...p) => {
+    import(module).then((module) => {
+      const component = new module.default().mount(element || document.body);
+      component.run('.', ...p);
+    });
+  });
+});
+`;
+
+  const startup_file = path.join(public, 'startup.js');
+  fs.writeFileSync(startup_file, statup);
+  console.log(cyan('Created Startup'), relative(startup_file));
+
   if (watch) {
     console.log(cyan('Watching ...'));
     const chokidar = require('chokidar');
@@ -52,7 +72,7 @@ app.on(events.POST_BUILD, () => {
 
 app.on(events.BUILD, async () => {
   console.log(cyan('Build from'), relative(pages));
-  app.config.pages = [];
+  app.config.components = [];
   function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
       let dirPath = path.join(dir, f);
@@ -95,21 +115,22 @@ async function process_file(file) {
     if (extra_module) page.head += extra_module.map(js => `<script src="${js}" type="module"></script>`).join('\n');
 
     // create component
-    const layout = page.meta?.layout || '';
     const pub_name = path.join(pub_dir, name);
     const component = `${path.join(pub_dir, name)}.esm.js`;
 
     app.run(`${events.BUILD}:component`, page, component);
     console.log(cyan('Created component'), relative(component));
 
-    app.config.pages.push({
+    app.config.components.push({
       link: site_url + (dir ? `${dir}/${name}` : name).replace('index', ''),
       file: dir ? `${dir}/${name}${ext}` : `${name}${ext}`,
       module: dir ? `${dir}/${name}.esm.js` : `${name}.esm.js`,
       element: page.meta.element
     });
 
+
     // create html file
+    const layout = page.meta?.layout || 'index';
     const viewPath = path.join(cust_theme, layout);
     try {
       const view = require(viewPath).default;

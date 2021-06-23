@@ -15,25 +15,28 @@ const index = page => `<!DOCTYPE html>
   ${page.head || ''}
 </head>
 ${page.content}
+<script src="startup.js" type="module"></script>
 </html>`;
 
 const header = page => `<header>
-  <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-light bg-light">
     <div class="container">
-      <a class="navbar-brand" href="#">Fixed navbar</a>
+      <a class="navbar-brand" href="/">${site_name}</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
+            <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
+            <a class="nav-link" href="/Contact">Contact</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="/About">About</a>
+          </li>
+          <li class="nav-item d-none">
             <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
           </li>
         </ul>
@@ -66,4 +69,4 @@ ${footer(page)}
   return index(page);
 };
 
-module.exports = { index, header, footer, default: main }
+module.exports = { index, header, footer, main, default: main }
