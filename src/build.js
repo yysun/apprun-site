@@ -112,7 +112,7 @@ async function process_file(file) {
     // create html file
     const viewPath = path.join(cust_theme, layout);
     try {
-      const view = require(viewPath);
+      const view = require(viewPath).default;
       const html = view && view(page);
       const target = `${pub_name}.html`;
       fs.writeFileSync(target, html);
