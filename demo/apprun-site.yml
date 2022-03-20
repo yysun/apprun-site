@@ -4,13 +4,7 @@ favicon: assets/favicon.ico
 logo: assets/logo.png
 copyright: Copyright &copy; 2022 Yiyi Sun
 
-theme:
-  name: bootstrap
-
-tabs:
-  Home:
-  About: about
-  Contact: contact
+theme: tailwind
 
 plugins:
   - my-plugin.js

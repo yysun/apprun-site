@@ -1,0 +1,28 @@
+@import "my-theme";
+
+@import "material-components-web/material-components-web";
+
+h1 {
+  @extend .mdc-typography--headline4;
+}
+
+h2 {
+  @extend .mdc-typography--headline5;
+}
+
+div, ul, li, p {
+  @extend .mdc-typography--body1;
+}
+
+body {
+  display: flex;
+  margin: 0;
+}
+
+img {
+  max-width:100%;
+}
+
+#main {
+  padding: 20px;
+}

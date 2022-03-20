@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "jsxFactory": "app.h",
+    "jsxFragmentFactory": "app.Fragment",
+    "lib": ["dom", "es2015", "es5"],
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  }
+}
