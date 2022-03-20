@@ -24,6 +24,7 @@ app.on(`${events.BUILD}:esbuild`, (file, target, public) => {
     outfile: target,
     format: 'esm',
     bundle: true,
+    sourcemap: true,
   });
   result.errors.length && console.log(red(result.errors));
   result.warnings.length && console.log(yellow(result.warnings));
@@ -35,11 +36,12 @@ app.on(`${events.BUILD}:add-route`, (route, target, public) => {
 });
 
 app.on(`${events.BUILD}:startup`, (config, public) => {
-  const main = `import { render_layout, add_components, load_apprun_dev_tools } from './apprun_site';
+  const startup = require('./startup');
+  const main = `${startup}
     window['config'] = ${JSON.stringify(config)};
     const components = ${JSON.stringify(routes)};
 
-    import layout from '../src/${config.theme.name}/layout';
+    import layout from '../${config.theme.name}';
     add_components(components, '${config.theme.main_element}');
     render_layout(layout);
     ${config['dev-tools']['apprun'] ? 'load_apprun_dev_tools();' : ''}
