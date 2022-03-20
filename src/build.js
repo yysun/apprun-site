@@ -61,12 +61,10 @@ async function process_file(file) {
   const name = path.basename(file).replace(/\.[^/.]+$/, '');
   const ext = path.extname(file);
   const event = content_events?.[ext] || ext;
-  const modules_dir = `${public}/_modules`;
   const pub_dir = path.join(public, dir);
-  ensure(modules_dir);
   ensure(pub_dir);
 
-  // console.log('Page: ', file, '=>', event);
+  console.log('Page: ', file, '=>', event);
   const text = fs.readFileSync(file).toString();
   if (Content_Types.indexOf(ext) >= 0) {
     const all_content = await app.query(`${events.BUILD}${event}`, text);
@@ -91,7 +89,7 @@ async function process_file(file) {
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     const js = path.join(public, dir, name) + '.js';
     app.run(`${events.BUILD}:esbuild`, file, js);
-    app.run(`${events.BUILD}:esm`, js, modules_dir);
+    // app.run(`${events.BUILD}:esm`, js, modules_dir);
     console.log(cyan('Created JavaSript'), relative(js));
   } else if (Media_Types.indexOf(ext) >= 0) {
     const dest = path.join(pub_dir, name) + ext;

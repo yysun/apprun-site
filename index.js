@@ -32,15 +32,12 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
     : null;
   app.config = config;
 
-  console.log(app.config);
-
   // system modules
   // modules?.forEach(module => require(`${__dirname}/src/${module}`));
   require('./src/build');
   require('./src/build-md');
   require('./src/build-html');
   require('./src/build-ts');
-  require('./src/build-esm');
 
   // plugins
   plugins?.forEach(module => require(`${source}/plugins/${module}`));
