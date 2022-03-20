@@ -8,9 +8,10 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 const routes = [];
 
 app.on(`${events.BUILD}:component`, (content, target, public) => {
-  const component = `export default () => {
+  const component = `const Component = window['Component'];
+  export default class extends Component {
     // ${JSON.stringify(content)}
-    return \`_html:${content.content}\`
+    view = () => \`_html:${content.content}\`
   }`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   fs.writeFileSync(tsx_file, component);

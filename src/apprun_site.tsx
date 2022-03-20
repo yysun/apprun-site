@@ -1,4 +1,5 @@
 import app from 'apprun';
+
 export const add_link = (rel, href, type) => {
   const link = document.createElement('link');
   rel && (link.rel = rel);
@@ -31,7 +32,7 @@ const add_component = (component, main_element) => {
   const [path, file] = component;
   app.once(path, async () => {
     const module = await import(`${file}`);
-    new module.default().mount(main_element);
+    new module.default().start(main_element, {route: path});
   });
 };
 
@@ -44,9 +45,21 @@ export const render_layout = async ({ Layout, styles = null, scripts = null, bod
   if (scripts) for (let i = 0; i < scripts.length; i++) await add_js(scripts[i]);
   body_class && document.body.classList.add(...body_class);
   Layout && app.render(document.body, <Layout/>);
-  app.run('route', location.pathname);
+  const menus = document.querySelectorAll('a[href*="/"]');
+  for (let i = 0; i < menus.length; i++) {
+    const menu = menus[i] as HTMLAnchorElement;
+    menu.onclick = (e) => {
+      e.preventDefault();
+      history.pushState(null, '', menu.href);
+      app.run('route', menu.pathname);
+    }
+  }
 };
 
 export const load_apprun_dev_tools = () => {
   add_js('https://unpkg.com/apprun/dist/apprun-dev-tools.js');
 }
+
+
+
+
