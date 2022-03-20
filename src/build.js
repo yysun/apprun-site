@@ -34,7 +34,7 @@ app.on(events.POST_BUILD, async () => {
   console.log(cyan('Created File'), relative(`${public}/main.js`));
 
   console.log(cyan('Creating Static Files ...'));
-  await app.query(`${events.BUILD}:static`, public);
+  await app.query(`${events.BUILD}:static`, config, public);
 
   if (watch) {
     console.log(cyan('Watching ...'));

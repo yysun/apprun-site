@@ -42,7 +42,7 @@ app.on(`${events.BUILD}:startup`, (config, public) => {
     import layout from '../src/${config.theme.name}/layout';
     add_components(components, '${config.theme.main_element}');
     render_layout(layout);
-    ${config['dev-tools'] ? 'load_apprun_dev_tools();' : ''}
+    ${config['dev-tools']['apprun'] ? 'load_apprun_dev_tools();' : ''}
   `;
 
   const tsx_file = `${public}/main.tsx`;
@@ -56,12 +56,13 @@ const write_html = (file, content) => {
   fs.writeFileSync(file, content);
 };
 
-app.on(`${events.BUILD}:static`, async (public) => {
+app.on(`${events.BUILD}:static`, async (config, public) => {
 
   const puppeteer = require('puppeteer');
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto(`http://localhost:8080`, { waitUntil: 'networkidle0', headless: false });
+  const port = config['dev-tools']['port'] || 8080;
+  await page.goto(`http://localhost:${port}`, { waitUntil: 'networkidle0'});
 
   const home_page = await page.evaluate(() => document.querySelector('*').outerHTML);
 

@@ -27,4 +27,6 @@ sidebar:
 plugins:
   - my-plugin.js
 
-dev-tools: true
+dev-tools:
+  apprun: true
+  port: 8080
