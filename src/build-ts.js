@@ -37,12 +37,13 @@ app.on(`${events.BUILD}:add-route`, (route, target, public) => {
 app.on(`${events.BUILD}:startup`, (config, public) => {
 
   const main = `import { render_layout, add_components, load_apprun_dev_tools } from './apprun_site';
-    const config = ${JSON.stringify(config)};
+    window['config'] = ${JSON.stringify(config)};
     const components = ${JSON.stringify(routes)};
-    import layout from '../src/${config.theme}/layout';
-    add_components(components);
+
+    import layout from '../src/${config.theme.name}/layout';
+    add_components(components, '${config.theme.main_element}');
     render_layout(layout);
-    load_apprun_dev_tools();
+    // load_apprun_dev_tools();
   `;
 
   const tsx_file = `${public}/main.tsx`;

@@ -1,7 +1,10 @@
-import app from '../apprun';
-import { title } from '../site.json';
-export default () => <header>
-  <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-    {title}
-  </h2>
-</header>
+import app from '../apprun';;
+
+export default () => {
+  const { site_name } = window['config'];
+  return <header>
+    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+      {site_name}
+    </h2>
+  </header>
+}
