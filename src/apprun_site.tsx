@@ -28,11 +28,11 @@ export const add_js = (url, type = null) => new Promise((resolve, reject) => {
 });
 
 const add_component = (component, main_element) => {
-
   const [path, file] = component;
   app.once(path, async () => {
     const module = await import(`${file}`);
-    new module.default().start(main_element, {route: path});
+    new module.default().mount(main_element, { route: path });
+    app.route(path);
   });
 };
 
@@ -44,14 +44,15 @@ export const render_layout = async ({ Layout, styles = null, scripts = null, bod
   if (styles) for (let i = 0; i < styles.length; i++) await add_css(styles[i]);
   if (scripts) for (let i = 0; i < scripts.length; i++) await add_js(scripts[i]);
   body_class && document.body.classList.add(...body_class);
-  Layout && app.render(document.body, <Layout/>);
+  Layout && app.render(document.body, <Layout />);
+  app.route(location.pathname);
   const menus = document.querySelectorAll('a[href*="/"]');
   for (let i = 0; i < menus.length; i++) {
     const menu = menus[i] as HTMLAnchorElement;
     menu.onclick = (e) => {
       e.preventDefault();
       history.pushState(null, '', menu.href);
-      app.run('route', menu.pathname);
+      app.route(menu.pathname);
     }
   }
 };

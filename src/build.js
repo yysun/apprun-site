@@ -18,6 +18,9 @@ const ensure = dir => {
 };
 const relative = fname => fname.replace(source, '');
 
+const conf = `${source}/apprun-site.yml`;
+const config = fs.existsSync(conf) ? yaml.load(fs.readFileSync(conf)) : {};
+
 app.on(events.PRE_BUILD, () => {
   if (clean) {
     fs.rmSync(public, { recursive: true, force: true });
@@ -25,13 +28,13 @@ app.on(events.PRE_BUILD, () => {
   }
 });
 
-app.on(events.POST_BUILD, () => {
+app.on(events.POST_BUILD, async () => {
 
-
-  const conf = `${source}/apprun-site.yml`;
-  const config = fs.existsSync(conf) ? yaml.load(fs.readFileSync(conf)) : {};
   app.run(`${events.BUILD}:startup`, config, public);
   console.log(cyan('Created File'), relative(`${public}/main.js`));
+
+  console.log(cyan('Creating Static Files ...'));
+  await app.query(`${events.BUILD}:static`, public);
 
   if (watch) {
     console.log(cyan('Watching ...'));

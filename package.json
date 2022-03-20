@@ -7,7 +7,6 @@
   "scripts": {
     "test": "jest --watch",
     "start": "",
-
     "build": "",
     "build:pages": "node apprun-site-cli build demo"
   },
@@ -37,7 +36,8 @@
     "markdown-it": "^12.3.2",
     "markdown-it-anchor": "^8.4.1",
     "markdown-it-front-matter": "^0.2.3",
-    "markdown-it-table-of-contents": "^0.6.0"
+    "markdown-it-table-of-contents": "^0.6.0",
+    "puppeteer": "^13.5.1"
   },
   "jest": {
     "transform": {

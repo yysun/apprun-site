@@ -27,7 +27,6 @@ app.on(`${events.BUILD}:esbuild`, (file, target, public) => {
   });
   result.errors.length && console.log(red(result.errors));
   result.warnings.length && console.log(yellow(result.warnings));
-
 });
 
 app.on(`${events.BUILD}:add-route`, (route, target, public) => {
@@ -50,5 +49,36 @@ app.on(`${events.BUILD}:startup`, (config, public) => {
   const target = `${public}/main.js`;
   fs.writeFileSync(tsx_file, main);
   app.run(`${events.BUILD}:esbuild`, tsx_file, target, public);
+});
 
+const write_html = (file, content) => {
+  content = content.replace('</body>', '<script type="module" src="/main.js"></script></body>');
+  fs.writeFileSync(file, content);
+};
+
+app.on(`${events.BUILD}:static`, async (public) => {
+
+  const puppeteer = require('puppeteer');
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(`http://localhost:8080`, { waitUntil: 'networkidle0', headless: false });
+
+  const home_page = await page.evaluate(() => document.querySelector('*').outerHTML);
+
+  write_html(`${public}/index.html`, home_page);
+  for (let i = 0; i < routes.length; i++) {
+    const route = routes[i][0];
+    const html_file = path.join(public, route, 'index.html');
+
+
+    await page.evaluate((route) => new Promise(resolve => {
+      app.run(route);
+      resolve();
+    }, route));
+
+    const content = await page.evaluate(() => document.querySelector('*').outerHTML);
+    write_html(html_file, content);
+  };
+
+  await browser.close();
 });
