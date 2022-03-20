@@ -27,8 +27,4 @@ sidebar:
 plugins:
   - my-plugin.js
 
-# extra_css:
-
-# extra_javascript:
-
-# extra_module:
+dev-tools: true
