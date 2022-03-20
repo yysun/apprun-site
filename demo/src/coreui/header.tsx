@@ -14,7 +14,7 @@ export default class extends Component {
       <span class="navbar-toggler-icon"></span>
     </button>
     <ul class="nav navbar-nav d-md-down-none">
-      <li class="nav-item px-3"><a class="nav-link" href="/home">Home</a></li>
+      <li class="nav-item px-3"><a class="nav-link" href="/">Home</a></li>
       <li class="nav-item px-3"><a class="nav-link" href="/contact">Contact</a></li>
       <li class="nav-item px-3"><a class="nav-link" href="/about">About</a></li>
     </ul>

@@ -3,12 +3,12 @@ site_url: /
 copyright: Copyright &copy; 2022
 
 theme:
-  name: src/material/layout
+  name: src/bootstrap5/layout
   main_element: my-app
 
 nav:
 - text: Home
-  link: "/home"
+  link: "/"
 - text: Contact
   link: "/contact"
 - text: About
