@@ -25,6 +25,7 @@ app.on(`${events.BUILD}:esbuild`, (file, target, public) => {
     format: 'esm',
     bundle: true,
     sourcemap: true,
+    minify: process.env.NODE_ENV === 'production'
   });
   result.errors.length && console.log(red(result.errors));
   result.warnings.length && console.log(yellow(result.warnings));

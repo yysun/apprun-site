@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "bin": "apprun-site-cli.js",
   "scripts": {
-    "test": "jest --watch",
+    "test": "",
     "start": "",
-    "build": "",
-    "build:pages": "node apprun-site-cli build demo"
+    "dev": "node apprun-site-cli build demo",
+    "build": "NODE_ENV=production node apprun-site-cli build demo"
   },
   "keywords": [
     "AppRun",
