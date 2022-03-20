@@ -4,6 +4,7 @@ app.on(`${events.BUILD}:esbuild`, (file, target) => {
   const result = require('esbuild').buildSync({
     entryPoints: [file],
     outfile: target,
+    format: 'esm',
     bundle: true,
   });
   result.errors.length && console.log(red(result.errors));

@@ -5,7 +5,8 @@ const chalk = require('chalk');
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 const events = require('./events');
 
-const Content_Types = ['.md', '.html'];
+const HTML_Types = ['.html', '.htm'];
+const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Media_Types = ['.png', '.gif', '.json'];
 
@@ -66,6 +67,15 @@ async function process_file(file) {
 
   console.log('Page: ', file, '=>', event);
   const text = fs.readFileSync(file).toString();
+
+
+  if (HTML_Types.indexOf(ext) >= 0 && text.indexOf('<html') >= 0) {
+    const new_file = path.join(pub_dir, name + '.html');
+    fs.writeFileSync(new_file, text);
+    console.log(cyan('Copied HTML'), relative(new_file));
+    return;
+  }
+
   if (Content_Types.indexOf(ext) >= 0) {
     const all_content = await app.query(`${events.BUILD}${event}`, text);
     const content = last(all_content);
@@ -94,7 +104,7 @@ async function process_file(file) {
   } else if (Media_Types.indexOf(ext) >= 0) {
     const dest = path.join(pub_dir, name) + ext;
     fs.copyFileSync(file, dest);
-    console.log(cyan('Created Media'), relative(dest));
+    console.log(cyan('Copied Media'), relative(dest));
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }
