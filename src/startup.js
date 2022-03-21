@@ -1,4 +1,6 @@
-module.exports = `import app from 'apprun';
+module.exports = `
+
+import app from 'apprun';
 
 const add_link = (rel, href, type) => {
   const link = document.createElement('link');
@@ -42,7 +44,10 @@ const add_components = (components, main_element) => {
 };
 
 const render_layout = async ({ Layout, styles = null, scripts = null, body_class = null }) => {
-  if (styles) for (let i = 0; i < styles.length; i++) await add_css(styles[i]);
+  if (document.head.parentElement.dataset.static == null) {
+    if (styles) for (let i = 0; i < styles.length; i++) await add_css(styles[i]);
+    document.head.parentElement.dataset.static = "true";
+  }
   if (scripts) for (let i = 0; i < scripts.length; i++) await add_js(scripts[i]);
   body_class && document.body.classList.add(...body_class);
   Layout && app.render(document.body, <Layout />);
@@ -60,7 +65,6 @@ app.on('//', () => {
     }
   }
 });
-
 
 const load_apprun_dev_tools = () => {
   add_js('https://unpkg.com/apprun/dist/apprun-dev-tools.js');
