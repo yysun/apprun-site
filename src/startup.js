@@ -33,8 +33,9 @@ const add_component = (component, main_element) => {
   const [path, file] = component;
   app.once(path, async () => {
     const module = await import(\`\${ file }\`);
-    new module.default().mount(main_element, { route: path });
-    app.route(path);
+    const component = new module.default();
+    component.mount(main_element, { route: path });
+    app.route(location.pathname);
   });
 };
 
