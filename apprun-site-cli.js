@@ -8,7 +8,8 @@ program
   .command('init [targetDir]')
   .description('initialize project', { targetDir: 'target directory (default: current directory)' } )
   .option('-r, --repo [repo]', 'repository, default: apprunjs/apprun-starter', 'apprunjs/apprun-starter')
-  .action((targetDir = '.', repo) => {
+  .action((targetDir = '.', { repo }) => {
+    console.log(repo)
     const emitter = degit(repo, {
       cache: false,
       force: false,
