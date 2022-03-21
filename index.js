@@ -1,8 +1,4 @@
-const fs = require('fs');
-
-const chalk = require('chalk');
-const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-
+const path = require('path');
 const app = require('apprun').app;
 const events = require('./src/events');
 
@@ -11,13 +7,11 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
 
   const config = {};
   config.source = source;
-  config.pages = `${source}/${pages || 'pages'}`;
-  config.public = `${source}/${public || 'public'}`;
+  config.pages = path.join(source, pages || 'pages');
+  config.public = path.join(source, public || 'public');
   config.clean = clean;
-  config.watch = watch;
   app.config = config;
-
-  // plugins
+ // plugins
   config.plugins?.forEach(module => require(`${source}/plugins/${module}`));
 
 
