@@ -39,8 +39,11 @@ app.on(`${events.BUILD}:add-route`, (route, target, public) => {
 
 app.on(`${events.BUILD}:startup`, (config, public) => {
   const startup = require('./startup');
+  const new_config = JSON.parse(JSON.stringify(config));
+  delete new_config['plugins'];
+  delete new_config['dev-tools'];
   const main = `${startup}
-    window['config'] = ${JSON.stringify(config)};
+    window['config'] = ${JSON.stringify(new_config)};
     const components = ${JSON.stringify(routes)};
 
     import layout from '../${config.theme.name}';
