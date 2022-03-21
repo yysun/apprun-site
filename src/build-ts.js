@@ -34,7 +34,7 @@ app.on(`${events.BUILD}:esbuild`, (file, target, public) => {
 app.on(`${events.BUILD}:add-route`, (route, target, public) => {
   const module_file = target.replace(public, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
-  module_file.endsWith('index.js') &&  routes.push([route, module_file]);
+  module_file.endsWith('index.js') && routes.push([route, module_file]);
 });
 
 app.on(`${events.BUILD}:startup`, (config, public) => {
@@ -63,9 +63,11 @@ const ensure = dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
 
-const write_html = (file, content) => {
+const write_html = (file, content, config) => {
   ensure(path.dirname(file));
-  content = content.replace('</body>', '<script type="module" src="/main.js"></script></body>');
+  content = content.replace('<head>', `<head><base href="${config.site_url}" />`);
+  content = content.replace('href="/style.css"', `href="${config.site_url}style.css"`);
+  content = content.replace('</body>', `<script type="module" src="${config.site_url}main.js"></script></body>`);
   fs.writeFileSync(file, content);
 };
 
@@ -75,10 +77,10 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   const port = config['dev-tools']['port'] || 8080;
-  await page.goto(`http://localhost:${port}`, { waitUntil: 'networkidle0'});
+  await page.goto(`http://localhost:${port}`, { waitUntil: 'networkidle0' });
 
   const home_page = await page.evaluate(() => document.querySelector('*').outerHTML);
-  write_html(`${public}/index.html`, home_page);
+  write_html(`${public}/index.html`, home_page, config);
 
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
@@ -92,7 +94,7 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
     }, route));
 
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);
-    write_html(html_file, content);
+    write_html(html_file, content, config);
     console.log('\t', green(html_file));
   };
 
