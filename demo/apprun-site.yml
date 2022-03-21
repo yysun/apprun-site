@@ -28,3 +28,8 @@ plugins:
 dev-tools:
   apprun: true
   port: 8080
+
+static-pages:
+  - /1
+  - /about/1
+  - /contact/2

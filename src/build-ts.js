@@ -42,6 +42,7 @@ app.on(`${events.BUILD}:startup`, (config, public) => {
   const new_config = JSON.parse(JSON.stringify(config));
   delete new_config['plugins'];
   delete new_config['dev-tools'];
+  delete new_config['static-pages'];
   const main = `${startup}
     window['config'] = ${JSON.stringify(new_config)};
     const components = ${JSON.stringify(routes)};
@@ -58,7 +59,12 @@ app.on(`${events.BUILD}:startup`, (config, public) => {
   app.run(`${events.BUILD}:esbuild`, tsx_file, target, public);
 });
 
+const ensure = dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+};
+
 const write_html = (file, content) => {
+  ensure(path.dirname(file));
   content = content.replace('</body>', '<script type="module" src="/main.js"></script></body>');
   fs.writeFileSync(file, content);
 };
@@ -72,13 +78,14 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
   await page.goto(`http://localhost:${port}`, { waitUntil: 'networkidle0'});
 
   const home_page = await page.evaluate(() => document.querySelector('*').outerHTML);
-
   write_html(`${public}/index.html`, home_page);
-  for (let i = 0; i < routes.length; i++) {
-    const route = routes[i][0];
+
+  let pages = routes.map(route => route[0]);
+  config['static-pages'] && (pages = pages.concat(config['static-pages']));
+
+  for (let i = 0; i < pages.length; i++) {
+    const route = pages[i];
     const html_file = path.join(public, route, 'index.html');
-
-
     await page.evaluate((route) => new Promise(resolve => {
       app.run(route);
       resolve();
@@ -86,6 +93,7 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
 
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);
     write_html(html_file, content);
+    console.log('\t', green(html_file));
   };
 
   await browser.close();
