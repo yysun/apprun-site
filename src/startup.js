@@ -1,6 +1,4 @@
-module.exports = `
-
-import app from 'apprun';
+module.exports = `import app from 'apprun';
 
 const add_link = (rel, href, type) => {
   const link = document.createElement('link');
@@ -49,6 +47,9 @@ const render_layout = async ({ Layout, styles = null, scripts = null, body_class
   body_class && document.body.classList.add(...body_class);
   Layout && app.render(document.body, <Layout />);
   app.route(location.pathname);
+};
+
+app.on('//', () => {
   const menus = document.querySelectorAll('a[href*="/"]');
   for (let i = 0; i < menus.length; i++) {
     const menu = menus[i] as HTMLAnchorElement;
@@ -58,9 +59,11 @@ const render_layout = async ({ Layout, styles = null, scripts = null, body_class
       app.route(menu.pathname);
     }
   }
-};
+});
+
 
 const load_apprun_dev_tools = () => {
   add_js('https://unpkg.com/apprun/dist/apprun-dev-tools.js');
 }
+
 `
