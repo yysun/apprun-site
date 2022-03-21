@@ -9,14 +9,16 @@
 
 ## Features
 
-* Progressive Web App (PWA) - support offline
-* Single Page App (SPA) - routing using / or #
-* Four built-in layouts and bring your own
-* Compile html, markdown pages to AppRun components
-* Auto generate the index of pages
-* Build app logic using AppRun/Web components
-* Targets ES5 or ES Module
-* Extensible through plugins (WIP)
+* Single Page App (SPA)
+* Static Page Generation
+* Five built-in layouts and bring your own
+  * Bootstrap4
+  * Bootstrap5
+  * Material
+  * CoreUI
+  * Tailwind
+* Configure Site with YAML file
+* Build pages using HTML, markdown, and AppRun components
 
 ## Quick Start
 
