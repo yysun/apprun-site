@@ -15,8 +15,11 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
   config.public = `${source}/${public || 'public'}`;
   config.clean = clean;
   config.watch = watch;
-
   app.config = config;
+
+  // plugins
+  config.plugins?.forEach(module => require(`${source}/plugins/${module}`));
+
 
   require('./src/build');
   require('./src/build-md');
