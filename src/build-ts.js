@@ -32,8 +32,9 @@ app.on(`${events.BUILD}:esbuild`, (file, target, public) => {
 });
 
 app.on(`${events.BUILD}:add-route`, (route, target, public) => {
-  const module_file = target.replace(public, '');
-  module_file.endsWith('index.js') &&  routes.push([route || '/', module_file]);
+  const module_file = target.replace(public, '').replace(/\\/g, '/');
+  route = (route || '/').replace(/\\/g, '/');
+  module_file.endsWith('index.js') &&  routes.push([route, module_file]);
 });
 
 app.on(`${events.BUILD}:startup`, (config, public) => {
