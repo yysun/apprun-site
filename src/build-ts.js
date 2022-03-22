@@ -18,7 +18,7 @@ app.on(`${events.BUILD}:component`, (content, target, public) => {
   app.run(`${events.BUILD}:esbuild`, tsx_file, target, public);
 });
 
-app.on(`${events.BUILD}:esbuild`, (file, target, public) => {
+app.on(`${events.BUILD}:esbuild`, (file, target) => {
   const result = require('esbuild').buildSync({
     entryPoints: [file],
     outfile: target,
@@ -48,7 +48,7 @@ app.on(`${events.BUILD}:startup`, (config, public) => {
     const components = ${JSON.stringify(routes)};
 
     import layout from '../${config.theme.name}';
-    add_components(components, '${config.theme.main_element}');
+    add_components(components, '${config.site_url}', '${config.theme.main_element}');
     render_layout(layout);
     ${config['dev-tools']['apprun'] ? 'load_apprun_dev_tools();' : ''}
   `;
@@ -66,9 +66,10 @@ const ensure = dir => {
 const write_html = (file, content, config) => {
   ensure(path.dirname(file));
   content = content.replace('<head>', `<head><base href="${config.site_url}" />`);
-  content = content.replace('href="/style.css"', `href="${config.site_url}style.css"`);
-  content = content.replace('</body>', `<script type="module" src="${config.site_url}main.js"></script></body>`);
+  content = content.replace('href="/style.css"', `href="${config.site_url}/style.css"`);
+  content = content.replace('</body>', `<script type="module" src="${config.site_url}/main.js"></script></body>`);
   fs.writeFileSync(file, content);
+  console.log('\t', green(file));
 };
 
 app.on(`${events.BUILD}:static`, async (config, public) => {
@@ -77,10 +78,10 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   const port = config['dev-tools']['port'] || 8080;
-  await page.goto(`http://localhost:${port}`, { waitUntil: 'networkidle0' });
+  const dev_server = `http://localhost:${port}`;
 
-  const home_page = await page.evaluate(() => document.querySelector('*').outerHTML);
-  write_html(`${public}/index.html`, home_page, config);
+  console.log(cyan('Creating Static Files from: ', dev_server));
+  await page.goto(dev_server, { waitUntil: 'networkidle0' });
 
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
@@ -93,10 +94,15 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
       resolve();
     }, route));
 
+    // await page.evaluate((route) => app.run(route), route);
+
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);
     write_html(html_file, content, config);
-    console.log('\t', green(html_file));
   };
+
+  await page.evaluate(() => document.body.innerHTML = '');
+  const default_page = await page.evaluate(() => document.querySelector('*').outerHTML);
+  write_html(`${public}/default.html`, default_page, config);
 
   await browser.close();
 });

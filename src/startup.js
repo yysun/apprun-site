@@ -29,24 +29,24 @@ const add_js = (url, type = null) => new Promise((resolve, reject) => {
   document.body.appendChild(link);
 });
 
-const add_component = (component, main_element) => {
-  const [path, file] = component;
-  app.once(path, async () => {
-    const module = await import(\`\${ file }\`);
+const add_component = (component, site_url, main_element) => {
+  let [path, file] = component;
+  app.once(path, async (...p) => {
+    const module = await import(\`\${site_url}\${file}\`);
     const component = new module.default();
     component.mount(main_element, { route: path });
     app.route(location.pathname);
   });
 };
 
-const add_components = (components, main_element) => {
-  components && components.forEach(item => add_component(item, main_element));
+const add_components = (components, site_url, main_element = 'my-app') => {
+  components && components.forEach(item => add_component(item, site_url, main_element));
 };
 
 const render_layout = async ({ Layout, styles = null, scripts = null, body_class = null }) => {
-  if (document.head.parentElement.dataset.static == null) {
+  if (document.head.parentElement.dataset.css == null) {
     if (styles) for (let i = 0; i < styles.length; i++) await add_css(styles[i]);
-    document.head.parentElement.dataset.static = "true";
+    document.head.parentElement.dataset.css = "true";
   }
   if (scripts) for (let i = 0; i < scripts.length; i++) await add_js(scripts[i]);
   body_class && document.body.classList.add(...body_class);
@@ -69,5 +69,4 @@ app.on('//', () => {
 const load_apprun_dev_tools = () => {
   add_js('https://unpkg.com/apprun/dist/apprun-dev-tools.js');
 }
-
 `

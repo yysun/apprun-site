@@ -10,6 +10,7 @@ module.exports = async function ({ source, clean, watch, pages, public }) {
   config.pages = path.join(source, pages || 'pages');
   config.public = path.join(source, public || 'public');
   config.clean = clean;
+  config.watch = watch;
   app.config = config;
 
   // plugins
