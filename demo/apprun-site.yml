@@ -3,7 +3,7 @@ site_url: /
 copyright: Copyright &copy; 2022
 
 theme:
-  name: src/bootstrap5/layout
+  name: src/tailwind/layout
   main_element: my-app
 
 nav:
@@ -30,6 +30,6 @@ dev-tools:
   port: 8080
 
 static-pages:
-  - /1
-  - /about/1
-  - /contact/2
+  - /products/1
+  - /products/2
+  - /products/3
