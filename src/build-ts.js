@@ -40,6 +40,10 @@ app.on(`${events.BUILD}:add-route`, (route, target, public) => {
 app.on(`${events.BUILD}:startup`, (config, public) => {
   const startup = require('./startup');
   const route_hash = config.route === '#';
+  const tsx_file = `${public}/main.tsx`;
+  const target = `${public}/main.js`;
+  const init = fs.existsSync(target) ? fs.readFileSync(target).toString() : '';
+
   const main = `${startup}
 ${config['apprun-dev-tools'] ? 'add_js("https://unpkg.com/apprun/dist/apprun-dev-tools.js");' : ''}
 import layout from '../${config.layout}';
@@ -59,10 +63,9 @@ document.body.addEventListener('click', e => {
     app.route(menu.pathname);
   }
 });` : ''}
+${init}
 `;
 
-  const tsx_file = `${public}/main.tsx`;
-  const target = `${public}/main.js`;
   fs.writeFileSync(tsx_file, main);
   app.run(`${events.BUILD}:esbuild`, tsx_file, target, public);
 });
