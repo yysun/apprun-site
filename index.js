@@ -2,15 +2,13 @@ const path = require('path');
 const app = require('apprun').app;
 const events = require('./src/events');
 
-module.exports = async function ({ source, clean, watch, pages, public }) {
+module.exports = async function (config) {
+  let { source, pages, public } = config;
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
-
-  const config = {};
   config.source = source;
   config.pages = path.join(source, pages || 'pages');
   config.public = path.join(source, public || 'public');
-  config.clean = clean;
-  config.watch = watch;
+
   app.config = config;
 
   // plugins

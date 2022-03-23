@@ -24,6 +24,7 @@ program
   .description('build site')
   .option('-c, --clean', 'clean the output directory', false)
   .option('-w, --watch', 'watch the directory', false)
+  .option('-s, --static', 'watch the directory', false)
   .option('-o, --public [public]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .action((source, options) => build({source, ...options}));

@@ -10,7 +10,7 @@ const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
 
-const { pages, clean, watch, public, content_events, source } = app['config'];
+const { pages, clean, watch, static, public, content_events, source } = app['config'];
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
@@ -36,7 +36,7 @@ app.on(events.POST_BUILD, async () => {
   app.run(`${events.BUILD}:startup`, config, public);
   console.log(cyan('Created File'), relative(`${public}/main.js`));
 
-  await app.query(`${events.BUILD}:static`, config, public);
+  static && await app.query(`${events.BUILD}:static`, config, public);
 
   if (watch) {
     console.log(cyan('Watching ...'));
