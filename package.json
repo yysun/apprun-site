@@ -1,6 +1,6 @@
 {
   "name": "apprun-site",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "AppRun Site is a framework for building AppRun applications.",
   "main": "dist/index.js",
   "bin": "apprun-site-cli.js",
