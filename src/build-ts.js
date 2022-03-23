@@ -59,7 +59,6 @@ document.body.addEventListener('click', e => {
     app.route(menu.pathname);
   }
 });` : ''}
-
 `;
 
   const tsx_file = `${public}/main.tsx`;
@@ -91,20 +90,20 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
 
   console.log(cyan('Creating Static Files from: ', dev_server));
 
+  fs.copyFileSync(`${public}/index.html`, `${public}/404.html`);
+
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
 
   for (let i = 0; i < pages.length; i++) {
     const route = pages[i];
     const html_file = path.join(public, route, 'index.html');
+    if (fs.existsSync(html_file)) fs.rmSync(html_file);
+
     await page.goto(`${dev_server}${route}`, { waitUntil: 'networkidle0' });
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);
     write_html(html_file, content, config);
   };
-
-  await page.evaluate(() => document.body.innerHTML = '');
-  const default_page = await page.evaluate(() => document.querySelector('*').outerHTML);
-  write_html(`${public}/default.html`, default_page, config);
 
   await browser.close();
 });

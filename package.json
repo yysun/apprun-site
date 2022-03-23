@@ -6,7 +6,8 @@
   "bin": "apprun-site-cli.js",
   "scripts": {
     "test": "",
-    "start": "apprun-dev-server --entry-file=index.html demo/public",
+    "start": "apprun-dev-server --entry-file=404.html demo/public",
+    "static": "http-server demo/public -c-1",
     "dev": "node apprun-site-cli build demo --watch",
     "build": "NODE_ENV=production node apprun-site-cli build demo"
   },
