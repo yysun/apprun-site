@@ -39,19 +39,28 @@ app.on(`${events.BUILD}:add-route`, (route, target, public) => {
 
 app.on(`${events.BUILD}:startup`, (config, public) => {
   const startup = require('./startup');
-  const new_config = JSON.parse(JSON.stringify(config));
-  delete new_config['plugins'];
-  delete new_config['dev-tools'];
-  delete new_config['static-pages'];
+  const route_hash = config.route === '#';
   const main = `${startup}
-    window['config'] = ${JSON.stringify(new_config)};
-    const components = ${JSON.stringify(routes)};
+${config['apprun-dev-tools'] ? 'add_js("https://unpkg.com/apprun/dist/apprun-dev-tools.js");' : ''}
+import layout from '../${config.layout}';
+const components = ${JSON.stringify(routes)};
+render_layout(layout).then(() => {
+  add_components(components, '${config.site_url}', layout.main_element)
+  app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
+});
 
-    import layout from '../${config.theme.name}';
-    add_components(components, '${config.site_url}', '${config.theme.main_element}');
-    render_layout(layout);
-    ${config['dev-tools']['apprun'] ? 'load_apprun_dev_tools();' : ''}
-  `;
+${!route_hash ? `
+document.body.addEventListener('click', e => {
+  const element = e.target as HTMLElement;
+  const menu = (element.tagName === 'A' ? element : element.closest('a')) as HTMLAnchorElement;
+  if (menu && menu.pathname.startsWith('/')) {
+    e.preventDefault();
+    history.pushState(null, '', menu.href);
+    app.route(menu.pathname);
+  }
+});` : ''}
+
+`;
 
   const tsx_file = `${public}/main.tsx`;
   const target = `${public}/main.js`;
@@ -77,11 +86,10 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
   const puppeteer = require('puppeteer');
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  const port = config['dev-tools']['port'] || 8080;
+  const port = config['dev-server']['port'] || 8080;
   const dev_server = `http://localhost:${port}`;
 
   console.log(cyan('Creating Static Files from: ', dev_server));
-  await page.goto(dev_server, { waitUntil: 'networkidle0' });
 
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
@@ -89,13 +97,7 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
   for (let i = 0; i < pages.length; i++) {
     const route = pages[i];
     const html_file = path.join(public, route, 'index.html');
-    await page.evaluate((route) => new Promise(resolve => {
-      app.run(route);
-      resolve();
-    }, route));
-
-    // await page.evaluate((route) => app.run(route), route);
-
+    await page.goto(`${dev_server}${route}`, { waitUntil: 'networkidle0' });
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);
     write_html(html_file, content, config);
   };

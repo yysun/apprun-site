@@ -6,8 +6,31 @@ import Aside from './aside';
 import Footer from './footer';
 import Breadcrumb from './breadcrumb';
 
+const main_element = 'my-app';
+
+const nav = [
+  {
+    "text": "Home",
+    "link": "/"
+  },
+  {
+    "text": "Contact",
+    "link": "/contact"
+  },
+  {
+    "text": "About",
+    "link": "/about"
+  },
+  {
+    "text": "Products",
+    "link": "/products"
+  }
+];
+
+const sidebar = nav;
+
 const Layout = () => {
-  const { theme, sidebar, nav } = window['config'];
+
   return <>
     <Header nav={nav} />
     <div class="app-body">
@@ -21,7 +44,7 @@ const Layout = () => {
         <Breadcrumb />
         <div class="container-fluid" >
           <div class="card">
-            <div className="card-body" id={theme.main_element}></div>
+            <div className="card-body" id={main_element}></div>
           </div>
         </div>
       </main>
@@ -43,5 +66,6 @@ export default {
     'https://unpkg.com/@coreui/coreui@2/dist/js/coreui.min.js'
   ],
   body_class: ['app', 'header-fixed', 'sidebar-fixed', 'aside-menu-fixed', 'sidebar-lg-show'],
-  Layout
+  Layout,
+  main_element
 }

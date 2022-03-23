@@ -8,11 +8,12 @@ app.on('//', (route) => {
   item && item.parentElement.classList.add('active');
 });
 
+const main_element = 'my-app';
+
 const Layout = () => {
-  const { theme, site_name, } = window['config'];
   return <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="/">{site_name}</a>
+      <a class="navbar-brand" href="/">My Site</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
         aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -33,7 +34,7 @@ const Layout = () => {
         </ul>
       </div>
     </nav>
-    <div class="container" id={theme.main_element}></div>
+    <div class="container" id={main_element}></div>
   </div>;
 };
 
@@ -46,5 +47,6 @@ export default {
     'https://unpkg.com/popper.js@1.16.1/dist/umd/popper.min.js',
     'https://unpkg.com/bootstrap@4.4.1/dist/js/bootstrap.min.js',
   ],
-  Layout
+  Layout,
+  main_element
 }

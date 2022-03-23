@@ -4,10 +4,52 @@ declare var mdc;
 let topAppBar;
 let drawer;
 
+const site_name = 'My Site';
+
+const main_element = 'my-app';
+
+const sidebar = [
+  {
+    "text": "Home",
+    "link": "/"
+  },
+  {
+    "text": "Contact",
+    "link": "/contact"
+  },
+  {
+    "text": "About",
+    "link": "/about"
+  },
+  {
+    "text": "Products",
+    "link": "/products"
+  }
+];
+
+
+app.on('$', ({ key, props }) => {
+  if (key === '$mdc-drawer') {
+    props.ref = e => drawer = mdc.drawer.MDCDrawer.attachTo(e);
+    props.onclick = e => {
+      drawer.open = false; return true;
+    }
+  } else if (key === '$mdc-top-app-bar') {
+    props.ref = e => {
+      topAppBar = mdc.topAppBar.MDCTopAppBar.attachTo(e);
+      // https://github.com/material-components/material-components-web/issues/5615
+      document.querySelectorAll('.mdc-list-item')[0].setAttribute('tabIndex', '0');
+      topAppBar.setScrollTarget(document.querySelector('.drawer-main-content'));
+      topAppBar.listen('MDCTopAppBar:nav', () => {
+        drawer.open = !drawer.open;
+      })
+    }
+  }
+});
 class Layout extends Component {
 
   view = () => {
-    const { theme, site_name, sidebar } = window['config'];
+
     return <div id="root">
       <div class="drawer-frame-root">
         <aside class="mdc-drawer mdc-drawer--modal" $mdc-drawer>
@@ -52,7 +94,7 @@ class Layout extends Component {
           </header>
           <div class="drawer-main-content" tabindex="0">
             <div class="mdc-top-app-bar--fixed-adjust"></div>
-            <div id={theme.main_element}></div>
+            <div id={main_element}></div>
           </div>
         </div>
       </div>
@@ -75,24 +117,6 @@ export default {
     'https://unpkg.com/material-components-web@6/dist/material-components-web.min.js',
   ],
   body_class: ['mdc-typography'],
-  Layout
+  Layout,
+  main_element
 }
-
-app.on('$', ({ key, props }) => {
-  if (key === '$mdc-drawer') {
-    props.ref = e => drawer = mdc.drawer.MDCDrawer.attachTo(e);
-    props.onclick = e => {
-      drawer.open = false; return true;
-    }
-  } else if (key === '$mdc-top-app-bar') {
-    props.ref = e => {
-      topAppBar = mdc.topAppBar.MDCTopAppBar.attachTo(e);
-      // https://github.com/material-components/material-components-web/issues/5615
-      document.querySelectorAll('.mdc-list-item')[0].setAttribute('tabIndex', '0');
-      topAppBar.setScrollTarget(document.querySelector('.drawer-main-content'));
-      topAppBar.listen('MDCTopAppBar:nav', () => {
-        drawer.open = !drawer.open;
-      })
-    }
-  }
-});

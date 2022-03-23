@@ -10,9 +10,9 @@ app.on('//', (route) => {
   for (let i = 0; i < menus.length; ++i) { menus[i].classList.add('active'); }
 });
 
+const main_element = 'my-app';
 
 const Layout = () => {
-  const { main_element } = window['config'].theme;
   return <div class="page">
     <Sidebar />
     <main class="main">
@@ -27,5 +27,6 @@ export default {
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
     '/style.css'
   ],
-  Layout
+  Layout,
+  main_element
 }
