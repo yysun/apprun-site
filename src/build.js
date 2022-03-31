@@ -33,7 +33,7 @@ app.on(events.PRE_BUILD, () => {
 
 app.on(events.POST_BUILD, async () => {
 
-  app.run(`${events.BUILD}:startup`, config, public);
+  app.run(`${events.BUILD}:startup`, config, public, pages);
   console.log(cyan('Created File'), relative(`${public}/main.js`));
 
   static && await app.query(`${events.BUILD}:static`, config, public);

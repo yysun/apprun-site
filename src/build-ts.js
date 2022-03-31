@@ -37,21 +37,28 @@ app.on(`${events.BUILD}:add-route`, (route, target, public) => {
   module_file.endsWith('index.js') && routes.push([route, module_file]);
 });
 
-app.on(`${events.BUILD}:startup`, (config, public) => {
+app.on(`${events.BUILD}:startup`, (config, public, pages) => {
+
   const startup = require('./startup');
   const route_hash = config.route === '#';
   const tsx_file = `${public}/main.tsx`;
-  const target = `${public}/main.js`;
-  const init = fs.existsSync(target) ? fs.readFileSync(target).toString() : '';
+  const main_file = `${pages}/main.tsx`;
+  const init = fs.existsSync(main_file) ? fs.readFileSync(main_file).toString() : '';
+  const { apprun_dev_tool, layout, app_element } = config;
 
   const main = `${startup}
-${config['apprun-dev-tools'] ? 'add_js("https://unpkg.com/apprun/dist/apprun-dev-tools.js");' : ''}
-import layout from '../${config.layout}';
-const components = ${JSON.stringify(routes)};
-render_layout(layout).then(() => {
-  add_components(components, '${config.site_url}', layout.main_element)
+${apprun_dev_tool ? 'add_js("https://unpkg.com/apprun/dist/apprun-dev-tools.js");' : ''}
+${layout ? `import layout from '../${config.layout}';` : ''}
+let components = ${JSON.stringify(routes)};
+add_components(components, '${config.site_url}', ${app_element ? `'${app_element}'` : 'document.body'});
+
+${init}
+
+${layout ? `render_layout(layout).then(() => {
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
-});
+});`
+  :
+`app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});`}
 
 ${!route_hash ? `
 document.body.addEventListener('click', e => {
@@ -63,11 +70,11 @@ document.body.addEventListener('click', e => {
     app.route(menu.pathname);
   }
 });` : ''}
-${init}
+
 `;
 
   fs.writeFileSync(tsx_file, main);
-  app.run(`${events.BUILD}:esbuild`, tsx_file, target, public);
+  // app.run(`${events.BUILD}:esbuild`, tsx_file, main_file, public);
 });
 
 const ensure = dir => {

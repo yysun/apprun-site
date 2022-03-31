@@ -3,6 +3,8 @@ site_url: /
 
 layout: src/tailwind/layout
 
+app_element: my-app
+
 plugins:
   - my-plugin.js
 

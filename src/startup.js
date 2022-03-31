@@ -39,7 +39,7 @@ const add_component = (component, site_url, main_element) => {
   });
 };
 
-const add_components = (components, site_url, main_element = 'my-app') => {
+const add_components = (components, site_url, main_element) => {
   components && components.forEach(item => add_component(item, site_url, main_element));
 };
 
