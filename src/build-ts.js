@@ -1,25 +1,27 @@
-const path = require('path');
-const fs = require('fs');
-const events = require('./events');
-const chalk = require('chalk');
-const { default: app } = require('apprun');
+import { app } from 'apprun/dist/apprun.esm.js';
+import { dirname, join } from 'path';
+import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync } from 'fs';
+import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
+import esbuild from 'esbuild';
+import { BUILD } from './events.js';
+import startup from './startup.js';
 
 const routes = [];
 
-app.on(`${events.BUILD}:component`, (content, target, public) => {
+app.on(`${BUILD}:component`, (content, target, output) => {
   const component = `const Component = window['Component'];
   export default class extends Component {
     // ${JSON.stringify(content)}
     view = () => \`_html:${content.content}\`
   }`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
-  fs.writeFileSync(tsx_file, component);
-  app.run(`${events.BUILD}:esbuild`, tsx_file, target, public);
+  writeFileSync(tsx_file, component);
+  app.run(`${BUILD}:esbuild`, tsx_file, target, output);
 });
 
-app.on(`${events.BUILD}:esbuild`, (file, target) => {
-  const result = require('esbuild').buildSync({
+app.on(`${BUILD}:esbuild`, (file, target) => {
+  const result = esbuild.buildSync({
     entryPoints: [file],
     outfile: target,
     format: 'esm',
@@ -31,19 +33,19 @@ app.on(`${events.BUILD}:esbuild`, (file, target) => {
   result.warnings.length && console.log(yellow(result.warnings));
 });
 
-app.on(`${events.BUILD}:add-route`, (route, target, public) => {
-  const module_file = target.replace(public, '').replace(/\\/g, '/');
+app.on(`${BUILD}:add-route`, (route, target, output) => {
+  const module_file = target.replace(output, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
   module_file.endsWith('index.js') && routes.push([route, module_file]);
 });
 
-app.on(`${events.BUILD}:startup`, (config, public, pages) => {
+app.on(`${BUILD}:startup`, (config, output, pages) => {
 
-  const startup = require('./startup');
   const route_hash = config.route === '#';
-  const tsx_file = `${public}/main.tsx`;
   const main_file = `${pages}/main.tsx`;
-  const init = fs.existsSync(main_file) ? fs.readFileSync(main_file).toString() : '';
+  const tsx_file = `${output}/main.tsx`;
+  const main_js_file = `${output}/main.js`;
+  const init = existsSync(main_file) ? readFileSync(main_file).toString() : '';
   const { apprun_dev_tool, layout, app_element } = config;
 
   const main = `${startup}
@@ -73,24 +75,24 @@ document.body.addEventListener('click', e => {
 
 `;
 
-  fs.writeFileSync(tsx_file, main);
-  // app.run(`${events.BUILD}:esbuild`, tsx_file, main_file, public);
+  writeFileSync(tsx_file, main);
+  app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
 });
 
 const ensure = dir => {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 };
 
 const write_html = (file, content, config) => {
-  ensure(path.dirname(file));
+  ensure(dirname(file));
   content = content.replace('<head>', `<head><base href="${config.site_url}" />`);
   content = content.replace('href="/style.css"', `href="${config.site_url}/style.css"`);
   content = content.replace('</body>', `<script type="module" src="${config.site_url}/main.js"></script></body>`);
-  fs.writeFileSync(file, content);
+  writeFileSync(file, content);
   console.log('\t', green(file));
 };
 
-app.on(`${events.BUILD}:static`, async (config, public) => {
+app.on(`${BUILD}:static`, async (config, output) => {
 
   const puppeteer = require('puppeteer');
   const browser = await puppeteer.launch();
@@ -100,15 +102,15 @@ app.on(`${events.BUILD}:static`, async (config, public) => {
 
   console.log(cyan('Creating Static Files from: ', dev_server));
 
-  fs.copyFileSync(`${public}/index.html`, `${public}/404.html`);
+  copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
 
   for (let i = 0; i < pages.length; i++) {
     const route = pages[i];
-    const html_file = path.join(public, route, 'index.html');
-    if (fs.existsSync(html_file)) fs.rmSync(html_file);
+    const html_file = join(output, route, 'index.html');
+    if (existsSync(html_file)) rmSync(html_file);
 
     await page.goto(`${dev_server}${route}`, { waitUntil: 'networkidle0' });
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);

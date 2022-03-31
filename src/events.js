@@ -1,5 +1,3 @@
-module.exports = {
-  BUILD: 'build',
-  PRE_BUILD: 'pre-build',
-  POST_BUILD: 'post-build',
-};
+export const BUILD = 'build';
+export const PRE_BUILD = 'pre-build';
+export const POST_BUILD = 'post-build';

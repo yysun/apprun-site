@@ -1,14 +1,18 @@
-const md = require('markdown-it')({ html: true });
-md.use(require('markdown-it-anchor'));
-md.use(require('markdown-it-table-of-contents'));
-const yaml = require('js-yaml');
+import _md from 'markdown-it';
+import a from 'markdown-it-anchor';
+import b from 'markdown-it-table-of-contents';
+import c from 'markdown-it-front-matter';
+import { load } from 'js-yaml';
+import { BUILD } from './events.js';
 
-const events = require('./events');
-app.on(`${events.BUILD}.md`, text => {
+const md = _md ({ html: true });
+md.use(a);
+md.use(b);
 
+app.on(`${BUILD}.md`, text => {
   let page = {};
-  md.use(require('markdown-it-front-matter'), function (fm) {
-    page = fm ? yaml.load(fm) : {};
+  md.use(c, function (fm) {
+    page = fm ? load(fm) : {};
   });
 
   const content = md.render(text);

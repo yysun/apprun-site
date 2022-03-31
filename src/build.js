@@ -1,42 +1,48 @@
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const chalk = require('chalk');
+//@ts-check
+import { existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync, writeFileSync, copyFileSync } from 'fs';
+import { join, dirname, basename, extname } from 'path';
+import { load } from 'js-yaml';
+import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-const events = require('./events');
+import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
+import { app } from 'apprun/dist/apprun.esm.js';
 
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
 
-const { pages, clean, watch, static, public, content_events, source } = app['config'];
+// const { pages, clean, watch, render, output, content_events, source } = app['config'];
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 };
-const relative = fname => fname.replace(source, '');
 
-const conf = `${source}/apprun-site.yml`;
-const config = fs.existsSync(conf) ? yaml.load(fs.readFileSync(conf)) : {};
+let relative, config;
 
-config.site_url = config.site_url || '/';
-config.site_url.endsWith('/') && (config.site_url = config.site_url.slice(0, -1));
+app.on(PRE_BUILD, ({ source, clean, output }) => {
 
-app.on(events.PRE_BUILD, () => {
+  relative = fname => fname.replace(source, '');
+
+  const conf = `${source}/apprun-site.yml`;
+  config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : {};
+  config.site_url = config.site_url || '/';
+  config.site_url.endsWith('/') && (config.site_url = config.site_url.slice(0, -1));
+
+
   if (clean) {
-    fs.rmSync(public, { recursive: true, force: true });
-    console.log(cyan('Clean'), relative(public));
+    rmSync(output, { recursive: true, force: true });
+    console.log(cyan('Clean'), relative(output));
   }
 });
 
-app.on(events.POST_BUILD, async () => {
+app.on(POST_BUILD, async ({ watch, render, output, pages}) => {
 
-  app.run(`${events.BUILD}:startup`, config, public, pages);
-  console.log(cyan('Created File'), relative(`${public}/main.js`));
+  app.run(`${BUILD}:startup`, config, output, pages);
+  console.log(cyan('Created File'), relative(`${output}/main.js`));
 
-  static && await app.query(`${events.BUILD}:static`, config, public);
+  render && await app.query(`${BUILD}:render`, config, output);
 
   if (watch) {
     console.log(cyan('Watching ...'));
@@ -44,7 +50,7 @@ app.on(events.POST_BUILD, async () => {
     chokidar.watch(pages).on('all', (event, path) => {
       if (event === 'change') {
         // console.log(cyan('Change detected'), relative(path));
-        process_file(path);
+        // process_file(path);
       }
     });
   } else {
@@ -52,63 +58,64 @@ app.on(events.POST_BUILD, async () => {
   }
 })
 
-app.on(events.BUILD, async () => {
-  const { pages } = app['config'];
+app.on(BUILD, async ({ pages, output }) => {
   console.log(cyan('Build from'), relative(pages));
   function walkDir(dir, callback) {
-    fs.readdirSync(dir).forEach(f => {
-      let dirPath = path.join(dir, f);
-      let isDirectory = fs.statSync(dirPath).isDirectory();
+    readdirSync(dir).forEach(f => {
+      let dirPath = join(dir, f);
+      let isDirectory = statSync(dirPath).isDirectory();
       if (f.startsWith('_')) {
         console.log(gray('Skip'), gray(relative(dirPath)));
         return;
       }
-      isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
+      isDirectory ? walkDir(dirPath, callback) : callback(join(dir, f));
     });
   }
   walkDir(pages, file => process_file(file));
-});
 
-async function process_file(file) {
-  const dir = path.dirname(file).replace(pages, '');
-  const name = path.basename(file).replace(/\.[^/.]+$/, '');
-  const ext = path.extname(file);
-  const event = content_events?.[ext] || ext;
-  const pub_dir = path.join(public, dir);
-  ensure(pub_dir);
 
-  const js_file = path.join(public, dir, name) + '.js';
+  async function process_file(file) {
+    const dir = dirname(file).replace(pages, '');
+    const name = basename(file).replace(/\.[^/.]+$/, '');
+    const ext = extname(file);
+    // const event = content_events?.[ext] || ext;
+    const event = ext;
+    const pub_dir = join(output, dir);
+    ensure(pub_dir);
 
-  // console.log('Page: ', file, '=>', event);
-  const text = fs.readFileSync(file).toString();
+    const js_file = join(output, dir, name) + '.js';
 
-  if (HTML_Types.indexOf(ext) >= 0 && text.indexOf('<html') >= 0) {
-    const new_file = path.join(pub_dir, name + '.html');
-    fs.writeFileSync(new_file, text);
-    console.log(cyan('Copied HTML'), relative(new_file));
-    return;
-  }
+    // console.log('Page: ', file, '=>', event);
+    const text = readFileSync(file).toString();
 
-  if (Content_Types.indexOf(ext) >= 0) {
-    const all_content = await app.query(`${events.BUILD}${event}`, text);
-    const content = last(all_content);
-    // console.log(content);
-    if (!content) {
-      console.log(red('Content load failed'));
+    if (HTML_Types.indexOf(ext) >= 0 && text.indexOf('<html') >= 0) {
+      const new_file = join(pub_dir, name + '.html');
+      writeFileSync(new_file, text);
+      console.log(cyan('Copied HTML'), relative(new_file));
       return;
     }
-    app.run(`${events.BUILD}:component`, content, js_file, public);
-    app.run(`${events.BUILD}:add-route`, dir, js_file, public);
-    console.log(cyan('Created Component'), relative(js_file));
-  } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    app.run(`${events.BUILD}:esbuild`, file, js_file, public);
-    console.log(cyan('Compiled JavaSript'), relative(js_file));
-    app.run(`${events.BUILD}:add-route`, dir, js_file, public);
-  } else if (Copy_Types.indexOf(ext) >= 0) {
-    const dest = path.join(pub_dir, name) + ext;
-    fs.copyFileSync(file, dest);
-    console.log(cyan('Copied File'), relative(dest));
-  } else {
-    console.log(magenta('Unknown file type'), relative(file));
+
+    if (Content_Types.indexOf(ext) >= 0) {
+      const all_content = await app.query(`${BUILD}${event}`, text);
+      const content = last(all_content);
+      // console.log(content);
+      if (!content) {
+        console.log(red('Content load failed'));
+        return;
+      }
+      app.run(`${BUILD}:component`, content, js_file, output);
+      app.run(`${BUILD}:add-route`, dir, js_file, output);
+      console.log(cyan('Created Component'), relative(js_file));
+    } else if (Esbuild_Types.indexOf(ext) >= 0) {
+      app.run(`${BUILD}:esbuild`, file, js_file, output);
+      console.log(cyan('Compiled JavaSript'), relative(js_file));
+      app.run(`${BUILD}:add-route`, dir, js_file, output);
+    } else if (Copy_Types.indexOf(ext) >= 0) {
+      const dest = join(pub_dir, name) + ext;
+      copyFileSync(file, dest);
+      console.log(cyan('Copied File'), relative(dest));
+    } else {
+      console.log(magenta('Unknown file type'), relative(file));
+    }
   }
-}
+});

@@ -1,25 +1,23 @@
-const path = require('path');
-const app = require('apprun').app;
-const events = require('./src/events');
+//@ts-check
+import { join } from 'path';
+import { PRE_BUILD, BUILD, POST_BUILD } from './src/events.js';
+import { app } from 'apprun/dist/apprun.esm.js';
 
-module.exports = async function (config) {
-  let { source, pages, public } = config;
+import './src/build.js';
+import './src/build-md.js';
+import './src/build-html.js';
+import './src/build-ts.js';
+
+export default async function (source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
-  config.source = source;
-  config.pages = path.join(source, pages || 'pages');
-  config.public = path.join(source, public || 'public');
-
-  app.config = config;
+  options.source = source;
+  options.pages = join(source, options.pages || 'pages');
+  options.output = join(source, options.output || 'output');
 
   // plugins
-  config.plugins?.forEach(module => require(`${source}/plugins/${module}`));
+  options.plugins?.forEach(module => require(`${source}/plugins/${module}`));
 
-  require('./src/build');
-  require('./src/build-md');
-  require('./src/build-html');
-  require('./src/build-ts');
-
-  await app.query(events.PRE_BUILD);
-  await app.query(events.BUILD);
-  await app.query(events.POST_BUILD);
+  await app.query(PRE_BUILD, options);
+  await app.query(BUILD, options);
+  await app.query(POST_BUILD, options);
 }

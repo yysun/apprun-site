@@ -3,10 +3,11 @@
   "version": "1.0.5",
   "description": "AppRun Site is a framework for building AppRun applications.",
   "main": "dist/index.js",
+  "type": "module",
   "bin": "apprun-site-cli.js",
   "scripts": {
     "test": "",
-    "start": "apprun-dev-server --entry-file=404.html demo/public",
+    "start": "node apprun-site-cli serv demo",
     "static": "http-server demo/public -c-1",
     "dev": "node apprun-site-cli build demo --watch",
     "build": "NODE_ENV=production node apprun-site-cli build demo"
@@ -34,7 +35,9 @@
     "commander": "^9.1.0",
     "degit": "^2.8.4",
     "esbuild": "^0.14.27",
+    "express": "^4.17.3",
     "js-yaml": "^4.1.0",
+    "jsdom": "^19.0.0",
     "markdown-it": "^12.3.2",
     "markdown-it-anchor": "^8.4.1",
     "markdown-it-front-matter": "^0.2.3",

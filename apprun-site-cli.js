@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-const program = require('commander');
-const degit = require('degit');
-const build = require('./index');
+import { program } from 'commander';
+import degit from 'degit';
+import build from './index.js';
+import server from './server.js';
 
 program
   .command('init [targetDir]')
@@ -24,9 +25,16 @@ program
   .description('build site')
   .option('-c, --clean', 'clean the output directory', false)
   .option('-w, --watch', 'watch the directory', false)
-  .option('-s, --static', 'watch the directory', false)
-  .option('-o, --public [public]', 'output directory', 'public')
+  .option('-r, --render', 'pre-render html pages', false)
+  .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .action((source, options) => build({source, ...options}));
+  .action(build);
 
-program.parse(process.args);
+program
+  .command('serv [source]')
+  .description('launch development server')
+  .option('-o, --output [output]', 'output directory', 'public')
+  .option('-p, --pages [pages]', 'pages directory', 'pages')
+  .action(server);
+
+program.parseAsync(process.argv);
