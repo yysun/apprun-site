@@ -17,7 +17,7 @@ export default function (source, { output, pages }) {
   const app = express();
   const html = readFileSync(`${pages}/index.html`, 'utf8');
 
-  app.get('*', async (req, res) => {
+  app.get('*', async (req, res, next) => {
 
     const dom = new JSDOM(html);
     const win = global.window = dom.window;
@@ -43,26 +43,29 @@ export default function (source, { output, pages }) {
           const main = await import(main_file);
           await main.default();
         }
-        const [_, event, ...args] = path.split('/');
-        const route = `/${event}`;
-        const js_file = `${output}/${event}/index.js`;
-        if (existsSync(js_file)) {
-          console.log(green(`\t ${js_file}`));
-          const module = await import(js_file);
-          const exp = module.default;
-          if (exp.name === exp.prototype.constructor.name) {
+        const paths = path.split('/');
+        for (let i = paths.length - 1; i > 1; i--) {
+          const route = paths.slice(1, i).join('/');
+          const js_file = `${output}/${route}/index.js`;
+          if (existsSync(js_file)) {
             try {
-              const component = new module.default();
-              component.mount && component.mount(win['app-element'] || document.body, { route });
-              component.run && component.run(route, ...args);
+              const module = await import(js_file);
+              const exp = module.default;
+              if (route.startsWith('api')) {
+                console.log(blue(`\t ${js_file}`));
+                exp(req, res, next);
+                return;
+              } else {
+                console.log(green(`\t ${js_file}`));
+                const component = new module.default();
+                component.mount && component.mount(win['app-element'] || document.body, { route });
+                component.run && component.run(route, ...paths.slice(i));
+              }
             } catch (e) {
               console.log(red(e.message));
-            }
-          } else if (typeof exp === 'function') {
-            try {
-              exp(...args);
-            } catch (e) {
-              console.log(red(e.message));
+              res.sendStatus(500);
+            // } finally {
+            //   delete require.cache[js_file];
             }
           }
         }
