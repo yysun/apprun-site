@@ -4,6 +4,7 @@ import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSyn
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from 'esbuild';
+import puppeteer from 'puppeteer';
 import { BUILD } from './events.js';
 import startup from './startup.js';
 
@@ -92,9 +93,8 @@ const write_html = (file, content, config) => {
   console.log('\t', green(file));
 };
 
-app.on(`${BUILD}:static`, async (config, output) => {
+app.on(`${BUILD}:render`, async (config, output) => {
 
-  const puppeteer = require('puppeteer');
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   const port = config['dev-server']['port'] || 8080;

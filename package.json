@@ -8,9 +8,8 @@
   "scripts": {
     "test": "",
     "start": "node apprun-site-cli serv demo",
-    "static": "http-server demo/public -c-1",
-    "dev": "node apprun-site-cli build demo --watch",
-    "build": "NODE_ENV=production node apprun-site-cli build demo"
+    "build": "node apprun-site-cli build demo",
+    "build:html": "node apprun-site-cli build demo --render"
   },
   "keywords": [
     "AppRun",
