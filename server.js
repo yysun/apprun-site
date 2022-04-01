@@ -12,7 +12,7 @@ export default function (source, { output }) {
   output = join(source, output || 'public');
 
   const app = express();
-  const _404 = readFileSync(`${output}/404.html`, 'utf8');
+
   const html = readFileSync(`${output}/index.html`, 'utf8');
   const dom = new JSDOM(html);
 
