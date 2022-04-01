@@ -46,7 +46,7 @@ app.on('$', ({ key, props }) => {
     }
   }
 });
-class Layout extends Component {
+export class Layout extends Component {
 
   view = () => {
 

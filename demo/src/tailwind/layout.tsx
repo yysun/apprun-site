@@ -12,7 +12,7 @@ app.on('//', (route) => {
 
 const main_element = 'my-app';
 
-const Layout = () => {
+export const Layout = () => {
   return <div class="page">
     <Sidebar />
     <main class="main">

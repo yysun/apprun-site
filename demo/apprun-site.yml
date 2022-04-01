@@ -1,14 +1,10 @@
 site_name: AppRun Site
 site_url: /
 
-layout: src/tailwind/layout
-
-app_element: my-app
+#no-startup: true
 
 plugins:
   - my-plugin.js
-
-apprun-dev-tools: true
 
 dev-server:
   port: 8080

@@ -29,7 +29,7 @@ const nav = [
 
 const sidebar = nav;
 
-const Layout = () => {
+export const Layout = () => {
 
   return <>
     <Header nav={nav} />

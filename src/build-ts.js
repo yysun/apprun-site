@@ -6,7 +6,6 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from 'esbuild';
 import puppeteer from 'puppeteer';
 import { BUILD } from './events.js';
-import startup from './startup.js';
 
 const routes = [];
 
@@ -40,29 +39,32 @@ app.on(`${BUILD}:add-route`, (route, target, output) => {
   module_file.endsWith('index.js') && routes.push([route, module_file]);
 });
 
-app.on(`${BUILD}:startup`, (config, output, pages) => {
+app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages) => {
 
-  const route_hash = config.route === '#';
+  const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
   const tsx_file = `${output}/main.tsx`;
   const main_js_file = `${output}/main.js`;
-  const init = existsSync(main_file) ? readFileSync(main_file).toString() : '';
-  const { apprun_dev_tool, layout, app_element } = config;
+  const init = existsSync(main_file);
 
-  const main = `${startup}
-${apprun_dev_tool ? 'add_js("https://unpkg.com/apprun/dist/apprun-dev-tools.js");' : ''}
-${layout ? `import layout from '../${config.layout}';` : ''}
-let components = ${JSON.stringify(routes)};
-add_components(components, '${config.site_url}', ${app_element ? `'${app_element}'` : 'document.body'});
+  copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
-${init}
-
-${layout ? `render_layout(layout).then(() => {
+  const main = `import app from 'apprun';
+window.onload = () => {
+  const add_component = (component, site_url, main_element) => {
+    let [path, file] = component;
+    app.once(path, async (...p) => {
+      const module = await import(\`\${site_url}\${file}\`);
+      const component = new module.default();
+      component.mount(main_element, { route: path });
+      app.route([path, ...p].join('/'));
+    });
+  };
+  const components = ${JSON.stringify(routes)};
+  const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"] || document.body'}
+  components.forEach(item => add_component(item, '${site_url}', app_element));
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
-});`
-  :
-`app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});`}
-
+};
 ${!route_hash ? `
 document.body.addEventListener('click', e => {
   const element = e.target as HTMLElement;
@@ -74,6 +76,10 @@ document.body.addEventListener('click', e => {
   }
 });` : ''}
 
+${init ? `import main from '${main_file}';
+export default main;
+main();
+` : ''}
 `;
 
   writeFileSync(tsx_file, main);
@@ -86,9 +92,8 @@ const ensure = dir => {
 
 const write_html = (file, content, config) => {
   ensure(dirname(file));
-  content = content.replace('<head>', `<head><base href="${config.site_url}" />`);
-  content = content.replace('href="/style.css"', `href="${config.site_url}/style.css"`);
-  content = content.replace('</body>', `<script type="module" src="${config.site_url}/main.js"></script></body>`);
+  // content = content.replace('<head>', `<head><base href="${config.site_url}" />`);
+  // content = content.replace('href="/style.css"', `href="${config.site_url}/style.css"`);
   writeFileSync(file, content);
   console.log('\t', green(file));
 };
@@ -102,8 +107,6 @@ app.on(`${BUILD}:render`, async (config, output) => {
 
   console.log(cyan('Creating Static Files from: ', dev_server));
 
-  copyFileSync(`${output}/index.html`, `${output}/404.html`);
-
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
 
@@ -112,7 +115,7 @@ app.on(`${BUILD}:render`, async (config, output) => {
     const html_file = join(output, route, 'index.html');
     if (existsSync(html_file)) rmSync(html_file);
 
-    await page.goto(`${dev_server}${route}`, { waitUntil: 'networkidle0' });
+    await page.goto(`${dev_server}${route}`, { waitUntil: 'networkidle2' });
     const content = await page.evaluate(() => document.querySelector('*').outerHTML);
     write_html(html_file, content, config);
   };

@@ -62,7 +62,7 @@ const nav = [
   }
 ];
 
-const Layout = () => {
+export const Layout = () => {
 
   return <>
     <style>{css}</style>

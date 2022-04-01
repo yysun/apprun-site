@@ -39,7 +39,8 @@ app.on(PRE_BUILD, ({ source, clean, output }) => {
 
 app.on(POST_BUILD, async ({ watch, render, output, pages}) => {
 
-  app.run(`${BUILD}:startup`, config, output, pages);
+  !config['no-startup'] && app.run(`${BUILD}:startup`, config, output, pages);
+
   console.log(cyan('Created File'), relative(`${output}/main.js`));
 
   render && await app.query(`${BUILD}:render`, config, output);
