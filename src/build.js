@@ -12,7 +12,6 @@ const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
 
-// const { pages, clean, watch, render, output, content_events, source } = app['config'];
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
@@ -37,26 +36,11 @@ app.on(PRE_BUILD, ({ source, clean, output }) => {
   }
 });
 
-app.on(POST_BUILD, async ({ watch, render, output, pages}) => {
-
+app.on(POST_BUILD, async ({ render, output, pages}) => {
   !config['no-startup'] && app.run(`${BUILD}:startup`, config, output, pages);
-
   console.log(cyan('Created File'), relative(`${output}/main.js`));
-
   render && await app.query(`${BUILD}:render`, config, output);
-
-  if (watch) {
-    console.log(cyan('Watching ...'));
-    const chokidar = require('chokidar');
-    chokidar.watch(pages).on('all', (event, path) => {
-      if (event === 'change') {
-        // console.log(cyan('Change detected'), relative(path));
-        // process_file(path);
-      }
-    });
-  } else {
-    console.log(cyan('Build done.'))
-  }
+  console.log(cyan('Build done.'));
 })
 
 app.on(BUILD, async ({ pages, output }) => {
