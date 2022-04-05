@@ -36,11 +36,10 @@ app.on(`${BUILD}:esbuild`, (file, target) => {
 app.on(`${BUILD}:add-route`, (route, target, output) => {
   const module_file = target.replace(output, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
-  if (route.startsWith('/api')) return;
+
   if (module_file.endsWith('index.js')) {
     routes.push([route, module_file]);
-  } else {
-    // routes.push([module_file.replace('.js', ''), module_file]);
+
   }
 });
 

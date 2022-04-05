@@ -6,6 +6,8 @@ import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
 import { JSDOM } from 'jsdom';
+import fetch from 'isomorphic-fetch';
+
 import { app as apprun, Component, safeHTML} from 'apprun/dist/apprun.esm.js';
 
 export default function (source, { output, pages }) {
@@ -57,6 +59,7 @@ export default function (source, { output, pages }) {
     const dom = new JSDOM(html);
     const win = global.window = dom.window;
     const document = global.document = dom.window.document;
+    global.fetch = fetch;
     global.window.app = apprun;
     global.window.Component = Component;
     global.window.safeHTML = safeHTML;
