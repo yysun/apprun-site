@@ -1,6 +1,6 @@
 {
   "name": "apprun-site",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "AppRun Site is a framework for building AppRun applications.",
   "main": "index.js",
   "type": "module",
