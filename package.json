@@ -9,9 +9,9 @@
     "test": "",
     "start": "run-p start:*",
     "start:server": "node apprun-site-cli serv demo",
-    "start:watch": "nodemon --watch demo/pages --exec \"npm run build\" -e \"tsx css html\" --delay 2.5",
+    "start:watch": "nodemon --watch demo/pages --exec \"npm run build\" -e \"tsx css html md\" --delay 2.5",
     "build": "node apprun-site-cli build demo",
-    "prerender": "node apprun-site-cli build demo --render"
+    "render": "node apprun-site-cli build demo --render"
   },
   "keywords": [
     "AppRun",
