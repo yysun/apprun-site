@@ -10,10 +10,10 @@ import { BUILD } from './events.js';
 const routes = [];
 
 app.on(`${BUILD}:component`, (content, target, output) => {
-  const component = `const Component = window['Component'];
+  const component = `const {Component, safeHTML} = window;
   export default class extends Component {
     // ${JSON.stringify(content)}
-    view = () => \`_html:${content.content}\`
+    view = () => safeHTML(\`${content.content}\`);
   }`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   writeFileSync(tsx_file, component);
