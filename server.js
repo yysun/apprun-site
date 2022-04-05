@@ -6,7 +6,7 @@ import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
 import { JSDOM } from 'jsdom';
-import { app as apprun, Component } from 'apprun/dist/apprun.esm.js';
+import { app as apprun, Component, safeHTML} from 'apprun/dist/apprun.esm.js';
 
 export default function (source, { output, pages }) {
 
@@ -17,6 +17,41 @@ export default function (source, { output, pages }) {
   const app = express();
   const html = readFileSync(`${pages}/index.html`, 'utf8');
 
+  app.get('/api/*', async (req, res, next) => {
+    const run_api = async (js_file) => {
+      const module = await import(js_file);
+      const exp = module.default;
+      console.log(blue(`\t${js_file}`));
+      exp(req, res, next);
+    };
+
+    const path = req.path;
+    const paths = path.split('/');
+    console.log(cyan(`Serving API ${path}`));
+    for (let i = paths.length; i > 1; i--) {
+      const route = paths.slice(1, i).join('/');
+      let js_index = `${source}/${route}/index.js`;
+      let js_file = `${source}/${route}.js`;
+      try {
+        if (existsSync(js_file)) {
+          await run_api(js_file);
+          return;
+        } else if (existsSync(js_index)) {
+          await run_api(js_index);
+          return;
+        }
+      } catch (e) {
+        console.log(red(e.message));
+        res.sendStatus(500);
+        return;
+        // } finally {
+        //   delete require.cache[js_file];
+      }
+    }
+    console.log(magenta(`\tUnknown path ${path}`));
+    res.sendStatus(404);
+  });
+
   app.get('*', async (req, res, next) => {
 
     const dom = new JSDOM(html);
@@ -24,8 +59,17 @@ export default function (source, { output, pages }) {
     const document = global.document = dom.window.document;
     global.window.app = apprun;
     global.window.Component = Component;
+    global.window.safeHTML = safeHTML;
     global.HTMLElement = dom.window.HTMLElement;
     global.SVGElement = dom.window.SVGElement;
+
+    const render = async (js_file, route, params) => {
+      const module = await import(js_file);
+      console.log(green(`\t ${js_file}`));
+      const component = new module.default();
+      component.mount && component.mount(win['app-element'] || document.body, { route });
+      component.run && component.run(route, ...params);
+    }
 
     let path = req.path;
     if (path.includes('.')) {
@@ -46,27 +90,20 @@ export default function (source, { output, pages }) {
         const paths = path.split('/');
         for (let i = paths.length - 1; i > 1; i--) {
           const route = paths.slice(1, i).join('/');
-          const js_file = `${output}/${route}/index.js`;
-          if (existsSync(js_file)) {
-            try {
-              const module = await import(js_file);
-              const exp = module.default;
-              if (route.startsWith('api')) {
-                console.log(blue(`\t ${js_file}`));
-                exp(req, res, next);
-                return;
-              } else {
-                console.log(green(`\t ${js_file}`));
-                const component = new module.default();
-                component.mount && component.mount(win['app-element'] || document.body, { route });
-                component.run && component.run(route, ...paths.slice(i));
-              }
-            } catch (e) {
-              console.log(red(e.message));
-              res.sendStatus(500);
+          const js_index = `${output}/${route}/index.js`;
+          const js_file = `${output}/${route}.js`;
+          try {
+            if (existsSync(js_index)) {
+              await render(js_index, route, paths.slice(i));
+            } else if (existsSync(js_file)) {
+              await render(js_file, route, paths.slice(i));
+            }
+          } catch (e) {
+            console.log(red(e.message));
+            res.sendStatus(500);
+            return;
             // } finally {
             //   delete require.cache[js_file];
-            }
           }
         }
         res.send(document.documentElement.outerHTML);
