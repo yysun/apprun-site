@@ -18,7 +18,7 @@ An AppRun-Site project has the following structure:
 /api                <- optional
 ```
 
-You can ddd pages to the directory `pages`; they can be HTML files, markdown files, and tsx/jsx files (AppRun components).
+You can add pages to the directory `pages`; they can be HTML files, markdown files, and tsx/jsx files (AppRun components).
 
 Then, you can use:
 
