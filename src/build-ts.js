@@ -36,7 +36,12 @@ app.on(`${BUILD}:esbuild`, (file, target) => {
 app.on(`${BUILD}:add-route`, (route, target, output) => {
   const module_file = target.replace(output, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
-  module_file.endsWith('index.js') && routes.push([route, module_file]);
+  if (route.startsWith('/api')) return;
+  if (module_file.endsWith('index.js')) {
+    routes.push([route, module_file]);
+  } else {
+    // routes.push([module_file.replace('.js', ''), module_file]);
+  }
 });
 
 app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages) => {
@@ -79,7 +84,8 @@ document.body.addEventListener('click', e => {
 ${init ? `import main from '${main_file}';
 export default main;
 main();
-` : ''}
+` :
+'export default () => {}'}
 `;
 
   writeFileSync(tsx_file, main);
@@ -102,7 +108,7 @@ app.on(`${BUILD}:render`, async (config, output) => {
 
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  const port = config['dev-server']['port'] || 8080;
+  const port = config['dev-server'] && config['dev-server']['port'] || 8080;
   const dev_server = `http://localhost:${port}`;
 
   console.log(cyan('Creating Static Files from: ', dev_server));

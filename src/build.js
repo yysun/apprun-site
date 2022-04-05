@@ -10,7 +10,8 @@ import { app } from 'apprun/dist/apprun.esm.js';
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
-const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
+// const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
+const Copy_Types = ['.json', '.css', '.ico'];
 
 
 const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
