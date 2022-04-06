@@ -39,5 +39,10 @@ Then, you can use:
 * _npm run render_ to build a static website
 
 
+## Documentation
+
+Please visit https://apprun.js.org/docs/apprun-site
+
+
 
 Have fun coding!

@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/yysun/apprun-site#readme",
   "dependencies": {
-    "apprun": "^3.28.13",
+    "apprun": "^3.28.14",
     "chalk": "4.1.2",
     "chokidar": "^3.5.3",
     "commander": "^9.1.0",

@@ -50,7 +50,7 @@ app.on(POST_BUILD, async ({ watch, render, output, pages}) => {
 
     chokidar.watch(pages).on('all', _.debounce((event, path) => {
       if (event === 'change'|| event === 'add') {
-        console.log(cyan('Change detected'), relative(path));
+        // console.log(cyan('Change detected'), relative(path));
         process_file(path, { pages, output });
       }
     },500));
