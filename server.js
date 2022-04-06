@@ -68,10 +68,17 @@ export default function (source, { output, pages }) {
 
     const render = async (js_file, route, params) => {
       const module = await import(js_file);
-      console.log(green(`\t ${js_file}`));
-      const component = new module.default();
-      component.mount && component.mount(win['app-element'] || document.body, { route });
-      component.run && component.run(route, ...params);
+      const exp = module.default;
+      const el = document.getElementById(win['app-element']);
+      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+        console.log(green(`\t ${js_file}`));
+        const component = new module.default();
+        component.mount && component.mount(el || document.body, { route });
+        component.run && component.run(route, ...params);
+      } else if (typeof exp === 'function') {
+        const vdom = await exp(...params);
+        apprun.render( el || document.body, vdom);
+      }
     }
 
     let path = req.path;

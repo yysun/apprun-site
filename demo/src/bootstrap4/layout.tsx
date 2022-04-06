@@ -26,7 +26,7 @@ export const Layout = () => {
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/docs">Docs</a>
+            <a class="nav-link" href="/docs">Guide</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/products">Products</a>
