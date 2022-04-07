@@ -110,10 +110,6 @@ export default function (source, { output, pages }) {
             }
           } catch (e) {
             console.log(red(e.message));
-            res.sendStatus(500);
-            return;
-            // } finally {
-            //   delete require.cache[js_file];
           }
         }
         res.send(document.documentElement.outerHTML);
