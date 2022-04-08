@@ -5,5 +5,8 @@ export default class Comic extends Component {
     const comic = await response.json();
     return { comic };
   }
-  view = state => state.comic ? <img src={state.comic.url} /> : `Loading...`;
+  view = state => state.comic ? <>
+    <p>{state.comic.title}</p>
+    <img src={state.comic.url} />
+  </> : `Loading...`;
 }
