@@ -24,7 +24,7 @@ export default ({ Layout, styles = null, scripts = null, body_class = null }) =>
   if (scripts) {
     for (let i = 0; i < scripts.length; i++) add_js(scripts[i]);
   }
-
+  window["app-element"] = 'my-app';
   body_class && document.body.classList.add(...body_class);
   Layout && app.render(document.body, <Layout />);
 }
