@@ -67,17 +67,21 @@ export default function (source, { output, pages }) {
     global.SVGElement = dom.window.SVGElement;
 
     const render = async (js_file, route, params) => {
-      const module = await import(js_file);
-      const exp = module.default;
-      const el = document.getElementById(win['app-element']);
-      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-        console.log(green(`\t ${js_file}`));
-        const component = new module.default();
-        component.mount && component.mount(el || document.body, { route });
-        component.run && component.run(route, ...params);
-      } else if (typeof exp === 'function') {
-        const vdom = await exp(...params);
-        apprun.render( el || document.body, vdom);
+      try {
+        const module = await import(js_file);
+        const exp = module.default;
+        const el = document.getElementById(win['app-element']);
+        if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+          console.log(green(`\t ${js_file}`));
+          const component = new module.default();
+          component.mount && component.mount(el || document.body, { route });
+          component.run && component.run(route, ...params);
+        } else if (typeof exp === 'function') {
+          const vdom = await exp(...params);
+          apprun.render(el || document.body, vdom);
+        }
+      } catch (e) {
+        console.log(red(e.message));
       }
     }
 
@@ -94,23 +98,19 @@ export default function (source, { output, pages }) {
       } else {
         if (existsSync(main_file)) {
           console.log(green(`\t ${main_file}`));
-          const main = await import(main_file);
-          await main.default();
+          await render(main_file, '/', []);
         }
         const paths = path.split('/');
         for (let i = paths.length - 1; i > 1; i--) {
           const route = paths.slice(1, i).join('/');
           const js_index = `${output}/${route}/index.js`;
           const js_file = `${output}/${route}.js`;
-          try {
-            if (existsSync(js_index)) {
-              await render(js_index, route, paths.slice(i));
-            } else if (existsSync(js_file)) {
-              await render(js_file, route, paths.slice(i));
-            }
-          } catch (e) {
-            console.log(red(e.message));
+          if (existsSync(js_index)) {
+            await render(js_index, route, paths.slice(i));
+          } else if (existsSync(js_file)) {
+            await render(js_file, route, paths.slice(i));
           }
+
         }
         res.send(document.documentElement.outerHTML);
       }

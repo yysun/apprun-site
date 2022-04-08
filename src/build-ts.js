@@ -21,16 +21,20 @@ app.on(`${BUILD}:component`, (content, target, output) => {
 });
 
 app.on(`${BUILD}:esbuild`, (file, target) => {
-  const result = esbuild.buildSync({
-    entryPoints: [file],
-    outfile: target,
-    format: 'esm',
-    bundle: true,
-    sourcemap: true,
-    minify: process.env.NODE_ENV === 'production'
-  });
-  result.errors.length && console.log(red(result.errors));
-  result.warnings.length && console.log(yellow(result.warnings));
+  try {
+    const result = esbuild.buildSync({
+      entryPoints: [file],
+      outfile: target,
+      format: 'esm',
+      bundle: true,
+      sourcemap: true,
+      minify: process.env.NODE_ENV === 'production'
+    });
+    result.errors.length && console.log(red(result.errors));
+    result.warnings.length && console.log(yellow(result.warnings));
+  } catch (e) {
+    console.log(red(e.message));
+  }
 });
 
 app.on(`${BUILD}:add-route`, (route, target, output) => {
@@ -51,7 +55,7 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages) => 
   const main_js_file = `${output}/main.js`;
   const init = existsSync(main_file);
 
-  copyFileSync(`${output}/index.html`, `${output}/404.html`);
+  // copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   const main = `import app from 'apprun';
 window.onload = () => {
@@ -89,6 +93,7 @@ main();
 
   writeFileSync(tsx_file, main);
   app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
+  console.log(green('Created File'), `main.js`);
 });
 
 const ensure = dir => {
