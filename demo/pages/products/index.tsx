@@ -19,7 +19,7 @@ export default class extends Component {
 export default class extends Component {
 
   state = async () => {
-    const url = 'http://localhost:8080/api/products'; //TODO: get from config
+    const url = '/api/products'; 
     const req = await fetch(url);
     const json = await req.json();
     return { products: json };

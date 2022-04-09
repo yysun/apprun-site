@@ -2,11 +2,12 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { load } from 'js-yaml';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
 import { JSDOM } from 'jsdom';
-import fetch from 'isomorphic-fetch';
+import _fetch from 'isomorphic-fetch';
 
 import { app as apprun, Component, safeHTML} from 'apprun/dist/apprun.esm.js';
 
@@ -15,6 +16,9 @@ export default function (source, { output, pages }) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
   output = join(source, output || 'public');
   pages = join(source, pages || 'pages');
+  const conf = `${source}/apprun-site.yml`;
+  const config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : { };
+  const port = config.port || 8080;
 
   const app = express();
   const html = readFileSync(`${pages}/index.html`, 'utf8');
@@ -59,7 +63,10 @@ export default function (source, { output, pages }) {
     const dom = new JSDOM(html);
     const win = global.window = dom.window;
     const document = global.document = dom.window.document;
-    global.fetch = fetch;
+    global.fetch = (url, ...p) => {
+      if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
+      return _fetch(url, ...p);
+    }
     global.window.app = apprun;
     global.window.Component = Component;
     global.window.safeHTML = safeHTML;
@@ -122,8 +129,7 @@ export default function (source, { output, pages }) {
     }
   });
 
-  const listener = app.listen(process.env.PORT || 8080, function () {
-    console.log(yellow('Your app is listening on port ') +
-      `http://localhost:${listener.address().port}`);
+  const listener = app.listen(port, function () {
+    console.log(yellow(`Your app is listening on http://localhost:${port}`));
   });
 }
