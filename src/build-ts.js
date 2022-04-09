@@ -83,6 +83,9 @@ window.onload = () => {
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
 };
 ${!route_hash ? `
+const route = app.route;
+app.route = null;
+document.addEventListener("DOMContentLoaded", () => app.route = route);
 document.body.addEventListener('click', e => {
   const element = e.target as HTMLElement;
   const menu = (element.tagName === 'A' ? element : element.closest('a')) as HTMLAnchorElement;
