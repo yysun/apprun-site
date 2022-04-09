@@ -66,19 +66,24 @@ export default function (source, { output, pages }) {
     global.HTMLElement = dom.window.HTMLElement;
     global.SVGElement = dom.window.SVGElement;
 
+    const get_element = () => {
+      const el = document.getElementById(win['app-element']);
+      if (!el) console.log(red(`window['app-element'] not defined`));
+      return el || document.body;
+    }
+
     const render = async (js_file, route, params) => {
       try {
         const module = await import(js_file);
         const exp = module.default;
-        const el = document.getElementById(win['app-element']);
         if (exp.prototype && exp.prototype.constructor.name === exp.name) {
           console.log(green(`\t ${js_file}`));
           const component = new module.default();
-          component.mount && component.mount(el || document.body, { route });
+          component.mount && component.mount(get_element(), { route });
           component.run && component.run(route, ...params);
         } else if (typeof exp === 'function') {
           const vdom = await exp(...params);
-          apprun.render(el || document.body, vdom);
+          vdom && apprun.render(get_element(), vdom);
         }
       } catch (e) {
         console.log(red(e.message));

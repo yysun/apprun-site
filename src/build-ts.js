@@ -40,10 +40,8 @@ app.on(`${BUILD}:esbuild`, (file, target) => {
 app.on(`${BUILD}:add-route`, (route, target, output) => {
   const module_file = target.replace(output, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
-
   if (module_file.endsWith('index.js')) {
     routes.push([route, module_file]);
-
   }
 });
 
@@ -58,19 +56,32 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages) => 
   // copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   const main = `import app from 'apprun';
+const get_element = () => {
+  const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
+  const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
+  if (!el) console.error(\`window['app-element'] not defined\`);
+  return el || document.body;
+}
 window.onload = () => {
-  const add_component = (component, site_url, main_element) => {
+  const add_component = (component, site_url) => {
     let [path, file] = component;
     app.once(path, async (...p) => {
       const module = await import(\`\${site_url}\${file}\`);
-      const component = new module.default();
-      component.mount(main_element, { route: path });
+      const exp = module.default;
+      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+        const component = new module.default();
+        component.mount(get_element(), { route: path });
+      } else {
+        app.on(path, async (...p) => {
+          const vdom = await exp(...p);
+          app.render(get_element(), vdom);
+        });
+      }
       app.route([path, ...p].join('/'));
     });
   };
   const components = ${JSON.stringify(routes)};
-  const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"] || document.body'}
-  components.forEach(item => add_component(item, '${site_url}', app_element));
+  components.forEach(item => add_component(item, '${site_url}'));
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
 };
 ${!route_hash ? `
