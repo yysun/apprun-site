@@ -26,7 +26,7 @@ export default class extends Component {
   }
 
   view = state => <div>
-    <p>This is demo of an AppRun component page that calls REST API.</p>
+    <p>This is an AppRun component page that calls REST API.</p>
     <ul>
       {
         state.products.map(({ id, name }) => <li key={id}>
