@@ -43,7 +43,7 @@ app.on(`${BUILD}:add-route`, (route, target, output) => {
   }
 });
 
-app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages) => {
+app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages, live_reload) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -95,7 +95,34 @@ document.body.addEventListener('click', e => {
     app.route(menu.pathname);
   }
 });` : ''}
-
+${live_reload ? `
+function reload_css(path) {
+  const sheets = document.getElementsByTagName("link");
+  for (let i = 0; i < sheets.length; ++i) {
+    const elem = sheets[i], parent = elem.parentElement;
+    if (elem.href === path) {
+      parent.removeChild(elem);
+      parent.appendChild(elem);
+      break;
+    }
+  }
+}
+function _init_refresh() {
+  const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+  const address = protocol + window.location.host + window.location.pathname + '/ws';
+  const socket = new WebSocket(address);
+  socket.onmessage = function (msg) {
+    const {event, path} = JSON.parse(msg.data);
+    if(path.endsWith('.css')) {
+      reload_css(location.protocol + '//' + location.host + path);
+    } else {
+      window.location.reload();
+    }
+  }
+  console.log('Live reload enabled.');
+}
+window.addEventListener('DOMContentLoaded', _init_refresh);
+` : ''}
 ${init ? `import main from '${main_file}';
 export default main;
 main();
@@ -105,7 +132,7 @@ main();
 
   writeFileSync(tsx_file, main);
   app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
-  console.log(green('Created File'), `main.js`);
+  console.log(green('Created File'), 'main.js', magenta(`(live reload: ${live_reload})`));
 });
 
 const ensure = dir => {

@@ -51,7 +51,7 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .action((source, options) => {
-    build(source, { ...options, watch: true });
+    build(source, { ...options, watch: true, live_reload: true });
     server(source, options);
   });
 

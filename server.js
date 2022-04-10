@@ -1,11 +1,14 @@
 // @ts-check
 
 import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 import { load } from 'js-yaml';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
+import WebSocket from 'ws';
+import chokidar from 'chokidar';
+import _ from 'lodash';
 import { JSDOM } from 'jsdom';
 import _fetch from 'isomorphic-fetch';
 
@@ -17,7 +20,7 @@ export default function (source, { output, pages }) {
   output = join(source, output || 'public');
   pages = join(source, pages || 'pages');
   const conf = `${source}/apprun-site.yml`;
-  const config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : { };
+  const config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : {};
   const port = config.port || 8080;
 
   const app = express();
@@ -129,7 +132,22 @@ export default function (source, { output, pages }) {
     }
   });
 
-  const listener = app.listen(port, function () {
+  const server = app.listen(port, function () {
+    const wss = new WebSocket.Server({ server });
+    const send = data => {
+      wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          // console.log(green(`\tWS Sending ${data}`));
+          client.send(data);
+        }
+      });
+    }
+    chokidar.watch(output).on('all', _.debounce((event, path) => {
+      if (event === 'change' || event === 'add') {
+        send(JSON.stringify({ event, path: '/' + relative(output, path) }));
+      }
+    }, 300));
+
     console.log(yellow(`Your app is listening on http://localhost:${port}`));
   });
 }

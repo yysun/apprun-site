@@ -46,7 +46,8 @@
     "markdown-it-front-matter": "^0.2.3",
     "markdown-it-table-of-contents": "^0.6.0",
     "node-fetch": "^3.2.3",
-    "puppeteer": "^13.5.1"
+    "puppeteer": "^13.5.1",
+    "ws": "^8.5.0"
   },
   "jest": {
     "transform": {

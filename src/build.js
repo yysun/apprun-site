@@ -39,8 +39,8 @@ app.on(PRE_BUILD, ({ source, clean, output }) => {
   }
 });
 
-app.on(POST_BUILD, async ({ watch, render, output, pages}) => {
-  !config['no-startup'] && app.run(`${BUILD}:startup`, config, output, pages);
+app.on(POST_BUILD, async ({ watch, render, output, pages, live_reload }) => {
+  !config['no-startup'] && app.run(`${BUILD}:startup`, config, output, pages, live_reload);
   render && await app.query(`${BUILD}:render`, config, output);
   console.log(cyan('Build done.'));
 
@@ -48,15 +48,15 @@ app.on(POST_BUILD, async ({ watch, render, output, pages}) => {
     console.log(cyan('Watching ...'));
 
     chokidar.watch(pages).on('all', _.debounce((event, path) => {
-      if (event === 'change'|| event === 'add') {
+      if (event === 'change' || event === 'add') {
         // console.log(yellow('Change detected'), pages, relative(path));
         if (path === `${pages}/main.tsx`) {
-          app.run(`${BUILD}:startup`, config, output, pages);
+          !config['no-startup'] && app.run(`${BUILD}:startup`, config, output, pages, live_reload);
         } else {
           process_file(path, { pages, output });
         }
       }
-    },500));
+    }, 500));
   } else {
     console.log(cyan('Build done.'))
   }
