@@ -57,7 +57,7 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages, liv
 const get_element = () => {
   const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
   const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
-  if (!el) console.error(\`window['app-element'] not defined\`);
+  if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
   return el || document.body;
 }
 window.onload = () => {
@@ -132,7 +132,7 @@ main();
 
   writeFileSync(tsx_file, main);
   app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
-  console.log(green('Created File'), 'main.js', magenta(`(live reload: ${live_reload})`));
+  console.log(green('Created File'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
 });
 
 const ensure = dir => {
