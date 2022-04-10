@@ -45,4 +45,14 @@ program
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .action(server);
 
+program
+  .command('dev [source]')
+  .description('launch development server')
+  .option('-o, --output [output]', 'output directory', 'public')
+  .option('-p, --pages [pages]', 'pages directory', 'pages')
+  .action((source, options) => {
+    build(source, { ...options, watch: true });
+    server(source, options);
+  });
+
 program.parseAsync(process.argv);

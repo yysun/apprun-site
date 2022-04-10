@@ -1,9 +1,7 @@
 To create a new AppRun Site:
 
   ```bash
-  npx apprun-site init [project-name]
-  cd [project-name]
-  npm install
+  npm init apprun-app [project-name]
   ```
 
 An AppRun-Site project has the following structure:
@@ -22,6 +20,6 @@ You can add pages to the directory `pages`; they can be HTML files, markdown fil
 
 Then, you can use:
 
-* _npm start_ to start the dev server
+* _npm start_ or _npm run dev_ to start the dev server
 * _npm run build_ to build for production
 * _npm run render_ to build a static website
