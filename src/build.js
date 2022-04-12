@@ -29,9 +29,8 @@ app.on(PRE_BUILD, ({ source, clean, output }) => {
 
   const conf = `${source}/apprun-site.yml`;
   config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : {};
-  config.site_url = config.site_url || '/';
-  config.site_url.endsWith('/') && (config.site_url = config.site_url.slice(0, -1));
-
+  config['site_url'] = config['site_url'] || config['site-url'] || '/';
+  config['site_url'].endsWith('/') && (config['site_url'] = config['site_url'].slice(0, -1));
 
   if (clean) {
     rmSync(output, { recursive: true, force: true });

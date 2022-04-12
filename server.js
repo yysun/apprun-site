@@ -14,7 +14,7 @@ import _fetch from 'isomorphic-fetch';
 
 import { app as apprun, Component, safeHTML} from 'apprun/dist/apprun.esm.js';
 
-export default function (source, { output, pages }) {
+export default function (source, { output, pages, no_ssr }) {
 
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
   output = join(source, output || 'public');
@@ -22,9 +22,9 @@ export default function (source, { output, pages }) {
   const conf = `${source}/apprun-site.yml`;
   const config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : {};
   const port = config.port || 8080;
+  no_ssr = no_ssr || config['no-ssr'];
 
   const app = express();
-  const html = readFileSync(`${pages}/index.html`, 'utf8');
 
   app.get('/api/*', async (req, res, next) => {
     const run_api = async (js_file) => {
@@ -62,7 +62,7 @@ export default function (source, { output, pages }) {
   });
 
   app.get('*', async (req, res, next) => {
-
+    const html = readFileSync(`${pages}/index.html`, 'utf8');
     const dom = new JSDOM(html);
     const win = global.window = dom.window;
     const document = global.document = dom.window.document;
@@ -110,6 +110,8 @@ export default function (source, { output, pages }) {
       console.log(cyan(`Rendering ${path}`));
       if (existsSync(html_file)) {
         res.sendFile(`${path}index.html`, { root: output });
+      } else if (no_ssr) {
+        res.sendFile(`${pages}/index.html`);
       } else {
         if (existsSync(main_file)) {
           console.log(green(`\t ${main_file}`));
@@ -125,7 +127,6 @@ export default function (source, { output, pages }) {
           } else if (existsSync(js_file)) {
             await render(js_file, route, paths.slice(i));
           }
-
         }
         res.send(document.documentElement.outerHTML);
       }
@@ -149,5 +150,6 @@ export default function (source, { output, pages }) {
     }, 300));
 
     console.log(yellow(`Your app is listening on http://localhost:${port}`));
+    console.log(`SSR ${ no_ssr ? 'disabled': 'enabled' }.`);
   });
 }

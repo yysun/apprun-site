@@ -43,6 +43,7 @@ program
   .description('launch development server')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
+  .option('-n, --no_ssr', 'disable server side rendering', false)
   .action(server);
 
 program
@@ -50,6 +51,7 @@ program
   .description('launch development server')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
+  .option('-n, --no_ssr', 'disable server side rendering', false)
   .action((source, options) => {
     build(source, { ...options, watch: true, live_reload: true });
     server(source, options);
