@@ -1,6 +1,6 @@
 // @ts-check
 
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, relative } from 'path';
 import { load } from 'js-yaml';
 import chalk from 'chalk';
@@ -12,7 +12,7 @@ import _ from 'lodash';
 import { JSDOM } from 'jsdom';
 import _fetch from 'isomorphic-fetch';
 
-import { app as apprun, Component, safeHTML} from 'apprun/dist/apprun.esm.js';
+import { app as apprun, Component, safeHTML } from 'apprun/dist/apprun.esm.js';
 
 export default function (source, { output, pages, no_ssr }) {
 
@@ -28,7 +28,8 @@ export default function (source, { output, pages, no_ssr }) {
 
   app.get('/api/*', async (req, res, next) => {
     const run_api = async (js_file) => {
-      const module = await import(js_file);
+      const { mtimeMs } = statSync(js_file);
+      const module = await import(`${js_file}?${mtimeMs}`);
       const exp = module.default;
       console.log(blue(`\t${js_file}`));
       exp(req, res, next);
@@ -84,7 +85,8 @@ export default function (source, { output, pages, no_ssr }) {
 
     const render = async (js_file, route, params) => {
       try {
-        const module = await import(js_file);
+        const { mtimeMs } = statSync(js_file);
+        const module = await import(`${js_file}?${mtimeMs}`);
         const exp = module.default;
         if (exp.prototype && exp.prototype.constructor.name === exp.name) {
           console.log(green(`\t ${js_file}`));
@@ -150,6 +152,6 @@ export default function (source, { output, pages, no_ssr }) {
     }, 300));
 
     console.log(yellow(`Your app is listening on http://localhost:${port}`));
-    console.log(`SSR ${ no_ssr ? 'disabled': 'enabled' }.`);
+    console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
   });
 }
