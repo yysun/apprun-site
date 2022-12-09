@@ -64,7 +64,10 @@ window.onload = () => {
   const add_component = (component, site_url) => {
     let [path, file] = component;
     app.once(path, async (...p) => {
-      const module = await import(\`\${site_url}\${file}\`);
+      const timestamp = Date.now();
+      ${live_reload ? `
+        const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
+      const module = await import(\`\${site_url}\${file}\`);`}
       const exp = module.default;
       if (exp.prototype && exp.prototype.constructor.name === exp.name) {
         const component = new module.default();
