@@ -40,15 +40,18 @@ program
 
 program
   .command('serv [source]')
-  .description('launch development server')
+  .description('launch development server, watch and no live reload')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-n, --no_ssr', 'disable server side rendering', false)
-  .action(server);
+  .action((source, options) => {
+    build(source, { ...options, watch: true, live_reload: false });
+    server(source, options);
+  });
 
 program
   .command('dev [source]')
-  .description('launch development server')
+  .description('launch development server, watch and live reload')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-n, --no_ssr', 'disable server side rendering', false)
