@@ -14,14 +14,9 @@ import _fetch from 'isomorphic-fetch';
 
 import { app as apprun, Component, safeHTML } from 'apprun/dist/apprun.esm.js';
 
-export default function (source, { output, pages, no_ssr }) {
-
-  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
-  output = join(source, output || 'public');
-  pages = join(source, pages || 'pages');
-  const conf = `${source}/apprun-site.yml`;
-  const config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : {};
-  const port = config.port || 8080;
+export default function (source, config) {
+  let { output, no_ssr, live_reload, port } = config;
+  port = port || 8080;
   no_ssr = no_ssr || config['no-ssr'];
 
   const app = express();
@@ -63,7 +58,7 @@ export default function (source, { output, pages, no_ssr }) {
   });
 
   app.get('*', async (req, res, next) => {
-    const html = readFileSync(`${pages}/index.html`, 'utf8');
+    const html = readFileSync(`${output}/index.html`, 'utf8');
     const dom = new JSDOM(html);
     const win = global.window = dom.window;
     const document = global.document = dom.window.document;
@@ -113,7 +108,7 @@ export default function (source, { output, pages, no_ssr }) {
       if (existsSync(html_file)) {
         res.sendFile(`${path}index.html`, { root: output });
       } else if (no_ssr) {
-        res.sendFile(`${pages}/index.html`);
+        res.sendFile(`${output}/index.html`);
       } else {
         if (existsSync(main_file)) {
           console.log(green(`\t ${main_file}`));
@@ -136,22 +131,26 @@ export default function (source, { output, pages, no_ssr }) {
   });
 
   const server = app.listen(port, function () {
-    const wss = new WebSocket.Server({ server });
-    const send = data => {
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          // console.log(green(`\tWS Sending ${data}`));
-          client.send(data);
-        }
-      });
-    }
-    chokidar.watch(output).on('all', _.debounce((event, path) => {
-      if (event === 'change' || event === 'add') {
-        send(JSON.stringify({ event, path: '/' + relative(output, path) }));
+    if (live_reload) {
+      const wss = new WebSocket.Server({ server });
+      const send = data => {
+        wss.clients.forEach(function each(client) {
+          if (client.readyState === WebSocket.OPEN) {
+            // console.log(green(`\tWS Sending ${data}`));
+            client.send(data);
+          }
+        });
       }
-    }, 300));
+      chokidar.watch(output).on('all', _.debounce((event, path) => {
+        if (event === 'change' || event === 'add') {
+          send(JSON.stringify({ event, path: '/' + relative(output, path) }));
+        }
+      }, 300));
+    }
 
     console.log(yellow(`Your app is listening on http://localhost:${port}`));
+    console.log(yellow(`Serving from:${output}`));
     console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
+    console.log(`Live reload ${!live_reload ? 'disabled' : 'enabled'}.`);
   });
 }

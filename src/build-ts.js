@@ -10,7 +10,7 @@ import { BUILD } from './events.js';
 const routes = [];
 
 app.on(`${BUILD}:component`, (content, target, output) => {
-  const html = content.content.replace(/\`/g, '\\`');
+  const html = content.replace(/\`/g, '\\`');
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
@@ -105,7 +105,6 @@ function reload_css(path) {
     const elem = sheets[i], parent = elem.parentElement;
     if (elem.href === path) {
       parent.removeChild(elem);
-      parent.appendChild(elem);
       break;
     }
   }

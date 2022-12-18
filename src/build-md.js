@@ -1,20 +1,22 @@
+import { readFileSync } from 'fs';
 import _md from 'markdown-it';
-import a from 'markdown-it-anchor';
-import b from 'markdown-it-table-of-contents';
-import c from 'markdown-it-front-matter';
-import { load } from 'js-yaml';
 import { BUILD } from './events.js';
 
-const md = _md ({ html: true });
-md.use(a);
-md.use(b);
+app.on('build:markdown', text => {
+  const md = _md({ html: true });
+  return text ? md.render(text) : '';
+});
 
-app.on(`${BUILD}.md`, text => {
-  let page = {};
-  md.use(c, function (fm) {
-    page = fm ? load(fm) : {};
-  });
+app.on('build:html', text => text);
 
-  const content = md.render(text);
-  return { ...page, content };
+app.on(`${BUILD}.md`, async (file) => {
+  const text = readFileSync(file).toString();
+  const all_content = await app.query('build:markdown', text);
+  return all_content[all_content.length - 1];
+});
+
+app.on(`${BUILD}.html`, async (file) => {
+  const text = readFileSync(file).toString();
+  const all_content = await app.query('build:html', text);
+  return all_content[all_content.length - 1];
 });

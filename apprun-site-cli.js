@@ -31,8 +31,10 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-n, --no_ssr', 'disable server side rendering', false)
+  .option('-w, --watch', 'watch the directory', true)
+  .option('-l, --live_reload', 'enable live reload', true)
   .action((source, options) => {
-    build(source, { ...options, watch: true, live_reload: true });
+    build(source, options);
     server(source, options);
   });
 

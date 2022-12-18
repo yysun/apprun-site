@@ -3,7 +3,6 @@ import { existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync, wri
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
 import _ from 'lodash';
-import { load } from 'js-yaml';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
@@ -12,25 +11,28 @@ import { app } from 'apprun/dist/apprun.esm.js';
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
-// const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
-const Copy_Types = ['.json', '.css', '.ico'];
+const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
 
-
-const last = arr => arr.reduce((acc, curr) => curr ? curr : acc);
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 };
 
-let relative, config;
+let relative, copy_files;
 
-app.on(PRE_BUILD, ({ source, clean, output }) => {
+export const should_ignore = (src, dest) => {
+  if (!existsSync(dest)) return false;
+  const src_stat = statSync(src);
+  const dest_stat = statSync(dest);
+  return src_stat.mtimeMs <= dest_stat.mtimeMs;
+}
+
+app.on(PRE_BUILD, ({ source, clean, output, assets }) => {
 
   relative = fname => fname.replace(source, '');
 
-  const conf = `${source}/apprun-site.yml`;
-  config = existsSync(conf) ? load(readFileSync(conf, 'utf-8')) : {};
-  config['site_url'] = config['site_url'] || config['site-url'] || '/';
-  config['site_url'].endsWith('/') && (config['site_url'] = config['site_url'].slice(0, -1));
+  Array.isArray(assets) && Copy_Types.push(...assets);
+  copy_files = [...new Set(Copy_Types)];
+
 
   if (clean) {
     rmSync(output, { recursive: true, force: true });
@@ -38,10 +40,11 @@ app.on(PRE_BUILD, ({ source, clean, output }) => {
   }
 });
 
-app.on(POST_BUILD, async ({ watch, render, output, pages, live_reload }) => {
+app.on(POST_BUILD, async (config) => {
+  const { watch, render, output, pages, live_reload } = config;
+
   !config['no-startup'] && app.run(`${BUILD}:startup`, config, output, pages, live_reload);
   render && await app.query(`${BUILD}:render`, config, output);
-  console.log(cyan('Build done.'));
 
   if (watch) {
     console.log(cyan('Watching ...'));
@@ -61,7 +64,8 @@ app.on(POST_BUILD, async ({ watch, render, output, pages, live_reload }) => {
   }
 })
 
-app.on(BUILD, async ({ pages, output }) => {
+app.on(BUILD, async (config) => {
+  const { pages } = config
   console.log(cyan('Build from'), relative(pages));
   function walkDir(dir, callback) {
     readdirSync(dir).forEach(f => {
@@ -74,51 +78,60 @@ app.on(BUILD, async ({ pages, output }) => {
       isDirectory ? walkDir(dirPath, callback) : callback(join(dir, f));
     });
   }
-  walkDir(pages, file => process_file(file, { pages, output }));
+  walkDir(pages, file => process_file(file, config));
 });
 
-async function process_file(file, { pages, output }) {
+
+async function process_file(file, config) {
+  const { pages, output, plugins } = config;
   const dir = dirname(file).replace(pages, '');
   const name = basename(file).replace(/\.[^/.]+$/, '');
   const ext = extname(file);
-  // const event = content_events?.[ext] || ext;
   const event = ext;
   const pub_dir = join(output, dir);
   ensure(pub_dir);
-
   const js_file = join(output, dir, name) + '.js';
 
-  // console.log('Page: ', file, '=>', event);
-  const text = readFileSync(file).toString();
-
-  if (HTML_Types.indexOf(ext) >= 0 && text.indexOf('<html') >= 0) {
-    const new_file = join(pub_dir, name + '.html');
-    writeFileSync(new_file, text);
-    console.log(cyan('Copied HTML'), relative(new_file));
-    return;
-  }
-
-  if (Content_Types.indexOf(ext) >= 0) {
-    const all_content = await app.query(`${BUILD}${event}`, text);
-    const content = last(all_content);
-    // console.log(content);
-    if (!content) {
-      console.log(red('Content load failed'));
-      return;
+  if (HTML_Types.indexOf(ext) >= 0) {
+    const text = readFileSync(file).toString();
+    if (text.indexOf('<html') >= 0) {
+      const new_file = join(pub_dir, name + '.html');
+      if (!should_ignore(file, new_file)) {
+        writeFileSync(new_file, text);
+        console.log(cyan('Copied HTML'), relative(new_file));
+      }
     }
-    app.run(`${BUILD}:component`, content, js_file, output);
-    app.run(`${BUILD}:add-route`, dir, js_file, output);
-    console.log(cyan('Created Component'), relative(js_file));
-  } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    app.run(`${BUILD}:esbuild`, file, js_file, output);
-    console.log(cyan('Compiled JavaSript'), relative(js_file));
-    app.run(`${BUILD}:add-route`, dir, js_file, output);
-  } else if (Copy_Types.indexOf(ext) >= 0) {
+  } else if (copy_files.indexOf(ext) >= 0) {
     const dest = join(pub_dir, name) + ext;
-    copyFileSync(file, dest);
-    console.log(cyan('Copied File'), relative(dest));
+    if (!should_ignore(file, dest)) {
+      copyFileSync(file, dest);
+      console.log(cyan('Copied File'), relative(dest));
+    }
+  } else if (Content_Types.indexOf(ext) >= 0) {
+
+    if (!should_ignore(file, js_file)) {
+      const all_content = await app.query(`${BUILD}${event}`, file, js_file, config);
+      const content = all_content[all_content.length - 1];
+      if (!content) {
+        console.log(red('Content load failed'));
+      } else {
+        app.run(`${BUILD}:component`, content, js_file, output);
+        app.run(`${BUILD}:add-route`, dir, js_file, output);
+        console.log(cyan('Created Component'), relative(js_file));
+      }
+    }
+  } else if (Esbuild_Types.indexOf(ext) >= 0) {
+    if (!should_ignore(file, js_file)) {
+      app.run(`${BUILD}:esbuild`, file, js_file, output);
+      console.log(cyan('Compiled JavaSript'), relative(js_file));
+      app.run(`${BUILD}:add-route`, dir, js_file, output);
+    }
   } else {
     console.log(magenta('Unknown file type'), relative(file));
+  }
+
+  if (plugins && plugins[event]) {
+    await plugins[event](file, config);
   }
 }
 
