@@ -1,32 +1,8 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import degit from 'degit';
 import build from './index.js';
 import server from './server.js';
-
-program
-  .command('init')
-  .description('initialize a new app')
-  .argument('[targetDir]', 'target directory (default: current directory)')
-  .option('-r, --repo [repo]', 'repository, default: apprunjs/apprun-starter', 'apprunjs/apprun-starter')
-  .action((targetDir = '.', { repo }) => {
-
-  console.log('Cloning from: ', repo);
-    const emitter = degit(repo, {
-      cache: false,
-      force: false,
-      verbose: true
-    });
-    emitter.on('info', info => console.log(info.message));
-    emitter.clone(targetDir || '').then(() => {
-      console.log('Project cloned to: ', targetDir);
-      console.log('Please go to the project directory and run:')
-      console.log('\tnpm install')
-      console.log('\tnpm start')
-      console.log('And then, you can visit the project at: http://localhost:8080');
-    });
-  });
 
 program
   .command('build [source]')
@@ -39,13 +15,13 @@ program
   .action(build);
 
 program
-  .command('serv [source]')
-  .description('launch development server, watch and no live reload')
+  .command('serve [source]')
+  .description('launch development server, live reload is optional')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-n, --no_ssr', 'disable server side rendering', false)
+  .option('-l, --live_reload', 'enable live reload', false)
   .action((source, options) => {
-    build(source, { ...options, watch: true, live_reload: false });
     server(source, options);
   });
 
