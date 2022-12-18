@@ -1,5 +1,7 @@
 //@ts-check
 import { existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync, writeFileSync, copyFileSync } from 'fs';
+import { readdir, stat } from 'fs/promises';
+
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
 import _ from 'lodash';
@@ -67,22 +69,22 @@ app.on(POST_BUILD, async (config) => {
 app.on(BUILD, async (config) => {
   const { pages } = config
   console.log(cyan('Build from'), relative(pages));
-  function walkDir(dir, callback) {
-    readdirSync(dir).forEach(f => {
-      let dirPath = join(dir, f);
-      let isDirectory = statSync(dirPath).isDirectory();
-      if (f.startsWith('_')) {
-        console.log(gray('Skip'), gray(relative(dirPath)));
-        return;
-      }
-      isDirectory ? walkDir(dirPath, callback) : callback(join(dir, f));
-    });
+
+  async function walk(dir) {
+    let files = await readdir(dir);
+    await Promise.all(files.map(async file => {
+      const filePath = join(dir, file);
+      const stats = await stat(filePath);
+      if (stats.isDirectory()) return walk(filePath);
+      else if (stats.isFile()) return process_file(filePath, config);
+    }));
   }
-  walkDir(pages, file => process_file(file, config));
+  await walk(pages);
 });
 
 
 async function process_file(file, config) {
+
   const { pages, output, plugins } = config;
   const dir = dirname(file).replace(pages, '');
   const name = basename(file).replace(/\.[^/.]+$/, '');
@@ -116,16 +118,17 @@ async function process_file(file, config) {
         console.log(red('Content load failed'));
       } else {
         app.run(`${BUILD}:component`, content, js_file, output);
-        app.run(`${BUILD}:add-route`, dir, js_file, output);
         console.log(cyan('Created Component'), relative(js_file));
       }
     }
+    app.run(`${BUILD}:add-route`, dir, js_file, output);
+
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file)) {
       app.run(`${BUILD}:esbuild`, file, js_file, output);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
-      app.run(`${BUILD}:add-route`, dir, js_file, output);
     }
+    app.run(`${BUILD}:add-route`, dir, js_file, output);
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }
