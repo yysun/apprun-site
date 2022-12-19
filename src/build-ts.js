@@ -1,4 +1,3 @@
-import { app } from 'apprun/dist/apprun.esm.js';
 import { dirname, join } from 'path';
 import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync } from 'fs';
 import chalk from 'chalk';
@@ -54,13 +53,12 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_
   // copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   const main = `import app from 'apprun';
-const get_element = () => {
-  const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
-  const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
-  if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
-  return el || document.body;
-}
-window.onload = async () => {
+  const get_element = () => {
+    const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
+    const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
+    if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
+    return el || document.body;
+  }
   const add_component = (component, site_url) => {
     return new Promise((resolve, reject) => {
       try {
@@ -93,6 +91,7 @@ window.onload = async () => {
       }
     });
   }
+window.onload = async () => {
   const components = ${JSON.stringify(routes)};
   await Promise.all(components.map(item => add_component(item, '${site_url}')));
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});

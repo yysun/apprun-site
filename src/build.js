@@ -8,7 +8,6 @@ import _ from 'lodash';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
-import { app } from 'apprun/dist/apprun.esm.js';
 
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];
@@ -57,6 +56,8 @@ export default async (config) => {
     render && await app.query(`${BUILD}:render`, config, output);
     console.log(cyan('Build done.'))
   }
+
+  await run_build();
 
   const { source, watch } = config;
 

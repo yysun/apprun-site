@@ -32,6 +32,7 @@ program
 program
   .command('dev [source]')
   .description('launch development server, watch and live reload')
+  .option('-c, --clean', 'clean the output directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-n, --no_ssr', 'disable server side rendering', false)
