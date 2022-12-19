@@ -1,8 +1,7 @@
 // @ts-check
 
 import { readFileSync, existsSync, statSync } from 'fs';
-import { join, relative } from 'path';
-import { load } from 'js-yaml';
+import { relative } from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
@@ -87,11 +86,7 @@ export default function (source, config) {
           console.log(green(`\t ${js_file}`));
           const component = new module.default();
           component.mount && component.mount(get_element(), { route });
-          if (component.state instanceof Promise) {
-            const state = await component.state;
-            component.state = state;
-          }
-          component.run && component.run(route, ...params);
+          component.run && await component.run(route, ...params);
           component.unmount && component.unmount();
         } else if (typeof exp === 'function') {
           const vdom = await exp(...params);
@@ -107,12 +102,9 @@ export default function (source, config) {
       res.sendFile(path, { root: output });
     } else {
       if (!path.endsWith('/')) path += '/';
-      const html_file = `${output}${path}index.html`;
       const main_file = `${output}/main.js`;
       console.log(cyan(`Rendering ${path}`));
-      if (existsSync(html_file)) {
-        res.sendFile(`${path}index.html`, { root: output });
-      } else if (no_ssr) {
+      if (no_ssr) {
         res.sendFile(`${output}/index.html`);
       } else {
         if (existsSync(main_file)) {
@@ -120,14 +112,16 @@ export default function (source, config) {
           await render(main_file, '/', []);
         }
         const paths = path.split('/');
-        for (let i = paths.length - 1; i > 1; i--) {
+        for (let i = paths.length - 1; i > 0; i--) {
           const route = '/' + paths.slice(1, i).join('/');
           const js_index = `${output}${route}/index.js`;
           const js_file = `${output}${route}.js`;
           if (existsSync(js_index)) {
             await render(js_index, route, paths.slice(i));
+            break;
           } else if (existsSync(js_file)) {
             await render(js_file, route, paths.slice(i));
+            break;
           }
         }
         res.send(document.documentElement.outerHTML);
