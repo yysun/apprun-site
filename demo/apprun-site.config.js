@@ -12,6 +12,11 @@ export default {
 //   md.use(b);
 // });
 
-// async function tailwindcss (file, { output }) {
-//   console.log('!!!');
-// }
+// app.on('pre-build', async (config) => {
+//   console.log('pre-build!!!')
+
+// });
+
+// app.on('post-build', async (config) => {
+//   console.log('post-build!!!')
+// });

@@ -43,7 +43,7 @@ app.on(`${BUILD}:add-route`, (route, target, output) => {
   }
 });
 
-app.on(`${BUILD}:startup`, ({ site_url, route, app_element }, output, pages, live_reload) => {
+app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_reload }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
