@@ -9,7 +9,7 @@
     "test": "",
     "dev": "node apprun-site-cli dev demo",
     "start": "node apprun-site-cli dev demo",
-    "start:server": "node apprun-site-cli serv demo",
+    "start:server": "node apprun-site-cli serve demo",
     "start:watch": "node apprun-site-cli build demo --watch",
     "build": "node apprun-site-cli build demo",
     "render": "node apprun-site-cli build demo --render"
@@ -40,7 +40,6 @@
     "jsdom": "^20.0.3",
     "lodash": "^4.17.21",
     "markdown-it": "^13.0.1",
-    "node-fetch": "^3.3.0",
     "puppeteer": "^19.4.0",
     "ws": "^8.11.0"
   },

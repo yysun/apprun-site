@@ -1,8 +1,9 @@
-To create a new AppRun Site:
+To create a new AppRun Site, run `npm create apprun-app` command and select the `AppRun Site` template.
 
-  ```bash
-  npm init apprun-app [project-name]
-  ```
+```sh
+npm init apprun-app [my-app]
+```
+
 
 An AppRun-Site project has the following structure:
 
@@ -12,7 +13,6 @@ An AppRun-Site project has the following structure:
   /index.html       <- index page
   /index.md         <- home page
   /main.tsx         <- start up code (registers web component and renders the layout)
-/components         <- optional
 /api                <- optional
 ```
 

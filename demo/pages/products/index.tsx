@@ -19,7 +19,7 @@ export default class extends Component {
 export default class extends Component {
 
   state = async () => {
-    const url = '/api/products'; 
+    const url = '/api/products';
     const req = await fetch(url);
     const json = await req.json();
     return { products: json };
@@ -43,8 +43,7 @@ export default class extends Component {
   </div>;
 
   update = {
-    '/products': async (state, id) => {
-      state = await Promise.resolve(state);
+    '/products': (state, id) => {
       return ({ ...state, id: parseInt(id) })
     }
   };
