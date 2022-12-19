@@ -87,7 +87,12 @@ export default function (source, config) {
           console.log(green(`\t ${js_file}`));
           const component = new module.default();
           component.mount && component.mount(get_element(), { route });
+          if (component.state instanceof Promise) {
+            const state = await component.state;
+            component.state = state;
+          }
           component.run && component.run(route, ...params);
+          component.unmount && component.unmount();
         } else if (typeof exp === 'function') {
           const vdom = await exp(...params);
           vdom && apprun.render(get_element(), vdom);
@@ -116,9 +121,9 @@ export default function (source, config) {
         }
         const paths = path.split('/');
         for (let i = paths.length - 1; i > 1; i--) {
-          const route = paths.slice(1, i).join('/');
-          const js_index = `${output}/${route}/index.js`;
-          const js_file = `${output}/${route}.js`;
+          const route = '/' + paths.slice(1, i).join('/');
+          const js_index = `${output}${route}/index.js`;
+          const js_file = `${output}${route}.js`;
           if (existsSync(js_index)) {
             await render(js_index, route, paths.slice(i));
           } else if (existsSync(js_file)) {
