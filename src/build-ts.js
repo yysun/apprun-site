@@ -60,29 +60,41 @@ const get_element = () => {
   if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
   return el || document.body;
 }
-window.onload = () => {
+window.onload = async () => {
   const add_component = (component, site_url) => {
-    let [path, file] = component;
-    app.once(path, async (...p) => {
-      const timestamp = Date.now();
-      ${live_reload ? `
-        const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
-      const module = await import(\`\${site_url}\${file}\`);`}
-      const exp = module.default;
-      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-        const component = new module.default();
-        component.mount(get_element(), { route: path });
-      } else {
-        app.on(path, async (...p) => {
-          const vdom = await exp(...p);
-          app.render(get_element(), vdom);
+    return new Promise((resolve, reject) => {
+      try {
+        let [path, file] = component;
+        app.once(path, async (...p) => {
+          const timestamp = Date.now();
+          ${live_reload ? `
+            const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
+          const module = await import(\`\${site_url}\${file}\`);`}
+          const exp = module.default;
+          if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+            const component = new module.default();
+            component.mount(get_element(), { route: path });
+            if (component.state instanceof Promise) {
+              component.state = await component.state;
+            }
+          } else {
+            app.on(path, async (...p) => {
+              const vdom = await exp(...p);
+              app.render(get_element(), vdom);
+            });
+          }
+          app.route([path, ...p].join('/'));
+          resolve(component);
         });
       }
-      app.route([path, ...p].join('/'));
+      catch (e) {
+        console.error(e);
+        reject(e);
+      }
     });
-  };
+  }
   const components = ${JSON.stringify(routes)};
-  components.forEach(item => add_component(item, '${site_url}'));
+  await Promise.all(components.map(item => add_component(item, '${site_url}')));
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
 };
 ${!route_hash ? `
@@ -129,7 +141,7 @@ ${init ? `import main from '${main_file}';
 export default main;
 main();
 ` :
-'export default () => {}'}
+      'export default () => {}'}
 `;
 
   writeFileSync(tsx_file, main);
