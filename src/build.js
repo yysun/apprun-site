@@ -13,7 +13,8 @@ import { app } from 'apprun/dist/apprun.esm.js';
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
-const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
+const Copy_Types = ['.png', '.gif', '.json', '.svg', '.jpg', '.jpeg', '.ico'];
+const Css_Types = ['.css'];
 
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -129,6 +130,12 @@ async function process_file(file, config) {
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
     app.run(`${BUILD}:add-route`, dir, js_file, output);
+  } else if (Css_Types.indexOf(ext) >= 0) {
+    const css_file = join(output, dir, name) + '.css';
+    if (!should_ignore(file, css_file)) {
+      app.run(`${BUILD}:css`, file, css_file, config);
+      console.log(cyan('Compiled CSS'), relative(css_file));
+    }
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }

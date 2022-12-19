@@ -3,6 +3,7 @@ import { app } from 'apprun/dist/apprun.esm.js';
 import './src/build.js';
 import './src/build-md.js';
 import './src/build-ts.js';
+import './src/build-css.js';
 
 export default {
   site_url: '/',
