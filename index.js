@@ -1,7 +1,6 @@
 //@ts-check
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { app } from 'apprun/dist/apprun.esm.js';
 import { PRE_BUILD, BUILD, POST_BUILD } from './src/events.js';
 import default_options from './config.js';
 import run_build from './src/build.js';

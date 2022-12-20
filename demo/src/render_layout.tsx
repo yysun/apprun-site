@@ -11,8 +11,9 @@ export const add_css = url => {
 export const add_js = (url, type = null) => {
   const link = document.createElement('script') as HTMLScriptElement;
   link.src = url;
+  link.defer = true;
   (type) ? link.type = type : null;
-  document.body.appendChild(link);
+  document.head.appendChild(link);
 };
 
 export default ({ Layout, styles = null, scripts = null, body_class = null }) => {

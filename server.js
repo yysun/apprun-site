@@ -10,7 +10,6 @@ import chokidar from 'chokidar';
 import _ from 'lodash';
 import { JSDOM } from 'jsdom';
 import _fetch from 'isomorphic-fetch';
-
 import { app as apprun, Component, safeHTML } from 'apprun/dist/apprun.esm.js';
 
 export default function (source, config) {
