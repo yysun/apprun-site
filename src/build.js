@@ -53,17 +53,18 @@ export default async (config) => {
   }
 
   const run_build = async () => {
+    const start_time = Date.now();
     await walk(pages);
     !config['no-startup'] && app.run(`${BUILD}:startup`, config);
     await app.query(`${BUILD}:css`, config);
-    render && await app.query(`${BUILD}:render`, config, output);
-    console.log(cyan('Build done.'))
+    render && await app.query(`${BUILD}:render`, config);
+    const elapsed = Date.now() - start_time;
+    console.log(cyan(`Build done in ${elapsed} ms.`))
   }
 
   await run_build();
 
   const { source, watch } = config;
-
   if (watch) {
     console.log(cyan('Watching ...'));
     const all_types = [...HTML_Types, ...Content_Types, ...Esbuild_Types, ...copy_files];
@@ -76,11 +77,7 @@ export default async (config) => {
         }
       }
     }, 500));
-  } else {
-    await run_build();
   }
-
-
 };
 
 async function process_file(file, config) {

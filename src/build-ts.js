@@ -3,8 +3,8 @@ import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSyn
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from 'esbuild';
-import puppeteer from 'puppeteer';
 import { BUILD } from './events.js';
+import render from './render.js';
 
 const routes = [];
 
@@ -136,42 +136,25 @@ main();
 
   writeFileSync(tsx_file, main);
   app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
-  console.log(green('Created File'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
+  console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
 });
 
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 };
 
-const write_html = (file, content, config) => {
-  ensure(dirname(file));
-  // content = content.replace('<head>', `<head><base href="${config.site_url}" />`);
-  // content = content.replace('href="/style.css"', `href="${config.site_url}/style.css"`);
-  writeFileSync(file, content);
-  console.log('\t', green(file));
-};
+app.on(`${BUILD}:render`, async (config) => {
 
-app.on(`${BUILD}:render`, async (config, output) => {
-
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  const port = config['dev-server'] && config['dev-server']['port'] || 8080;
-  const dev_server = `http://localhost:${port}`;
-
-  console.log(cyan('Creating Static Files from: ', dev_server));
-
+  const { output, relative } = config;
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
 
   for (let i = 0; i < pages.length; i++) {
     const route = pages[i];
     const html_file = join(output, route, 'index.html');
-    if (existsSync(html_file)) rmSync(html_file);
-
-    await page.goto(`${dev_server}${route}`, { waitUntil: 'networkidle2' });
-    const content = await page.evaluate(() => document.querySelector('*').outerHTML);
-    write_html(html_file, content, config);
+    console.log(magenta('Creating File'), relative(html_file));
+    const content = await render(route + '/', config);
+    writeFileSync(html_file, content, { flag: 'w' });
   };
 
-  await browser.close();
 });

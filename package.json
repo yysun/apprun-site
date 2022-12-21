@@ -40,9 +40,6 @@
     "jsdom": "^20.0.3",
     "lodash": "^4.17.21",
     "markdown-it": "^13.0.1",
-    "postcss": "^8.4.20",
-    "postcss-load-config": "^4.0.1",
-    "puppeteer": "^19.4.0",
     "ws": "^8.11.0"
   },
   "jest": {
