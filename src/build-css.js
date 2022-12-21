@@ -22,26 +22,28 @@ app.on(`${BUILD}:tailwind`, async ({ source, output, relative }) => {
 });
 
 app.on(`${BUILD}:css`, async ({ source, pages, output, relative }) => {
-  const postcss_config = `${source}/postcss.config.js`;
-  if (!existsSync(postcss_config)) return false;
+  try {
+    const css_file = `${output}/style.css`;
+    const css = readFileSync(`${pages}/style.css`, 'utf8');
+    const from = `${pages}/style.css`;
+    const to = css_file;
+    const context = { from, to, cwd: source, map: true }
 
-  const css_file = `${output}/style.css`;
-  const css = readFileSync(`${pages}/style.css`, 'utf8');
-  const from = `${pages}/style.css`;
-  const to = css_file;
-  const context = { from, to, cwd: source, map: true }
+    const { plugins, options } = await (await import('postcss-load-config'))
+      .default(context, source);
 
-  const { plugins, options } = await (await import('postcss-load-config'))
-    .default(context, css_file);
+    const result = await (await import('postcss'))
+      .default(plugins).process(css, options);
 
-  const result = await (await import('postcss'))
-    .default(plugins).process(css, options);
+    for (const err of result.warnings()) {
+      console.warn(err.toString());
+    }
 
-  for (const err of result.warnings()) {
-    console.warn(err.toString());
+    writeFileSync(css_file, result.css);
+    console.log(cyan('Compiled CSS with PostCss'), relative(css_file));
+
+  } catch (err) {
+    console.log(blue('CSS build: '), err.message);
   }
-
-  writeFileSync(css_file, result.css);
-  console.log(cyan('Compiled CSS with PostCss'), relative(css_file));
 })
 
