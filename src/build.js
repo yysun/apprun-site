@@ -9,8 +9,8 @@ import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
 
-import { App } from 'apprun/dist/apprun.esm.js';
-global['app'] = new App();
+import apprun from 'apprun';
+global['app'] = apprun.app;
 
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];

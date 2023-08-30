@@ -3,8 +3,8 @@ import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { JSDOM } from 'jsdom';
 import _fetch from 'isomorphic-fetch';
-import { app, Component, safeHTML } from 'apprun/dist/apprun.esm.js';
-
+import apprun from 'apprun';
+const { app, Component, safeHTML } = apprun;
 
 export default async (path, config) => {
   const {output } = config;
