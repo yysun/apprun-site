@@ -10,7 +10,7 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
 
 import apprun from 'apprun';
-global['app'] = apprun.app;
+const app = global['app'] = apprun['app'];
 
 const HTML_Types = ['.html', '.htm'];
 const Content_Types = ['.md', '.mdx', '.html', '.htm'];
@@ -54,6 +54,7 @@ export default async (config) => {
 
   const run_build = async () => {
     const start_time = Date.now();
+    app.run(`${BUILD}:start`);
     await walk(pages);
     !config['no-startup'] && app.run(`${BUILD}:startup`, config);
     await app.query(`${BUILD}:css`, config);

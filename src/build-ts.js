@@ -6,7 +6,11 @@ import esbuild from 'esbuild';
 import { BUILD } from './events.js';
 import render from './render.js';
 
-const routes = [];
+let routes = [];
+
+app.on(`${BUILD}:start`, (content, target, output) => {
+  routes = [];
+});
 
 app.on(`${BUILD}:component`, (content, target, output) => {
   const html = content.replace(/\`/g, '\\`');
