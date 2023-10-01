@@ -26,6 +26,7 @@ program
   .option('-l, --live_reload', 'enable live reload', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
+    build(source, options);
     server(source, options);
   });
 
