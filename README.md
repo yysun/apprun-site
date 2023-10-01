@@ -10,12 +10,10 @@ It allows you to build website pages using HTML, markdown, and AppRun components
 
 ## Quick Start
 
-To create an AppRun Site:
+To create a new AppRun Site, run `npm init apprun-app` command and select the `AppRun Site` template.
 
 ```sh
-npx apprun-site init my-apprun-site
-cd my-apprun-site
-npm install
+npm init apprun-app [my-app]
 ```
 
 An AppRun-Site project has the following structure:
@@ -34,7 +32,8 @@ You can add pages to the directory `pages`; they can be HTML files, markdown fil
 
 Then, you can use:
 
-* _npm start_ to start the dev server
+* _npm start_ to start the preview server
+* _npm run dev_ to start the dev server
 * _npm run build_ to build for production
 * _npm run render_ to build a static website
 

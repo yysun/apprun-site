@@ -10,7 +10,7 @@ import './src/build-ts.js';
 import './src/build-css.js';
 
 import apprun from 'apprun';
-const app = apprun.app;
+const app = apprun['app'];
 
 export async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
