@@ -5,6 +5,10 @@ import { build, init_options } from './index.js';
 import server from './server.js';
 
 program
+  .version('1.3.0')
+  .description('AppRun Site CLI');
+
+program
   .command('build [source]')
   .description('build site')
   .option('-c, --clean', 'clean the output directory', false)
@@ -19,7 +23,7 @@ program
 
 program
   .command('serve [source]')
-  .description('launch development server, live reload is optional')
+  .description('launch preview server, live reload is optional')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-n, --no_ssr', 'disable server side rendering', false)
