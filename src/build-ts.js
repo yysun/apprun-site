@@ -1,5 +1,5 @@
 import { dirname, join } from 'path';
-import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync } from 'fs';
+import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync, unlinkSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from 'esbuild';
@@ -19,6 +19,7 @@ app.on(`${BUILD}:component`, (content, target, output) => {
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   writeFileSync(tsx_file, component);
   app.run(`${BUILD}:esbuild`, tsx_file, target, output);
+  unlinkSync(tsx_file);
 });
 
 app.on(`${BUILD}:esbuild`, (file, target) => {
@@ -46,7 +47,7 @@ app.on(`${BUILD}:add-route`, (route, target, output) => {
   }
 });
 
-app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_reload }) => {
+app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_reload, relative }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -63,32 +64,32 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_
     if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
     return el || document.body;
   }
-  const add_component = (component, site_url) => {
-    let [path, file] = component;
+
+  const add_route = (path, module) => {
     app.once(path, async (...p) => {
-      const timestamp = Date.now();
-      ${live_reload ? `
-        const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
-      const module = await import(\`\${site_url}\${file}\`);`}
       const exp = module.default;
       if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-        const component = new module.default();
-        component.mount(get_element(), { route: path });
-        if (component.state instanceof Promise) {
-          component.state = await component.state;
+        const component2 = new module.default();
+        component2.mount(get_element(), { route: path });
+        if (component2.state instanceof Promise) {
+          component2.state = await component2.state;
         }
       } else {
-        app.on(path, async (...p) => {
-          const vdom = await exp(...p);
+        app.on(path, async (...p2) => {
+          const vdom = await exp(...p2);
           app.render(get_element(), vdom);
         });
       }
-      app.route([path, ...p].join('/'));
+      app.route([path, ...p].join("/"));
     });
-  }
+  };
+
 window.onload = async () => {
   const components = ${JSON.stringify(routes)};
-  components.map(item => add_component(item, '${site_url}'));
+  // components.map(item => add_component(item, '${site_url}'));
+  ${
+    routes.map(route => `add_route('${route[0]}', await import('.${route[1]}'));`).join('\n')
+  }
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
 };
 ${!route_hash ? `
@@ -131,10 +132,10 @@ function _init_refresh() {
 }
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
-${init ? `import main from '${main_file}';
+${init ? `import main from '..${relative(pages)}/main';
 export default main;
 main();
-` :
+`:
       'export default () => {}'}
 `;
 
