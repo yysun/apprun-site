@@ -7,7 +7,7 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
 import WebSocket from 'ws';
 import chokidar from 'chokidar';
-import _ from 'lodash';
+import debounce from 'lodash.debounce';
 import render from './src/render.js';
 
 export default function (source, config) {
@@ -87,11 +87,13 @@ export default function (source, config) {
           }
         });
       }
-      chokidar.watch(output).on('all', _.debounce((event, path) => {
-        if (event === 'change' || event === 'add') {
-          send(JSON.stringify({ event, path: '/' + relative(output, path) }));
-        }
-      }, 300));
+      chokidar.watch(output).on('all', ((event, path) => {
+        debounce(() => {
+          if (event === 'change' || event === 'add') {
+            send(JSON.stringify({ event, path: '/' + relative(output, path) }));
+          }
+        }, 300);
+      }));
     }
 
     console.log(yellow(`Your app is listening on http://localhost:${port}`));

@@ -30,21 +30,21 @@
   },
   "homepage": "https://github.com/yysun/apprun-site#readme",
   "dependencies": {
-    "apprun": "^3.31.0",
+    "apprun": "^3.33.7",
     "chalk": "5.3.0",
-    "chokidar": "^3.5.3",
-    "commander": "^11.0.0",
-    "esbuild": "^0.19.4",
-    "express": "^4.18.2",
+    "chokidar": "^3.6.0",
+    "commander": "^12.1.0",
+    "esbuild": "^0.23.1",
+    "express": "^4.19.2",
     "isomorphic-fetch": "^3.0.0",
-    "jsdom": "^22.1.0",
-    "lodash": "^4.17.21",
-    "markdown-it": "^13.0.2",
-    "postcss-load-config": "^4.0.1",
-    "ws": "^8.14.2"
+    "jsdom": "^24.1.1",
+    "lodash.debounce": "^4.0.8",
+    "markdown-it": "^14.1.0",
+    "postcss-load-config": "^6.0.1",
+    "ws": "^8.18.0"
   },
   "peerDependencies": {
-    "postcss": "^8.4.31"
+    "postcss": "^8.4.41"
   },
   "jest": {
     "transform": {

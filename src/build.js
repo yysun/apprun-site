@@ -4,7 +4,7 @@ import { readdir, stat } from 'fs/promises';
 
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
-import _ from 'lodash';
+import debounce from 'lodash.debounce';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
@@ -69,17 +69,19 @@ export default async (config) => {
   if (watch) {
     console.log(cyan('Watching ...'));
     const all_types = [...HTML_Types, ...Content_Types, ...Esbuild_Types, ...copy_files];
-    chokidar.watch(source).on('all', _.debounce((event, path) => {
-      if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
-        const ext = extname(path);
-        if (all_types.indexOf(ext) >= 0) {
-          console.log(yellow('Change detected'), relative(path));
-          run_build();
+    chokidar.watch(source).on('all', ((event, path) => {
+      debounce(() => {
+        if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
+          const ext = extname(path);
+          if (all_types.indexOf(ext) >= 0) {
+            console.log(yellow('Change detected'), relative(path));
+            run_build();
+          }
         }
-      }
-    }, 500));
+      }, 500)
+    }));
   }
-};
+}
 
 async function process_file(file, config) {
   const { pages, output, plugins } = config;
