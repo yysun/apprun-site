@@ -5,7 +5,7 @@ import { build, init_options } from './index.js';
 import server from './dev-server.js';
 
 program
-  .version('1.3.0')
+  .version('1.3.3')
   .description('AppRun Site CLI');
 
 program
