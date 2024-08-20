@@ -28,7 +28,7 @@ app.on(`${BUILD}:esbuild`, (file, target) => {
       entryPoints: [file],
       outfile: target,
       format: 'esm',
-      bundle: true,
+      bundle: false,
       sourcemap: true,
       minify: process.env.NODE_ENV === 'production'
     });
@@ -141,6 +141,7 @@ main();
 
   writeFileSync(tsx_file, main);
   app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
+  unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
 });
 
