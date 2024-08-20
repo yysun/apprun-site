@@ -10,7 +10,7 @@ export default function (file, target, options = {}) {
       format: 'esm',
       bundle: true,
       sourcemap: true,
-      minify: process.env.NODE_ENV === 'production',
+      minify: true,
       ...options
     });
     result.errors.length && console.log(red(result.errors));
