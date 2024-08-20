@@ -27,20 +27,6 @@ app.on(`${BUILD}:component`, (content, target, output) => {
 
 app.on(`${BUILD}:esbuild`, (file, target) => {
   build(file, target);
-  // try {
-  //   const result = esbuild.buildSync({
-  //     entryPoints: [file],
-  //     outfile: target,
-  //     format: 'esm',
-  //     bundle: true,
-  //     sourcemap: true,
-  //     minify: process.env.NODE_ENV === 'production'
-  //   });
-  //   result.errors.length && console.log(red(result.errors));
-  //   result.warnings.length && console.log(yellow(result.warnings));
-  // } catch (e) {
-  //   console.log(red(e.message));
-  // }
 });
 
 app.on(`${BUILD}:add-route`, (route, target, output) => {
@@ -69,30 +55,31 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_
     return el || document.body;
   }
 
-  const add_route = (path, module) => {
-    app.once(path, async (...p) => {
-      const exp = module.default;
-      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-        const component2 = new module.default();
-        component2.mount(get_element(), { route: path });
-        if (component2.state instanceof Promise) {
-          component2.state = await component2.state;
-        }
-      } else {
-        app.on(path, async (...p2) => {
-          const vdom = await exp(...p2);
-          app.render(get_element(), vdom);
-        });
+  const add_route = async (path, module) => {
+    const exp = module.default;
+    if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+      const component2 = new module.default();
+      component2.mount(get_element(), { route: path });
+      if (component2.state instanceof Promise) {
+        component2.state = await component2.state;
       }
-      app.route([path, ...p].join("/"));
-    });
+    } else {
+      app.on(path, async (...p2) => {
+        const vdom = await exp(...p2);
+        app.render(get_element(), vdom);
+      });
+    }
   };
 
 window.onload = async () => {
   const components = ${JSON.stringify(routes)};
   // components.map(item => add_component(item, '${site_url}'));
   ${
-    routes.map(route => `add_route('${route[0]}', await import('.${route[1]}'));`).join('\n')
+    routes.map(route => `
+    app.once('${route[0]}', async (...p) => {
+      add_route('${route[0]}', await import('.${route[1]}'));
+      app.route(['${route[0]}', ...p].join("/"));
+    });`).join('\n')
   }
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
 };
