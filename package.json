@@ -11,7 +11,7 @@
     "start": "node apprun-site-cli serve demo",
     "start:server": "node apprun-site-cli serve demo",
     "start:watch": "node apprun-site-cli build demo --watch",
-    "build": "node apprun-site-cli build demo",
+    "build": "node apprun-site-cli build demo -c",
     "render": "node apprun-site-cli build demo --render"
   },
   "keywords": [

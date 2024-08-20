@@ -78,7 +78,9 @@ document.addEventListener("DOMContentLoaded", () => app.route = route);
 document.body.addEventListener('click', e => {
   const element = e.target as HTMLElement;
   const menu = (element.tagName === 'A' ? element : element.closest('a')) as HTMLAnchorElement;
-  if (menu && menu.pathname.startsWith('/') && !menu.hash) {
+  if (menu &&
+    menu.origin === location.origin &&
+    menu.pathname.startsWith('/') && !menu.hash) {
     e.preventDefault();
     history.pushState(null, '', menu.href);
     app.route(menu.pathname);
