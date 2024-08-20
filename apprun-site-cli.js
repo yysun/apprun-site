@@ -34,19 +34,19 @@ program
     server(source, options);
   });
 
-// program
-//   .command('dev [source]')
-//   .description('launch development server, watch and live reload')
-//   .option('-c, --clean', 'clean the output directory', false)
-//   .option('-o, --output [output]', 'output directory', 'public')
-//   .option('-p, --pages [pages]', 'pages directory', 'pages')
-//   .option('-n, --no_ssr', 'disable server side rendering', false)
-//   .option('-w, --watch', 'watch the directory', true)
-//   .option('-l, --live_reload', 'enable live reload', true)
-//   .action(async (source, options) => {
-//     ({ source, options } = await init_options(source, options));
-//     build(source, options);
-//     server(source, options);
-//   });
+program
+  .command('dev [source]')
+  .description('launch development server, watch and live reload')
+  .option('-c, --clean', 'clean the output directory', false)
+  .option('-o, --output [output]', 'output directory', 'public')
+  .option('-p, --pages [pages]', 'pages directory', 'pages')
+  .option('-n, --no_ssr', 'disable server side rendering', false)
+  .option('-w, --watch', 'watch the directory', true)
+  .option('-l, --live_reload', 'enable live reload', true)
+  .action(async (source, options) => {
+    ({ source, options } = await init_options(source, options));
+    build(source, options);
+    server(source, options);
+  });
 
 program.parseAsync(process.argv);

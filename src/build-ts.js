@@ -54,33 +54,32 @@ app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_
     if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
     return el || document.body;
   }
-
-  const add_route = async (path, module) => {
-    const exp = module.default;
-    if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-      const component2 = new module.default();
-      component2.mount(get_element(), { route: path });
-      if (component2.state instanceof Promise) {
-        component2.state = await component2.state;
+  const add_component = (component, site_url) => {
+    let [path, file] = component;
+    app.once(path, async (...p) => {
+      const timestamp = Date.now();
+      ${live_reload ? `
+        const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
+      const module = await import(\`\${site_url}\${file}\`);`}
+      const exp = module.default;
+      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+        const component = new module.default();
+        component.mount(get_element(), { route: path });
+        if (component.state instanceof Promise) {
+          component.state = await component.state;
+        }
+      } else {
+        app.on(path, async (...p) => {
+          const vdom = await exp(...p);
+          app.render(get_element(), vdom);
+        });
       }
-    } else {
-      app.on(path, async (...p2) => {
-        const vdom = await exp(...p2);
-        app.render(get_element(), vdom);
-      });
-    }
-  };
-
+      app.route([path, ...p].join('/'));
+    });
+  }
 window.onload = async () => {
   const components = ${JSON.stringify(routes)};
-  // components.map(item => add_component(item, '${site_url}'));
-  ${
-    routes.map(route => `
-    app.once('${route[0]}', async (...p) => {
-      add_route('${route[0]}', await import('.${route[1]}'));
-      app.route(['${route[0]}', ...p].join("/"));
-    });`).join('\n')
-  }
+  components.map(item => add_component(item, '${site_url}'));
   app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
 };
 ${!route_hash ? `
@@ -142,7 +141,7 @@ main();
 const port = process.env.PORT || 8080;
 server('.', {port});`);
 
-  build(server_file, server_js_file, { bundle: false, sourcemap: false });
+  build(server_file, server_js_file, { bundle: false, sourcemap: false, minify: false });
   console.log(green('Created server file'), 'server.js');
 
 });
