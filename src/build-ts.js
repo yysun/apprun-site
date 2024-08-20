@@ -2,11 +2,9 @@ import { dirname, join } from 'path';
 import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync, unlinkSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-import esbuild from 'esbuild';
-import { BUILD } from './events.js';
 import render from './render.js';
 
-import build from './esbuild.js';
+import esbuild from './esbuild.js';
 
 let routes = [];
 
@@ -21,13 +19,10 @@ app.on(`${BUILD}:component`, (content, target, output) => {
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
-  app.run(`${BUILD}:esbuild`, tsx_file, target, output);
+  esbuild(tsx_file, target);
   unlinkSync(tsx_file);
 });
 
-app.on(`${BUILD}:esbuild`, (file, target) => {
-  build(file, target);
-});
 
 app.on(`${BUILD}:add-route`, (route, target, output) => {
   const module_file = target.replace(output, '').replace(/\\/g, '/');
@@ -130,19 +125,14 @@ main();
 `;
 
   writeFileSync(tsx_file, main);
-  app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
+  esbuild(tsx_file, main_js_file);
   unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
 
-  const server_file = `${output}/server.js`;
   const server_js_file = `${source}/server.js`;
-
-  writeFileSync(server_file, `import server from 'apprun-site/server.js';
+  writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
 const port = process.env.PORT || 8080;
 server('.', {port});`);
-
-  build(server_file, server_js_file, { bundle: false, sourcemap: false, minify: false });
-  console.log(green('Created server file'), 'server.js');
 
 });
 

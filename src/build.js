@@ -7,7 +7,7 @@ import chokidar from 'chokidar';
 import debounce from 'lodash.debounce';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-import { PRE_BUILD, POST_BUILD, BUILD } from './events.js';
+import esbuild from './esbuild.js';
 
 import apprun from 'apprun';
 const app = global['app'] = apprun['app'];
@@ -123,7 +123,7 @@ async function process_file(file, config) {
 
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file) && js_file.endsWith('index.js')) {
-      app.run(`${BUILD}:esbuild`, file, js_file, output);
+      esbuild(file, js_file);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
     app.run(`${BUILD}:add-route`, dir, js_file, output);
