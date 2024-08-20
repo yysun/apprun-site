@@ -1,6 +1,4 @@
 import { readFileSync, existsSync, statSync } from 'fs';
-import chalk from 'chalk';
-const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { JSDOM } from 'jsdom';
 import _fetch from 'isomorphic-fetch';
 import apprun from 'apprun';
@@ -55,7 +53,7 @@ async function run_module(element, js_file, route, params) {
     const { mtimeMs } = statSync(js_file);
     const module = await import(`${js_file}?${mtimeMs}`);
     const exp = module.default;
-    console.log(green(`\t ${js_file}`));
+    // console.log(green(`\t ${js_file}`));
     if (exp.prototype && exp.prototype.constructor.name === exp.name) {
       const component = new module.default();
       component.mount && component.mount(element, { route });

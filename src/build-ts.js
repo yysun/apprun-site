@@ -6,6 +6,8 @@ import esbuild from 'esbuild';
 import { BUILD } from './events.js';
 import render from './render.js';
 
+import build from './esbuild.js';
+
 let routes = [];
 
 app.on(`${BUILD}:start`, (content, target, output) => {
@@ -24,20 +26,21 @@ app.on(`${BUILD}:component`, (content, target, output) => {
 });
 
 app.on(`${BUILD}:esbuild`, (file, target) => {
-  try {
-    const result = esbuild.buildSync({
-      entryPoints: [file],
-      outfile: target,
-      format: 'esm',
-      bundle: false,
-      sourcemap: true,
-      minify: process.env.NODE_ENV === 'production'
-    });
-    result.errors.length && console.log(red(result.errors));
-    result.warnings.length && console.log(yellow(result.warnings));
-  } catch (e) {
-    console.log(red(e.message));
-  }
+  build(file, target);
+  // try {
+  //   const result = esbuild.buildSync({
+  //     entryPoints: [file],
+  //     outfile: target,
+  //     format: 'esm',
+  //     bundle: true,
+  //     sourcemap: true,
+  //     minify: process.env.NODE_ENV === 'production'
+  //   });
+  //   result.errors.length && console.log(red(result.errors));
+  //   result.warnings.length && console.log(yellow(result.warnings));
+  // } catch (e) {
+  //   console.log(red(e.message));
+  // }
 });
 
 app.on(`${BUILD}:add-route`, (route, target, output) => {
@@ -48,7 +51,7 @@ app.on(`${BUILD}:add-route`, (route, target, output) => {
   }
 });
 
-app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_reload, relative }) => {
+app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_reload, relative, source, port }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -144,6 +147,17 @@ main();
   app.run(`${BUILD}:esbuild`, tsx_file, main_js_file, output);
   unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
+
+  const server_file = `${output}/server.js`;
+  const server_js_file = `${source}/server.js`;
+
+  writeFileSync(server_file, `import server from 'apprun-site/server.js';
+const port = process.env.PORT || 8080;
+server('.', {port});`);
+
+  build(server_file, server_js_file, { bundle: false, sourcemap: false });
+  console.log(green('Created server file'), 'server.js');
+
 });
 
 const ensure = dir => {

@@ -1,18 +1,19 @@
 // @ts-check
 
-import { existsSync, statSync, writeFileSync } from 'fs';
-import { join, relative } from 'path';
+import { existsSync, statSync } from 'fs';
+import { relative } from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
+import WebSocket from 'ws';
+import chokidar from 'chokidar';
+import debounce from 'lodash.debounce';
 import render from './src/render.js';
 
 export default function (source, config) {
-  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
-  let { output, no_ssr, port, root, save_ssr } = config;
+  let { output, no_ssr, live_reload, port } = config;
   config.port = port = port || 8080;
-  output = output || root || 'public';
-  output = join(source, output);
+  no_ssr = no_ssr || config['no-ssr'];
 
   const app = express();
 
@@ -66,29 +67,38 @@ export default function (source, config) {
       }
       else if (no_ssr) {
         const home_html = `${output}/index.html`;
-        console.log(gray(`\t${home_html} (SPA)`));
+        console.log(cyan(`\t${home_html}`));
         res.sendFile(home_html);
       } else {
-        let content = await render(path, { output, port });
-        if (!content) {
-          console.log(red(`\t${path} not found`));
-          res.sendStatus(404);
-          return;
-        }
-        // console.log(green(`\t${html_file} (SSR)`));
-
-        if (save_ssr) {
-          writeFileSync(html_file, content);
-          // console.log(green(`\t${html_file} (SSR Saved)`));
-        }
+        let content = await render(path, config);
         res.send(content);
       }
     }
   });
 
-  app.listen(port, function () {
+  const server = app.listen(port, function () {
+    if (live_reload) {
+      const wss = new WebSocket.Server({ server });
+      const send = data => {
+        wss.clients.forEach(function each(client) {
+          if (client.readyState === WebSocket.OPEN) {
+            // console.log(green(`\tWS Sending ${data}`));
+            client.send(data);
+          }
+        });
+      }
+      chokidar.watch(output).on('all', ((event, path) => {
+        debounce(() => {
+          if (event === 'change' || event === 'add') {
+            send(JSON.stringify({ event, path: '/' + relative(output, path) }));
+          }
+        }, 300);
+      }));
+    }
+
     console.log(yellow(`Your app is listening on http://localhost:${port}`));
-    console.log(yellow(`Serving from: ${output}`));
+    console.log(yellow(`Serving from:${output}`));
     console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
+    console.log(`Live reload ${!live_reload ? 'disabled' : 'enabled'}.`);
   });
 }

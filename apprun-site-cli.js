@@ -2,7 +2,7 @@
 
 import { program } from 'commander';
 import { build, init_options } from './index.js';
-import server from './server.js';
+import server from './dev-server.js';
 
 program
   .version('1.3.0')

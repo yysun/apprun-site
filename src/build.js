@@ -122,7 +122,7 @@ async function process_file(file, config) {
     app.run(`${BUILD}:add-route`, dir, js_file, output);
 
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    if (!should_ignore(file, js_file)) {
+    if (!should_ignore(file, js_file) && js_file.endsWith('index.js')) {
       app.run(`${BUILD}:esbuild`, file, js_file, output);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
