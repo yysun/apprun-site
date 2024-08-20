@@ -1,18 +1,13 @@
-import { dirname, join } from 'path';
+//@ts-check
 import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync, unlinkSync } from 'fs';
+import { join } from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-import render from './render.js';
-
+import render_page from './render.js';
 import esbuild from './esbuild.js';
 
 let routes = [];
-
-app.on(`${BUILD}:start`, (content, target, output) => {
-  routes = [];
-});
-
-app.on(`${BUILD}:component`, (content, target, output) => {
+export const build_component = (content, target) => {
   const html = content.replace(/\`/g, '\\`');
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
@@ -21,18 +16,17 @@ app.on(`${BUILD}:component`, (content, target, output) => {
   writeFileSync(tsx_file, component);
   esbuild(tsx_file, target);
   unlinkSync(tsx_file);
-});
+};
 
-
-app.on(`${BUILD}:add-route`, (route, target, output) => {
+export const add_route = (route, target, output) => {
   const module_file = target.replace(output, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
   if (module_file.endsWith('index.js')) {
     routes.push([route, module_file]);
   }
-});
+};
 
-app.on(`${BUILD}:startup`, ({ site_url, route, app_element, output, pages, live_reload, relative, source, port }) => {
+export const build_main = ({ site_url, route, app_element, output, pages, live_reload, relative, source }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -117,7 +111,7 @@ function _init_refresh() {
 }
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
-${init ? `import main from '..${relative(pages)}/main';
+${init ? `import main from '../${relative(pages)}/main';
 export default main;
 main();
 `:
@@ -134,14 +128,9 @@ main();
 const port = process.env.PORT || 8080;
 server('.', {port});`);
 
-});
-
-const ensure = dir => {
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 };
 
-app.on(`${BUILD}:render`, async (config) => {
-
+export const render = async (config) => {
   const { output, relative } = config;
   let pages = routes.map(route => route[0]);
   config['static-pages'] && (pages = pages.concat(config['static-pages']));
@@ -150,8 +139,7 @@ app.on(`${BUILD}:render`, async (config) => {
     const route = pages[i];
     const html_file = join(output, route, 'index.html');
     console.log(magenta('Creating File'), relative(html_file));
-    const content = await render(route + '/', config);
+    const content = await render_page(route + '/', config);
     writeFileSync(html_file, content, { flag: 'w' });
   };
-
-});
+}

@@ -1,12 +1,9 @@
 import { existsSync, writeFileSync, readFileSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-import { BUILD } from './events.js';
 import { exec } from 'child_process';
-// import postcss from 'postcss';
-// import postcssrc from 'postcss-load-config';
 
-app.on(`${BUILD}:tailwind`, async ({ source, output, relative }) => {
+export const build_tailwind = async ({ source, output, relative }) => {
   return new Promise((resolve, reject) => {
     const tailwind = `${source}/tailwindcss.config.js`;
     if (existsSync(tailwind)) return false;
@@ -19,9 +16,9 @@ app.on(`${BUILD}:tailwind`, async ({ source, output, relative }) => {
       resolve(css_file);
     })
   })
-});
+};
 
-app.on(`${BUILD}:css`, async ({ source, pages, output, relative }) => {
+export const build_css = async ({ source, pages, output, relative }) => {
   try {
     const css_file = `${output}/style.css`;
     const css = readFileSync(`${pages}/style.css`, 'utf8');
@@ -45,5 +42,5 @@ app.on(`${BUILD}:css`, async ({ source, pages, output, relative }) => {
   } catch (err) {
     console.log(blue('CSS build: '), err.message);
   }
-})
+};
 

@@ -1,11 +1,31 @@
 #!/usr/bin/env node
 
+import { existsSync } from 'fs';
+import { relative, join } from 'path';
+import default_options from './config.js';
+
 import { program } from 'commander';
-import { build, init_options } from './index.js';
+import build from './src/build.js';
 import server from './dev-server.js';
 
+async function init_options(source, options) {
+  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
+  options.source = source;
+  options.pages = join(source, options.pages || 'pages');
+  options.output = join(source, options.output || 'output');
+  const conf = `${source}/apprun-site.config.js`;
+  if (existsSync(conf)) {
+    const config = await import(conf);
+    options = { ...config.default, ...options };
+  }
+  options = { ...default_options, ...options };
+  options['site_url'].endsWith('/') && (options['site_url'] = options['site_url'].slice(0, -1));
+  options.relative = fname => relative(source, fname);
+  return { source, options };
+}
+
 program
-  .version('1.3.3')
+  .version('1.3.5')
   .description('AppRun Site CLI');
 
 program

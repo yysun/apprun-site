@@ -8,14 +8,13 @@ import debounce from 'lodash.debounce';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from './esbuild.js';
+import { build_main, build_component, add_route, render } from './build-ts.js';
+import { build_css } from './build-css.js';
+import { markdown } from './build-md.js';
 
-import apprun from 'apprun';
-const app = global['app'] = apprun['app'];
-
-const HTML_Types = ['.html', '.htm'];
-const Content_Types = ['.md', '.mdx', '.html', '.htm'];
+const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
-const Copy_Types = ['.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
+const Copy_Types = ['.html', '.htm', '.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
 
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -28,11 +27,10 @@ export const should_ignore = (src, dest) => {
   return src_stat.mtimeMs <= dest_stat.mtimeMs;
 }
 
-let relative, copy_files;
-export default async (config) => {
+let copy_files;
+export default async (source, config) => {
 
-  const { render, output, pages, assets, clean } = config;
-  relative = config.relative;
+  const { render, output, pages, assets, clean, relative } = config;
   Array.isArray(assets) && Copy_Types.push(...assets);
   copy_files = [...new Set(Copy_Types)];
 
@@ -54,21 +52,20 @@ export default async (config) => {
 
   const run_build = async () => {
     const start_time = Date.now();
-    app.run(`${BUILD}:start`);
     await walk(pages);
-    !config['no-startup'] && app.run(`${BUILD}:startup`, config);
-    await app.query(`${BUILD}:css`, config);
-    render && await app.query(`${BUILD}:render`, config);
+    !config['no-startup'] && build_main(config);
+    await build_css(config);
+    render && await render(config);
     const elapsed = Date.now() - start_time;
     console.log(cyan(`Build done in ${elapsed} ms.`))
   }
 
   await run_build();
 
-  const { source, watch } = config;
+  const { watch } = config;
   if (watch) {
     console.log(cyan('Watching ...'));
-    const all_types = [...HTML_Types, ...Content_Types, ...Esbuild_Types, ...copy_files];
+    const all_types = [...Copy_Types, ...Markdown_Types, ...Esbuild_Types, ...copy_files];
     chokidar.watch(source).on('all', ((event, path) => {
       debounce(() => {
         if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
@@ -84,7 +81,7 @@ export default async (config) => {
 }
 
 async function process_file(file, config) {
-  const { pages, output, plugins } = config;
+  const { pages, output, plugins, relative } = config;
   const dir = dirname(file).replace(pages, '');
   const name = basename(file).replace(/\.[^/.]+$/, '');
   const ext = extname(file);
@@ -92,41 +89,29 @@ async function process_file(file, config) {
   ensure(pub_dir);
   const js_file = join(output, dir, name) + '.js';
 
-  if (HTML_Types.indexOf(ext) >= 0) {
-    const text = readFileSync(file).toString();
-    if (text.indexOf('<html') >= 0) {
-      const new_file = join(pub_dir, name + '.html');
-      if (!should_ignore(file, new_file)) {
-        writeFileSync(new_file, text);
-        console.log(cyan('Copied HTML'), relative(new_file));
-      }
-    }
-  } else if (copy_files.indexOf(ext) >= 0) {
+  if (copy_files.indexOf(ext) >= 0) {
     const dest = join(pub_dir, name) + ext;
     if (!should_ignore(file, dest)) {
       copyFileSync(file, dest);
       console.log(cyan('Copied File'), relative(dest));
     }
-  } else if (Content_Types.indexOf(ext) >= 0) {
-
+  } else if (Markdown_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file)) {
-      const all_content = await app.query(`${BUILD}${ext}`, file, js_file, config);
-      const content = all_content[all_content.length - 1];
+      const content = markdown(file)
       if (!content) {
-        console.log(red('Content load failed'));
+        console.log(red('Markdown load failed'));
       } else {
-        app.run(`${BUILD}:component`, content, js_file, output);
+        build_component(content, js_file);
         console.log(cyan('Created Component'), relative(js_file));
       }
     }
-    app.run(`${BUILD}:add-route`, dir, js_file, output);
-
+    add_route(dir, js_file, output);
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file) && js_file.endsWith('index.js')) {
       esbuild(file, js_file);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
-    app.run(`${BUILD}:add-route`, dir, js_file, output);
+    add_route(dir, js_file, output);
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }
