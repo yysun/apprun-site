@@ -17,6 +17,7 @@ app.on(`${BUILD}:component`, (content, target, output) => {
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
+  if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
   app.run(`${BUILD}:esbuild`, tsx_file, target, output);
   unlinkSync(tsx_file);
