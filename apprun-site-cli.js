@@ -5,7 +5,7 @@ import { relative, join } from 'path';
 import default_options from './config.js';
 
 import { program } from 'commander';
-import { build, server } from 'index';
+import { build, server } from './index.js';
 
 async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
