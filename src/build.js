@@ -8,7 +8,7 @@ import debounce from 'lodash.debounce';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from './esbuild.js';
-import { build_main, build_component, add_route, render } from './build-ts.js';
+import { build_main, build_component, add_route } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 
@@ -55,7 +55,6 @@ export default async (source, config) => {
     await walk(pages);
     !config['no-startup'] && build_main(config);
     await build_css(config);
-    render && await render(config);
     const elapsed = Date.now() - start_time;
     console.log(cyan(`Build done in ${elapsed} ms.`))
   }
