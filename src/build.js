@@ -28,9 +28,9 @@ export const should_ignore = (src, dest) => {
 }
 
 let copy_files;
-export default async (source, config) => {
+export default async (config) => {
 
-  const { render, output, pages, assets, clean, relative } = config;
+  const { source, output, pages, assets, clean, relative } = config;
   Array.isArray(assets) && Copy_Types.push(...assets);
   copy_files = [...new Set(Copy_Types)];
 

@@ -3,15 +3,14 @@ import { relative } from 'path';
 import WebSocket from 'ws';
 import chokidar from 'chokidar';
 import debounce from 'lodash.debounce';
-import _server from './server.js';
+import server from './server.js';
 
-export default function (source, config) {
+export default function (config) {
   let { output, live_reload, port } = config;
-
-  const app = _server(source, config);
-  const server = app.listen(port, function () {
+  const app = server(config);
+  const ws_server = app.listen(port, function () {
     if (live_reload) {
-      const wss = new WebSocket.Server({ server });
+      const wss = new WebSocket.Server({ server: ws_server });
       const send = data => {
         wss.clients.forEach(function each(client) {
           if (client.readyState === WebSocket.OPEN) {

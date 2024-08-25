@@ -1,69 +1,71 @@
 // @ts-check
 
 import { existsSync, statSync, writeFileSync } from 'fs';
-import { join, relative } from 'path';
+import { relative, join } from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
 import render from './src/render.js';
 
-export default function (source, config) {
-  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
-  let { output, no_ssr, port, root, save_ssr } = config;
-  config.port = port = port || 8080;
-  output = output || root || 'public';
-  output = join(source, output);
+export default function (config) {
+  let { source, output, no_ssr, port, root, save_ssr } = config;
+  source = source || process.cwd();
+  port = port || 8080;
+  root = output || root || join(source, 'public');
   const app = express();
-
   api(app, source);
-  ssr(app, output, no_ssr, port, save_ssr);
+  ssr(app, root, no_ssr, save_ssr);
+
+  const fetch = global.fetch;
+  global.fetch = (url, ...p) => {
+    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
+    return fetch(url, ...p);
+  }
 
   app.listen(port, function () {
     console.log(yellow(`Your app is listening on http://localhost:${port}`));
-    console.log(yellow(`Serving from: ${output}`));
+    console.log(yellow(`Serving from: ${root}`));
     console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
   });
   return app;
 }
 
-export function ssr(app, output, no_ssr, port, save_ssr) {
-  app.get('*', async (req, res, next) => {
+export function ssr(app, root, no_ssr, save_ssr) {
+
+  app.get('*', async (req, res) => {
     let path = req.path;
     if (path.includes('.')) {
-      res.sendFile(path, { root: output });
+      res.sendFile(path, { root });
     } else {
       if (!path.endsWith('/')) path += '/';
-      const html_file = `${output}${path}index.html`;
+      const html_file = `${root}${path}index.html`;
       console.log(cyan(`Serving ${path}`));
       if (existsSync(html_file)) {
         console.log(cyan(`\t${html_file}`));
         res.sendFile(html_file);
       }
       else if (no_ssr) {
-        const home_html = `${output}/index.html`;
+        const home_html = `${root}/index.html`;
         console.log(gray(`\t${home_html} (SPA)`));
         res.sendFile(home_html);
       } else {
-        let content = await render(path, output);
-        if (!content) {
+        let content = await render(path, root);
+        if (content) {
+          if (save_ssr) {
+            writeFileSync(html_file, content);
+          }
+          console.log(green(`\t${root}${path} - SSR`));
+          res.send(content);
+        } else {
           console.log(red(`\t${path} not found`));
           res.sendStatus(404);
-          return;
         }
-        // console.log(green(`\t${html_file} (SSR)`));
-        if (save_ssr) {
-          writeFileSync(html_file, content);
-          // console.log(green(`\t${html_file} (SSR Saved)`));
-        }
-        res.send(content);
       }
-    };
-    next();
+    }
   });
 }
 
-export function api(app, source = '.') {
-  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
+export function api(app, source) {
   app.get('/api/*', async (req, res, next) => {
     const run_api = async (js_file) => {
       const { mtimeMs } = statSync(js_file);

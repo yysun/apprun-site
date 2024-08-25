@@ -5,7 +5,8 @@ import { relative, join } from 'path';
 import default_options from './config.js';
 
 import { program } from 'commander';
-import { build, server } from './index.js';
+import { build } from './index.js';
+import server from './dev-server.js';
 
 async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
@@ -36,7 +37,7 @@ program
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    build(source, options);
+    build(options);
   });
 
 program
@@ -48,8 +49,8 @@ program
   .option('-l, --live_reload', 'enable live reload', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    build(source, options);
-    server(source, options);
+    build(options);
+    server(options);
   });
 
 program
@@ -63,8 +64,8 @@ program
   .option('-l, --live_reload', 'enable live reload', true)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    build(source, options);
-    server(source, options);
+    build(options);
+    server(options);
   });
 
 program.parseAsync(process.argv);

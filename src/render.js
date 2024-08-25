@@ -1,10 +1,10 @@
+//@ ts -check
 import { readFileSync, existsSync, statSync } from 'fs';
 import { JSDOM } from 'jsdom';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
 
-export default async (path, config) => {
-  const { output } = config;
+export default async (path, output) => {
   let content = '';
   const paths = path.split('/');
   for (let i = paths.length - 1; i > 0; i--) {
@@ -12,10 +12,10 @@ export default async (path, config) => {
     const js_index = `${output}${route}/index.js`;
     const js_file = `${output}${route}.js`;
     if (existsSync(js_index)) {
-      content = await render(config, js_index, route, paths.slice(i));
+      content = await render(output, js_index, route, paths.slice(i));
       break;
     } else if (existsSync(js_file)) {
-      content = await render(config, js_file, route, paths.slice(i));
+      content = await render(output, js_file, route, paths.slice(i));
       break;
     }
   }

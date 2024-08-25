@@ -128,7 +128,7 @@ main();
   const server_js_file = `${source}/server.js`;
   writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
 const port = process.env.PORT || 8080;
-server('.', {port});`);
+server({port});`);
 
 };
 
