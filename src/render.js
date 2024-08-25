@@ -1,11 +1,10 @@
 import { readFileSync, existsSync, statSync } from 'fs';
 import { JSDOM } from 'jsdom';
-import _fetch from 'isomorphic-fetch';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
 
 export default async (path, config) => {
-  const {output } = config;
+  const { output } = config;
   let content = '';
   const paths = path.split('/');
   for (let i = paths.length - 1; i > 0; i--) {
@@ -23,17 +22,12 @@ export default async (path, config) => {
   return content;
 }
 
-async function render({ port, output }, js_file, route, params) {
-  port = port || 8080;
+async function render(output, js_file, route, params) {
   const html = readFileSync(`${output}/index.html`, 'utf8');
   const dom = new JSDOM(html);
   const win = global.window = dom.window;
   const document = global.document = dom.window.document;
 
-  global.fetch = (url, ...p) => {
-    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
-    return _fetch(url, ...p);
-  }
   global.window.app = app;
   global.window.Component = Component;
   global.window.safeHTML = safeHTML;
@@ -49,21 +43,18 @@ async function render({ port, output }, js_file, route, params) {
 }
 
 async function run_module(element, js_file, route, params) {
-  try {
-    const { mtimeMs } = statSync(js_file);
-    const module = await import(`${js_file}?${mtimeMs}`);
-    const exp = module.default;
-    // console.log(green(`\t ${js_file}`));
-    if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-      const component = new module.default();
-      component.mount && component.mount(element, { route });
-      component.run && await component.run(route, ...params);
-      component.unmount && component.unmount();
-    } else if (typeof exp === 'function') {
-      const vdom = await exp(...params);
-      vdom && app.render(element, vdom);
-    }
-  } catch (e) {
-    console.log(red(e.message));
+  const { mtimeMs } = statSync(js_file);
+  const module = await import(`${js_file}?${mtimeMs}`);
+  const exp = module.default;
+  // console.log(green(`\t ${js_file}`));
+  if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+    const component = new module.default();
+    component.mount && component.mount(element, { route });
+    component.run && await component.run(route, ...params);
+    component.unmount && component.unmount();
+  } else if (typeof exp === 'function') {
+    const vdom = await exp(...params);
+    vdom && app.render(element, vdom);
   }
+
 }

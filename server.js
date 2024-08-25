@@ -13,9 +13,57 @@ export default function (source, config) {
   config.port = port = port || 8080;
   output = output || root || 'public';
   output = join(source, output);
-
   const app = express();
 
+  api(app, source);
+  ssr(app, output, no_ssr, port, save_ssr);
+
+  app.listen(port, function () {
+    console.log(yellow(`Your app is listening on http://localhost:${port}`));
+    console.log(yellow(`Serving from: ${output}`));
+    console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
+  });
+  return app;
+}
+
+export function ssr(app, output, no_ssr, port, save_ssr) {
+  app.get('*', async (req, res, next) => {
+    let path = req.path;
+    if (path.includes('.')) {
+      res.sendFile(path, { root: output });
+    } else {
+      if (!path.endsWith('/')) path += '/';
+      const html_file = `${output}${path}index.html`;
+      console.log(cyan(`Serving ${path}`));
+      if (existsSync(html_file)) {
+        console.log(cyan(`\t${html_file}`));
+        res.sendFile(html_file);
+      }
+      else if (no_ssr) {
+        const home_html = `${output}/index.html`;
+        console.log(gray(`\t${home_html} (SPA)`));
+        res.sendFile(home_html);
+      } else {
+        let content = await render(path, output);
+        if (!content) {
+          console.log(red(`\t${path} not found`));
+          res.sendStatus(404);
+          return;
+        }
+        // console.log(green(`\t${html_file} (SSR)`));
+        if (save_ssr) {
+          writeFileSync(html_file, content);
+          // console.log(green(`\t${html_file} (SSR Saved)`));
+        }
+        res.send(content);
+      }
+    };
+    next();
+  });
+}
+
+export function api(app, source = '.') {
+  source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
   app.get('/api/*', async (req, res, next) => {
     const run_api = async (js_file) => {
       const { mtimeMs } = statSync(js_file);
@@ -50,45 +98,5 @@ export default function (source, config) {
     }
     console.log(magenta(`\tUnknown path ${path}`));
     res.sendStatus(404);
-  });
-
-  app.get('*', async (req, res, next) => {
-    let path = req.path;
-    if (path.includes('.')) {
-      res.sendFile(path, { root: output });
-    } else {
-      if (!path.endsWith('/')) path += '/';
-      const html_file = `${output}${path}index.html`;
-      console.log(cyan(`Serving ${path}`));
-      if (existsSync(html_file)) {
-        console.log(cyan(`\t${html_file}`));
-        res.sendFile(html_file);
-      }
-      else if (no_ssr) {
-        const home_html = `${output}/index.html`;
-        console.log(gray(`\t${home_html} (SPA)`));
-        res.sendFile(home_html);
-      } else {
-        let content = await render(path, { output, port });
-        if (!content) {
-          console.log(red(`\t${path} not found`));
-          res.sendStatus(404);
-          return;
-        }
-        // console.log(green(`\t${html_file} (SSR)`));
-
-        if (save_ssr) {
-          writeFileSync(html_file, content);
-          // console.log(green(`\t${html_file} (SSR Saved)`));
-        }
-        res.send(content);
-      }
-    }
-  });
-
-  app.listen(port, function () {
-    console.log(yellow(`Your app is listening on http://localhost:${port}`));
-    console.log(yellow(`Serving from: ${output}`));
-    console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
   });
 }
