@@ -128,9 +128,12 @@ main();
   const server_js_file = `${source}/server.js`;
   writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
 const port = process.env.PORT || 8080;
-server({port});`);
-
+const app = server();
+app.listen(port, () => console.log(\`Your app is listening on http://localhost:\${port}\`));
+`);
 };
+
+
 
 export const render = async (config) => {
   const { output, relative } = config;

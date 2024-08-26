@@ -6,7 +6,8 @@ import debounce from 'lodash.debounce';
 import server from './server.js';
 
 export default function (config) {
-  let { output, live_reload, port } = config;
+  let { output, live_reload, port, no_ssr } = config;
+  config.port = port = port || 8080;
   const app = server(config);
   const ws_server = app.listen(port, function () {
     if (live_reload) {
@@ -26,6 +27,9 @@ export default function (config) {
         }, 300);
       }));
     }
+    console.log(`Your app is listening on http://localhost:${port}`);
+    console.log(`Serving from: ${output}`);
+    console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
     console.log(`Live reload ${!live_reload ? 'disabled' : 'enabled'}.`);
   });
 }

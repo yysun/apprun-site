@@ -7,7 +7,7 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
 import render from './src/render.js';
 
-export default function (config) {
+export default function (config = {}) {
   let { source, output, no_ssr, port, root, save_ssr } = config;
   source = source || process.cwd();
   port = port || 8080;
@@ -21,12 +21,6 @@ export default function (config) {
     if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
     return fetch(url, ...p);
   }
-
-  app.listen(port, function () {
-    console.log(yellow(`Your app is listening on http://localhost:${port}`));
-    console.log(yellow(`Serving from: ${root}`));
-    console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
-  });
   return app;
 }
 
