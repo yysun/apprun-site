@@ -7,7 +7,7 @@ import chokidar from 'chokidar';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from './esbuild.js';
-import { build_main, build_component, add_route } from './build-ts.js';
+import { build_main, build_component, add_route, routes } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 
@@ -51,6 +51,7 @@ export default async (config) => {
 
   const run_build = async () => {
     const start_time = Date.now();
+    routes.length = 0;
     await walk(pages);
     !config['no-startup'] && build_main(config);
     await build_css(config);

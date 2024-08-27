@@ -6,7 +6,8 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import render_page from './render.js';
 import esbuild from './esbuild.js';
 
-let routes = [];
+export let routes = [];
+
 export const build_component = (content, target) => {
   const html = content.replace(/\`/g, '\\`');
   const component = `const {safeHTML} = window;
