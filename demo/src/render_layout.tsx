@@ -27,5 +27,5 @@ export default ({ Layout, styles = null, scripts = null, body_class = null }) =>
     for (let i = 0; i < scripts.length; i++) add_js(scripts[i]);
   }
   body_class && document.body.classList.add(...body_class);
-  Layout && app.render(document.body, <Layout />);
+  Layout && app.render(document.getElementById('root'), <Layout />);
 }

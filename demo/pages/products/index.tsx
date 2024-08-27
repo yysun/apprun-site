@@ -29,6 +29,7 @@ export default class extends Component {
     <p>This is an AppRun component page that calls REST API.</p>
     <ul>
       {
+        state.products &&
         state.products.map(({ id, name }) => <li key={id}>
           <a class="nav-link" href={`/products/${id}`}>{name}
             {state.id === id && <span class="fa fa-check"> - selected</span>}
