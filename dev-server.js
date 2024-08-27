@@ -2,7 +2,6 @@
 import { relative } from 'path';
 import WebSocket from 'ws';
 import chokidar from 'chokidar';
-import debounce from 'lodash.debounce';
 import server from './server.js';
 
 export default function (config) {
@@ -19,13 +18,28 @@ export default function (config) {
           }
         });
       }
-      chokidar.watch(output).on('all', ((event, path) => {
-        debounce(() => {
-          if (event === 'change' || event === 'add') {
-            send(JSON.stringify({ event, path: '/' + relative(output, path) }));
-          }
-        }, 300);
-      }));
+
+      const debounce = (func, delay) => {
+        let timeout;
+        return (...args) => {
+          if (timeout) clearTimeout(timeout);
+          timeout = setTimeout(() => func(...args), delay);
+        };
+      };
+
+      const onChange = ((path) => {
+        path = '/' + relative(output, path);
+        send(JSON.stringify({ path }));
+      });
+
+      const debouncedOnChange = debounce(onChange, 300);
+
+      const watcher = chokidar.watch(output, {
+        ignored: /(^|[\/\\])\../, // ignore dotfiles
+        persistent: true
+      });
+      watcher.on('change', debouncedOnChange);
+      watcher.on('add', debouncedOnChange);
     }
     console.log(`Your app is listening on http://localhost:${port}`);
     console.log(`Serving from: ${output}`);

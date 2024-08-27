@@ -4,7 +4,6 @@ import { readdir, stat } from 'fs/promises';
 
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
-import debounce from 'lodash.debounce';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import esbuild from './esbuild.js';
@@ -61,21 +60,33 @@ export default async (config) => {
 
   await run_build();
 
-  const { watch } = config;
-  if (watch) {
+  const debounce = (func, delay) => {
+    let timeout;
+    return (...args) => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  const all_types = [...Copy_Types, ...Markdown_Types, ...Esbuild_Types, ...copy_files];
+  const onChange = ((event, path) => {
+    if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
+      const ext = extname(path);
+      if (all_types.indexOf(ext) >= 0) {
+        console.log(yellow('Change detected'), relative(path));
+        run_build();
+      }
+    }
+  });
+  const debouncedOnChange = debounce(onChange, 500);
+
+  if (config.watch) {
     console.log(cyan('Watching ...'));
-    const all_types = [...Copy_Types, ...Markdown_Types, ...Esbuild_Types, ...copy_files];
-    chokidar.watch(source).on('all', ((event, path) => {
-      debounce(() => {
-        if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
-          const ext = extname(path);
-          if (all_types.indexOf(ext) >= 0) {
-            console.log(yellow('Change detected'), relative(path));
-            run_build();
-          }
-        }
-      }, 500)
-    }));
+    const watcher = chokidar.watch(pages, {
+      ignored: /(^|[\/\\])\../, // ignore dotfiles
+      persistent: true
+    });
+    watcher.on('all', debouncedOnChange);
   }
 }
 
@@ -119,4 +130,3 @@ async function process_file(file, config) {
     await plugins[ext](file, config);
   }
 }
-
