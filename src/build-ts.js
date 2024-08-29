@@ -27,7 +27,7 @@ export const add_route = (route, target, output) => {
   }
 };
 
-export const build_main = ({ site_url, route, app_element, output, pages, live_reload, relative, source }) => {
+export const build_main = ({ site_url, route, app_element, output, pages, live_reload, relative, source, should_ignore }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -35,6 +35,7 @@ export const build_main = ({ site_url, route, app_element, output, pages, live_r
   const main_js_file = `${output}/main.js`;
   const init = existsSync(main_file);
 
+  if(should_ignore(main_file, main_js_file)) return;
   // copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   const main = `import app from 'apprun';

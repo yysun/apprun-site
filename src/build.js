@@ -39,6 +39,8 @@ export default async (config) => {
     console.log(cyan('Clean'), relative(output));
   }
 
+  config.should_ignore = should_ignore;
+
   async function walk(dir) {
     let files = await readdir(dir);
     await Promise.all(files.map(async file => {
