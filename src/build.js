@@ -13,7 +13,8 @@ import { markdown } from './build-md.js';
 
 const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
-const Copy_Types = ['.html', '.htm', '.png', '.gif', '.json', '.css', '.svg', '.jpg', '.jpeg', '.ico'];
+const Copy_Types = ['.html', '.htm', '.png', '.gif', '.json', '.svg', '.jpg', '.jpeg', '.ico'];
+const Css_Types = ['.css'];
 
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -71,7 +72,7 @@ export default async (config) => {
     };
   };
 
-  const all_types = [...Copy_Types, ...Markdown_Types, ...Esbuild_Types, ...copy_files];
+  const all_types = [...Copy_Types, ...Markdown_Types, ...Esbuild_Types, ...Css_Types, ...copy_files];
   const onChange = ((event, path) => {
     if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
       const ext = extname(path);
@@ -81,7 +82,7 @@ export default async (config) => {
       }
     }
   });
-  const debouncedOnChange = debounce(onChange, 500);
+  const debouncedOnChange = debounce(onChange, 300);
 
   if (config.watch) {
     console.log(cyan('Watching ...'));
@@ -125,6 +126,7 @@ async function process_file(file, config) {
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
     add_route(dir, js_file, output);
+  } else if (Css_Types.indexOf(ext) >= 0) {
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }
