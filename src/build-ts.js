@@ -35,7 +35,7 @@ export const build_main = ({ site_url, route, app_element, output, pages, live_r
   const main_js_file = `${output}/main.js`;
   const init = existsSync(main_file);
 
-  if(should_ignore(main_file, main_js_file)) return;
+  // if(should_ignore(main_file, main_js_file)) return;
   // copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   const main = `import app from 'apprun';
@@ -50,7 +50,7 @@ export const build_main = ({ site_url, route, app_element, output, pages, live_r
     app.once(path, async (...p) => {
       const timestamp = Date.now();
       ${live_reload ? `
-        const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
+      const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
       const module = await import(\`\${site_url}\${file}\`);`}
       const exp = module.default;
       if (exp.prototype && exp.prototype.constructor.name === exp.name) {
@@ -116,15 +116,13 @@ function _init_refresh() {
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
 ${init ? `import main from '../${relative(pages)}/main';
-export default main;
 main();
-`:
-      'export default () => {}'}
+`: 'export default () => {}'}
 `;
 
   writeFileSync(tsx_file, main);
   esbuild(tsx_file, main_js_file);
-  unlinkSync(tsx_file);
+  // unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
 
   const server_js_file = `${source}/server.js`;
@@ -134,8 +132,6 @@ const app = server();
 app.listen(port, () => console.log(\`Your app is listening on http://localhost:\${port}\`));
 `);
 };
-
-
 
 export const render = async (config) => {
   const { output, relative } = config;
