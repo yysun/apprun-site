@@ -35,7 +35,7 @@ export default function (config) {
   const debouncedOnChange = debounce(onChange, 300);
   server.listen(port, function () {
     if (live_reload) {
-      const watcher = chokidar.watch(output, {
+      const watcher = chokidar.watch(`${output}/**/*.{js,css,html}`, {
         ignored: /(^|[\/\\])\../, // ignore dotfiles
         persistent: true
       });
