@@ -71,7 +71,7 @@ export function api(app, source, port) {
     return fetch(url, ...p);
   }
 
-  app.get('/api/*', async (req, res, next) => {
+  app.all('/api/*', async (req, res, next) => {
     try {
       const run_api = async (js_file) => {
         const { mtimeMs } = statSync(js_file);
