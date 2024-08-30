@@ -44,7 +44,7 @@ async function render(output, js_file, route, params) {
 
 async function run_module(element, js_file, route, params) {
   const { mtimeMs } = statSync(js_file);
-  const module = await import(`${js_file}?${mtimeMs}`);
+  const module = await import(`file://${js_file}?${mtimeMs}`);
   const exp = module.default;
   // console.log(green(`\t ${js_file}`));
   if (exp.prototype && exp.prototype.constructor.name === exp.name) {
