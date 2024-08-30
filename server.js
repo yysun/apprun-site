@@ -13,14 +13,8 @@ export default function (config = {}) {
   port = port || 8080;
   root = output || root || join(source, 'public');
   const app = express();
-  api(app, source);
+  api(app, source, port);
   ssr(app, root, no_ssr, save_ssr);
-
-  const fetch = global.fetch;
-  global.fetch = (url, ...p) => {
-    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
-    return fetch(url, ...p);
-  }
   return app;
 }
 
@@ -64,7 +58,14 @@ export function ssr(app, root, no_ssr, save_ssr) {
   });
 }
 
-export function api(app, source) {
+export function api(app, source, port) {
+
+  const fetch = global.fetch;
+  global.fetch = (url, ...p) => {
+    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
+    return fetch(url, ...p);
+  }
+  
   app.get('/api/*', async (req, res, next) => {
     try {
       const run_api = async (js_file) => {
@@ -84,11 +85,9 @@ export function api(app, source) {
         let js_file = `${source}/${route}.js`;
 
         if (existsSync(js_file)) {
-          await run_api(js_file);
-          next();
+          return run_api(js_file);
         } else if (existsSync(js_index)) {
-          await run_api(js_index);
-          next();
+          return run_api(js_index);
         }
       }
       console.log(magenta(`\tUnknown path ${path}`));
