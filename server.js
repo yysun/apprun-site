@@ -5,6 +5,7 @@ import { relative, join } from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import express from 'express';
+import bodyParser from 'body-parser';
 import render from './src/render.js';
 
 export default function (config = {}) {
@@ -13,6 +14,10 @@ export default function (config = {}) {
   port = port || 8080;
   root = output || root || join(source, 'public');
   const app = express();
+
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+
   api(app, source, port);
   ssr(app, root, no_ssr, save_ssr);
   return app;
@@ -65,7 +70,7 @@ export function api(app, source, port) {
     if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
     return fetch(url, ...p);
   }
-  
+
   app.get('/api/*', async (req, res, next) => {
     try {
       const run_api = async (js_file) => {

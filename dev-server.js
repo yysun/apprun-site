@@ -1,23 +1,16 @@
 // @ts-check
 import { relative } from 'path';
-import http from 'http';
 import WebSocket from 'ws';
 import chokidar from 'chokidar';
-import server from './server.js';
+import app_server from './server.js';
+import ws_server from './ws.js';
 
 export default function (config) {
   let { output, live_reload, port, no_ssr } = config;
   config.port = port = port || 8080;
-  const app = server(config);
-  const ws_server = http.createServer(app);
-  const wss = new WebSocket.Server({ server: ws_server });
-  // wss.on('connection', (ws) => {
-  //   console.log('New WebSocket connection established');
-  //   ws.on('close', () => {
-  //     console.log('WebSocket connection closed');
-  //   });
-  // });
 
+  const app = app_server(config);
+  const { server, wss } = ws_server(app);
   const send = message => {
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
@@ -40,7 +33,7 @@ export default function (config) {
   });
 
   const debouncedOnChange = debounce(onChange, 300);
-  ws_server.listen(port, function () {
+  server.listen(port, function () {
     if (live_reload) {
       const watcher = chokidar.watch(output, {
         ignored: /(^|[\/\\])\../, // ignore dotfiles
