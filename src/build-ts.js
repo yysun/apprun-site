@@ -127,11 +127,16 @@ main();
   console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
 
   const server_js_file = `${source}/server.js`;
-  writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
+  if (!existsSync(server_js_file)) {
+    writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
 const port = process.env.PORT || 8080;
 const app = server();
 app.listen(port, () => console.log(\`Your app is listening on http://localhost:\${port}\`));
-`);
+  `);
+    console.log(green('Created server file'), relative(server_js_file));
+  } else {
+    console.log(gray('Server file exists, skipped'), relative(server_js_file));
+  }
 };
 
 export const render = async (config) => {
