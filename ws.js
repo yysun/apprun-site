@@ -7,12 +7,14 @@ export default app => {
   wss.on('connection', (ws) => {
     console.log('New WebSocket connection established');
     ws.on('message', async function (message) {
+      const data = JSON.parse(message);
       try {
         const req = {
           method: 'GET',
-          ...JSON.parse(message)
+          ...data,
         };
         const res = {
+          __uuid: data.__uuid,
           statusCode: 200,
           headers: {},
           status: function (code) {
