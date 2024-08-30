@@ -4,7 +4,7 @@ import { join } from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import render_page from './render.js';
-import esbuild from './esbuild.js';
+import esbuild, { bundle } from './esbuild.js';
 
 export let routes = [];
 
@@ -34,9 +34,6 @@ export const build_main = ({ site_url, route, app_element, output, pages, live_r
   const tsx_file = `${output}/main.tsx`;
   const main_js_file = `${output}/main.js`;
   const init = existsSync(main_file);
-
-  // if(should_ignore(main_file, main_js_file)) return;
-  // copyFileSync(`${output}/index.html`, `${output}/404.html`);
 
   const main = `import app from 'apprun';
   const get_element = () => {
@@ -124,6 +121,10 @@ main();
   esbuild(tsx_file, main_js_file);
   // unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
+
+  const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
+  bundle(output, entryPoints);
+  console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
 
   const server_js_file = `${source}/server.js`;
   writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
