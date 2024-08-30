@@ -113,6 +113,7 @@ function _init_refresh() {
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
 ${init ? `import main from '../${relative(pages)}/main';
+export default main;
 main();
 `: 'export default () => {}'}
 `;
