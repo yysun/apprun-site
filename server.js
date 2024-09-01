@@ -82,8 +82,7 @@ export function api(app, source, port) {
   app.all('/api/*', async (req, res, next) => {
     try {
       const run_api = async (js_file) => {
-        const { mtimeMs } = statSync(js_file);
-        const module = await import(`file://${js_file}?${mtimeMs}`);
+        const module = await import(`file://${js_file}`);
         const exp = module.default;
         console.log(blue(`\t${js_file}`));
         exp(req, res, next);
