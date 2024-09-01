@@ -20,6 +20,14 @@ export default function (config = {}) {
 
   api(app, source, port);
   ssr(app, root, no_ssr, save_ssr);
+
+  app.use((err, req, res, next) => {
+    const time = new Date(Date.now()).toString();
+    console.error('Error occurred:', req.path, time, err.message);
+    res.status(500).send(err.message);
+    next(err);
+  });
+
   return app;
 }
 
@@ -101,10 +109,5 @@ export function api(app, source, port) {
       console.log(red(e.message));
       next(e);
     }
-  });
-
-  app.use((err, req, res, next) => {
-    console.error(err.stack); // Log the error
-    res.status(500).send(err.message); // Send a generic error response
   });
 }
