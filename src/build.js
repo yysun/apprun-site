@@ -121,7 +121,7 @@ async function process_file(file, config) {
     }
     add_route(dir, js_file, output);
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    if (!should_ignore(file, js_file) && js_file.endsWith('index.js')) {
+    if (js_file.endsWith('index.js')) {
       esbuild(file, js_file);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
