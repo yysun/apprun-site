@@ -84,13 +84,20 @@ export default async (config) => {
   });
   const debouncedOnChange = debounce(onChange, 300);
 
+  let ready = false
   if (config.watch) {
-    console.log(cyan('Watching ...'));
     const watcher = chokidar.watch(pages, {
       ignored: /(^|[\/\\])\../, // ignore dotfiles
       persistent: true
     });
-    watcher.on('all', debouncedOnChange);
+    watcher.on('all', (event, path) => {
+      if (ready && (event === 'change' || event === 'add' || event === 'unlink')) {
+        debouncedOnChange(event, path);
+      }
+    }).on('ready', () => {
+      ready = true;
+      console.log(cyan('Watching ...'));
+    });
   }
 }
 
