@@ -78,7 +78,8 @@ export default async (config) => {
       const ext = extname(path);
       if (all_types.indexOf(ext) >= 0) {
         console.log(yellow('Change detected'), relative(path));
-        run_build();
+        // run_build();
+        walk(dirname(path));
       }
     }
   });
