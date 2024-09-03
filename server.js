@@ -37,7 +37,11 @@ export function ssr(app, root, no_ssr, save_ssr) {
     try {
       let path = req.path;
       if (path.includes('.')) {
-        res.sendFile(path, { root });
+        if (existsSync(`${root}${path}`)) {
+          res.sendFile(path, { root });
+        } else {
+          res.sendStatus(404);
+        }
       } else {
         if (!path.endsWith('/')) path += '/';
         const html_file = `${root}${path}index.html`;
