@@ -137,7 +137,7 @@ async function process_file(file, config) {
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';
     if (!should_ignore(file, css_file)) {
-      await build_css(file, css_file);
+      await build_css(file, css_file, config);
     }
   } else {
     console.log(magenta('Unknown file type'), relative(file));

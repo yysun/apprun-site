@@ -1,29 +1,34 @@
-import { existsSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, writeFileSync, readFileSync, copyFileSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { exec } from 'child_process';
 
-export const build_tailwind = async (from, to) => {
+export const build_tailwind = async (from, to, config) => {
   const { source, pages, output, relative, should_ignore } = config;
+  const tailwind = `${source}/tailwind.config.cjs`;
+  if (!existsSync(from)) return;
+  if (!existsSync(tailwind)) {
+    console.log(cyan('Copied CSS'), relative(to));
+    copyFileSync(from, to);
+    return;
+  }
   return new Promise((resolve, reject) => {
-    const tailwind = `${source}/tailwindcss.config.cjs`;
-    if (!existsSync(from)) return;
-    if (existsSync(tailwind)) return false;
-
-    exec(`npx tailwindcss -o ${css_file}`, { cwd: source }, (err, output) => {
+    exec(`npx tailwindcss -o ${to}`, { cwd: source }, (err, output) => {
       if (err) {
         reject(err);
       }
-      console.log(cyan('Compiled CSS with Tailwindcss'), relative(css_file));
-      resolve(css_file);
+      console.log(cyan('Compiled CSS with Tailwindcss'), relative(to));
+      resolve(to);
     })
   })
 };
 
-export const build_css = async (from, to) => {
+export const build_css = async (from, to, config) => {
+  const { source, relative } = config;
   try {
+    const postcss = `${source}/postcss.config.cjs`;
     if (!existsSync(from)) return;
-    if (!existsSync(postcss)) return build_tailwind(config);
+    if (!existsSync(postcss)) return build_tailwind(from, to, config);
     const css = readFileSync(from, 'utf8');
     const context = { from, to, cwd: source, map: true }
 
@@ -38,8 +43,8 @@ export const build_css = async (from, to) => {
       console.warn(err.toString());
     }
 
-    writeFileSync(css_file, result.css);
-    console.log(cyan('Compiled CSS with PostCss'), relative(css_file));
+    writeFileSync(to, result.css);
+    console.log(cyan('Compiled CSS with PostCss'), relative(to));
 
   } catch (err) {
     console.log(blue('CSS build: '), err.message);
