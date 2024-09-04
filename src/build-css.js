@@ -3,15 +3,13 @@ import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { exec } from 'child_process';
 
-export const build_tailwind = async (config) => {
+export const build_tailwind = async (from, to) => {
   const { source, pages, output, relative, should_ignore } = config;
   return new Promise((resolve, reject) => {
     const tailwind = `${source}/tailwindcss.config.cjs`;
-    if (existsSync(tailwind)) return false;
-    const css_file = `${output}/style.css`;
-    const from = `${pages}/style.css`;
-    const to = css_file;
+    if (!existsSync(from)) return;
     if (should_ignore(from, to)) return;
+    if (existsSync(tailwind)) return false;
 
     exec(`npx tailwindcss -o ${css_file}`, { cwd: source }, (err, output) => {
       if (err) {
@@ -23,18 +21,13 @@ export const build_tailwind = async (config) => {
   })
 };
 
-export const build_css = async (config) => {
+export const build_css = async (from, to) => {
   try {
-    const { source, pages, output, relative, should_ignore } = config;
-    const postcss = `${source}/postcss.config.cjs`;
-    if (!existsSync(postcss)) return build_tailwind(config);
-
-    const css_file = `${output}/style.css`;
-    const css = readFileSync(`${pages}/style.css`, 'utf8');
-    const from = `${pages}/style.css`;
-    const to = css_file;
-    const context = { from, to, cwd: source, map: true }
+    if (!existsSync(from)) return;
     if (should_ignore(from, to)) return;
+    if (!existsSync(postcss)) return build_tailwind(config);
+    const css = readFileSync(from, 'utf8');
+    const context = { from, to, cwd: source, map: true }
 
     const { plugins, options } = await (await import('postcss-load-config'))
       .default(context, source);

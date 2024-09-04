@@ -57,7 +57,7 @@ export default async (config) => {
     routes.length = 0;
     await walk(pages);
     !config['no-startup'] && build_main(config);
-    await build_css(config);
+    // await build_css(config);
     const elapsed = Date.now() - start_time;
     console.log(cyan(`Build done in ${elapsed} ms.`))
   }
@@ -135,6 +135,8 @@ async function process_file(file, config) {
     }
     add_route(dir, js_file, output);
   } else if (Css_Types.indexOf(ext) >= 0) {
+    const css_file = join(output, dir, name) + '.css';
+    await build_css(file, css_file);
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }
