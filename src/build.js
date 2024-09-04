@@ -136,7 +136,9 @@ async function process_file(file, config) {
     add_route(dir, js_file, output);
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';
-    await build_css(file, css_file);
+    if (!should_ignore(file, css_file)) {
+      await build_css(file, css_file);
+    }
   } else {
     console.log(magenta('Unknown file type'), relative(file));
   }

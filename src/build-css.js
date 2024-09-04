@@ -8,7 +8,6 @@ export const build_tailwind = async (from, to) => {
   return new Promise((resolve, reject) => {
     const tailwind = `${source}/tailwindcss.config.cjs`;
     if (!existsSync(from)) return;
-    if (should_ignore(from, to)) return;
     if (existsSync(tailwind)) return false;
 
     exec(`npx tailwindcss -o ${css_file}`, { cwd: source }, (err, output) => {
@@ -24,7 +23,6 @@ export const build_tailwind = async (from, to) => {
 export const build_css = async (from, to) => {
   try {
     if (!existsSync(from)) return;
-    if (should_ignore(from, to)) return;
     if (!existsSync(postcss)) return build_tailwind(config);
     const css = readFileSync(from, 'utf8');
     const context = { from, to, cwd: source, map: true }
