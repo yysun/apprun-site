@@ -48,6 +48,7 @@ program
   .option('-n, --no_ssr', 'disable server side rendering', false)
   .option('-l, --live_reload', 'enable live reload', false)
   .action(async (source, options) => {
+    process.env.NODE_ENV = 'production';
     ({ source, options } = await init_options(source, options));
     build(options);
     server(options);
@@ -63,8 +64,11 @@ program
   .option('-w, --watch', 'watch the directory', true)
   .option('-l, --live_reload', 'enable live reload', true)
   .action(async (source, options) => {
+    process.env.NODE_ENV = 'development';
     ({ source, options } = await init_options(source, options));
+    const output = options.output;
     build(options);
+    options.output = output;
     server(options);
   });
 

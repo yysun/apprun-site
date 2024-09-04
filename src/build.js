@@ -1,7 +1,6 @@
 //@ts-check
 import { existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync, writeFileSync, copyFileSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
-
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
 import chalk from 'chalk';
@@ -27,14 +26,60 @@ export const should_ignore = (src, dest) => {
   return src_stat.mtimeMs <= dest_stat.mtimeMs;
 }
 
+async function walk(dir, config) {
+  let files = await readdir(dir);
+  await Promise.all(files.map(async file => {
+    const filePath = join(dir, file);
+    const stats = await stat(filePath);
+    if (stats.isDirectory()) return walk(filePath, config);
+    else if (stats.isFile()) return process_file(filePath, config);
+  }));
+}
+
+const run_build = async (config) => {
+  const start_time = Date.now();
+  routes.length = 0;
+  await walk(config.pages, config);
+  build_main(config);
+  const elapsed = Date.now() - start_time;
+  console.log(cyan(`Build done in ${elapsed} ms.`))
+}
+
+
+const debounce = (func, delay) => {
+  let timeout;
+  return (...args) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+};
+
+const onChange = ((config, path) => {
+  walk(dirname(path), config);
+//   if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
+//     const ext = extname(path);
+//     if (all_types.indexOf(ext) >= 0) {
+//       console.log(yellow('Change detected'), relative(path));
+//       // run_build();
+//       walk(dirname(path));
+//     }
+//   }
+});
+const debouncedOnChange = debounce(onChange, 300);
+
+
 let copy_files;
 export default async (config) => {
 
-  const { source, output, pages, assets, clean, relative } = config;
-  Array.isArray(assets) && Copy_Types.push(...assets);
-  copy_files = [...new Set(Copy_Types)];
+  let { pages, assets, clean, relative } = config;
 
-  console.log(cyan('Build from'), relative(pages));
+  const is_production = process.env.NODE_ENV === 'production';
+  const buildId = is_production ? '' : Math.floor(Date.now() / 1000).toString();
+  process.env.BUILD_ID = buildId;
+
+  const output = config.output = join(config.output, buildId);
+
+  console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${is_production ? cyan('for production') : cyan('for development')}`);
   if (clean) {
     rmSync(output, { recursive: true, force: true });
     console.log(cyan('Clean'), relative(output));
@@ -42,48 +87,10 @@ export default async (config) => {
 
   config.should_ignore = should_ignore;
 
-  async function walk(dir) {
-    let files = await readdir(dir);
-    await Promise.all(files.map(async file => {
-      const filePath = join(dir, file);
-      const stats = await stat(filePath);
-      if (stats.isDirectory()) return walk(filePath);
-      else if (stats.isFile()) return process_file(filePath, config);
-    }));
-  }
+  Array.isArray(assets) && Copy_Types.push(...assets);
+  copy_files = [...new Set(Copy_Types)];
 
-  const run_build = async () => {
-    const start_time = Date.now();
-    routes.length = 0;
-    await walk(pages);
-    !config['no-startup'] && build_main(config);
-    // await build_css(config);
-    const elapsed = Date.now() - start_time;
-    console.log(cyan(`Build done in ${elapsed} ms.`))
-  }
-
-  await run_build();
-
-  const debounce = (func, delay) => {
-    let timeout;
-    return (...args) => {
-      if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), delay);
-    };
-  };
-
-  const all_types = [...Copy_Types, ...Markdown_Types, ...Esbuild_Types, ...Css_Types, ...copy_files];
-  const onChange = ((event, path) => {
-    if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
-      const ext = extname(path);
-      if (all_types.indexOf(ext) >= 0) {
-        console.log(yellow('Change detected'), relative(path));
-        // run_build();
-        walk(dirname(path));
-      }
-    }
-  });
-  const debouncedOnChange = debounce(onChange, 300);
+  await run_build(config);
 
   let ready = false
   if (config.watch) {
@@ -93,7 +100,7 @@ export default async (config) => {
     });
     watcher.on('all', (event, path) => {
       if (ready && (event === 'change' || event === 'add' || event === 'unlink')) {
-        debouncedOnChange(event, path);
+        debouncedOnChange(config, path);
       }
     }).on('ready', () => {
       ready = true;

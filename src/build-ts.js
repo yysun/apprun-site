@@ -1,6 +1,6 @@
 //@ts-check
 import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import path from 'path';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import render_page from './render.js';
@@ -112,7 +112,7 @@ function _init_refresh() {
 }
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
-${init ? `import main from '../${relative(pages)}/main';
+${init ? `import main from '${path.relative(output, `${pages}/main`)}';
 export default main;
 main();
 `: 'export default () => {}'}
@@ -147,7 +147,7 @@ export const render = async (config) => {
 
   for (let i = 0; i < pages.length; i++) {
     const route = pages[i];
-    const html_file = join(output, route, 'index.html');
+    const html_file = path.join(output, route, 'index.html');
     console.log(magenta('Creating File'), relative(html_file));
     const content = await render_page(route + '/', config);
     writeFileSync(html_file, content, { flag: 'w' });
