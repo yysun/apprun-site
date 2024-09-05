@@ -1,15 +1,16 @@
 /* eslint-disable no-console */
 //@ts-check
-import { existsSync, mkdirSync, rmSync, statSync, copyFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, statSync, copyFileSync, writeFileSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
 import chalk from 'chalk';
-const { cyan, yellow, magenta, red } = chalk;
+const { cyan, yellow, magenta, red, green } = chalk;
 import esbuild from './esbuild.js';
 import { build_main, build_component, add_route, routes } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
+import render from './render.js';
 
 const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
@@ -37,13 +38,42 @@ async function walk(dir, config) {
   }));
 }
 
+const render_routes = async ({ output, relative}) => {
+  for (const route of routes) {
+    const path = route[0];
+    try {
+      const content = await render(path + '/', output);
+      if (content) {
+        const html_file = join(output, path, 'index.html');
+        writeFileSync(html_file, content);
+        console.log(green('Rendered'), relative(html_file));
+      } else {
+        console.log(magenta('Rendered empty'), path);
+      }
+    } catch (e) {
+      console.log(red('Render failed'), path, e.message);
+    }
+  }
+}
+
 const run_build = async (config) => {
-  const start_time = Date.now();
+  let start_time = Date.now();
   routes.length = 0;
   await walk(config.pages, config);
   build_main(config);
-  const elapsed = Date.now() - start_time;
-  console.log(cyan(`Build done in ${elapsed} ms.`))
+  let elapsed = Date.now() - start_time;
+  console.log(cyan(`Build done in ${elapsed} ms.`));
+  start_time = Date.now();
+  if (config.render) {
+    const fetch = global.fetch;
+    global.fetch = (url, ...p) => {
+      if (url.startsWith('/')) url = `http://localhost:${config.port || 8080}${url}`;
+      return fetch(url, ...p);
+    };
+    await render_routes(config);
+  }
+  elapsed = Date.now() - start_time;
+  console.log(cyan(`Render done in ${elapsed} ms.`));
 }
 
 
@@ -56,18 +86,10 @@ const debounce = (func, delay) => {
 };
 
 const onChange = ((config, path) => {
+  // console.log(yellow('Change detected'), relative(path));
   walk(dirname(path), config);
-//   if (path.indexOf(output) < 0 && path.indexOf(`${source}/api/`) < 0) {
-//     const ext = extname(path);
-//     if (all_types.indexOf(ext) >= 0) {
-//       console.log(yellow('Change detected'), relative(path));
-//       // run_build();
-//       walk(dirname(path));
-//     }
-//   }
 });
 const debouncedOnChange = debounce(onChange, 300);
-
 
 let copy_files;
 export default async (config) => {

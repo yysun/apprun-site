@@ -45,21 +45,20 @@ export function set_ssr(app, root, ssr) {
         const html_file = `${root}${path}index.html`;
         info('Serve:', path);
         if (existsSync(html_file)) {
-          debug('Serve:', html_file);
+          debug('Send:', html_file);
           res.sendFile(html_file);
         }
         else if (ssr) {
-          debug('SSR:', path);
           let content = await render(path, root);
           if (content) {
-            info('Serve:', `${root}${path}`, '(SSR)');
+            info('Serve:', `${path}`, '(SSR)');
             res.send(content);
             return;
           } else {
             warn('SSR:', path, 'failed, fallback to SPA');
           }
           const home_html = `${root}/_.html`;
-          info('Serve:', home_html, '(SPA)');
+          info('Serve:', '/._html', '(SPA)');
           res.sendFile(home_html);
         }
       }
