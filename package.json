@@ -8,7 +8,7 @@
   "scripts": {
     "test": "",
     "dev": "node apprun-site-cli dev demo",
-    "start": "node apprun-site-cli dev demo",
+    "start": "node demo/server",
     "serve": "node apprun-site-cli serve demo",
     "build:watch": "node apprun-site-cli build demo --watch",
     "build": "node apprun-site-cli build demo -c"

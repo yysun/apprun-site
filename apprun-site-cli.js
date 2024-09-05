@@ -35,8 +35,10 @@ program
   .option('-w, --watch', 'watch the directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
+  .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
+    options.info && console.log(options);
     build(options);
   });
 
@@ -45,11 +47,12 @@ program
   .description('launch preview server, live reload is optional')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .option('-n, --no_ssr', 'disable server side rendering', false)
-  .option('-l, --live_reload', 'enable live reload', false)
+  .option('--no-ssr', 'disable server side rendering')
+  .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
     process.env.NODE_ENV = 'production';
     ({ source, options } = await init_options(source, options));
+    options.info && console.log(options);
     build(options);
     server(options);
   });
@@ -60,12 +63,14 @@ program
   .option('-c, --clean', 'clean the output directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .option('-n, --no_ssr', 'disable server side rendering', false)
-  .option('-w, --watch', 'watch the directory', true)
-  .option('-l, --live_reload', 'enable live reload', true)
+  .option('--no-ssr', 'disable server side rendering', true)
+  .option('--no-watch', 'watch the directory', true)
+  .option('--no-live_reload', 'enable live reload', true)
+  .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
     process.env.NODE_ENV = 'development';
     ({ source, options } = await init_options(source, options));
+    options.info && console.log(options);
     const output = options.output;
     build(options);
     options.output = output;

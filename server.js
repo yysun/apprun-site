@@ -9,7 +9,7 @@ import bodyParser from 'body-parser';
 import render from './src/render.js';
 
 export default function (config = {}) {
-  let { source, output, no_ssr, port, root, save_ssr } = config;
+  let { source, output, ssr, port, root, save_ssr } = config;
   source = source || process.cwd();
   port = port || 8080;
   root = output || root || join(source, 'public');
@@ -18,8 +18,8 @@ export default function (config = {}) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  api(app, source, port);
-  ssr(app, root, no_ssr, save_ssr);
+  set_api(app, source, port);
+  set_ssr(app, root, ssr, save_ssr);
 
   app.use((err, req, res, next) => {
     const time = new Date(Date.now()).toString();
@@ -31,7 +31,7 @@ export default function (config = {}) {
   return app;
 }
 
-export function ssr(app, root, no_ssr, save_ssr) {
+export function set_ssr(app, root, ssr, save_ssr) {
 
   app.get('*', async (req, res, next) => {
     try {
@@ -46,11 +46,12 @@ export function ssr(app, root, no_ssr, save_ssr) {
         if (!path.endsWith('/')) path += '/';
         const html_file = `${root}${path}index.html`;
         console.log(cyan(`Serving ${path}`));
+
         if (existsSync(html_file)) {
           console.log(cyan(`\t${html_file}`));
           res.sendFile(html_file);
         }
-        else if (no_ssr) {
+        else if (!ssr) {
           const home_html = `${root}/index.html`;
           console.log(gray(`\t${home_html} (SPA)`));
           res.sendFile(home_html);
@@ -75,7 +76,7 @@ export function ssr(app, root, no_ssr, save_ssr) {
   });
 }
 
-export function api(app, source, port) {
+export function set_api(app, source, port) {
 
   const fetch = global.fetch;
   global.fetch = (url, ...p) => {
