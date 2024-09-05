@@ -1,16 +1,14 @@
 // @ts-check
-import { relative, join } from 'path';
+import { relative } from 'path';
 import WebSocket from 'ws';
 import chokidar from 'chokidar';
 import app_server from './server.js';
 import ws_server from './ws.js';
+import { info } from './src/log.js';
 
 export default function (config) {
   let { live_reload, port, no_ssr } = config;
   config.port = port = port || 8080;
-
-  const buildId = process.env.BUILD_ID || '';
-  config.output = join(config.output, buildId);
 
   const app = app_server(config);
   const { server, wss } = ws_server(app);
@@ -39,15 +37,15 @@ export default function (config) {
   server.listen(port, function () {
     if (live_reload) {
       const watcher = chokidar.watch(`${config.output}/**/*.{js,css,html}`, {
-        ignored: /(^|[\/\\])\../, // ignore dotfiles
+        ignored: /(^|[\\/])\../, // ignore dotfiles
         persistent: true
       });
       watcher.on('change', debouncedOnChange);
       watcher.on('add', debouncedOnChange);
     }
-    console.log(`Your app is listening on http://localhost:${port}`);
-    console.log(`Serving from: ${config.output}`);
-    console.log(`SSR ${no_ssr ? 'disabled' : 'enabled'}.`);
-    console.log(`Live reload ${!live_reload ? 'disabled' : 'enabled'}.`);
+    info('Your app is listening on:', `http://localhost:${port}`);
+    info('Serving from:', `${config.output}`);
+    info('SSR:', `${no_ssr ? 'disabled' : 'enabled'}.`);
+    info('Live reload:', `${!live_reload ? 'disabled' : 'enabled'}.`);
   });
 }

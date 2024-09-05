@@ -1,12 +1,11 @@
 // @ts-check
 
-import { existsSync, statSync, writeFileSync } from 'fs';
-import { relative, join } from 'path';
-import chalk from 'chalk';
-const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
+import { existsSync } from 'fs';
+import { join } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import render from './src/render.js';
+import { info, debug, error, warn } from './src/log';
 
 export default function (config = {}) {
   let { source, output, ssr, port, root } = config;
@@ -22,8 +21,7 @@ export default function (config = {}) {
   set_ssr(app, root, ssr);
 
   app.use((err, req, res, next) => {
-    const time = new Date(Date.now()).toString();
-    console.error('Error occurred:', req.path, time, err.message);
+    error('Failed: ', req.path, err.message);
     res.status(500).send(err.message);
     next(err);
   });
@@ -45,25 +43,25 @@ export function set_ssr(app, root, ssr) {
       } else {
         if (!path.endsWith('/')) path += '/';
         const html_file = `${root}${path}index.html`;
-        console.log(cyan(`Serving ${path}`));
-
+        const home_html = `${root}/index.html`;
+        info('Serve:', path);
         if (existsSync(html_file)) {
-          console.log(cyan(`\t${html_file}`));
+          info('Serve:', html_file);
           res.sendFile(html_file);
         }
-        else if (!ssr) {
-          const home_html = `${root}/index.html`;
-          console.log(gray(`\t${home_html} (SPA)`));
-          res.sendFile(home_html);
-        } else {
+        else if (ssr) {
+          debug('SSR:', path, 'start');
           let content = await render(path, root);
+          debug('SSR:', path, 'done');
+
           if (content) {
-            console.log(green(`\t${root}${path} - SSR`));
+            info('Serve:', `${root}${path}`, '(SSR)');
             res.send(content);
           } else {
-            console.log(red(`\t${path} not found`));
-            res.sendStatus(404);
+            warn('SSR:', path, 'failed, fallback to SPA');
           }
+          info('Serve:', home_html, '(SPA)');
+          res.sendFile(home_html);
         }
       }
     }
@@ -82,17 +80,22 @@ export function set_api(app, source, port) {
   }
 
   app.all('/api/*', async (req, res, next) => {
+
+    const path = req.path;
+    const paths = path.split('/');
+    info('API:', path);
+
     try {
       const run_api = async (js_file) => {
+
+        debug('API import:', js_file);
         const module = await import(`file://${js_file}`);
         const exp = module.default;
-        console.log(blue(`\t${js_file}`));
+        debug('API execute:', exp.name);
         exp(req, res, next);
       };
 
-      const path = req.path;
-      const paths = path.split('/');
-      console.log(blue(`Serving API ${path}`));
+
       for (let i = paths.length; i > 1; i--) {
         const route = paths.slice(1, i).join('/');
         let js_index = `${source}/${route}/index.js`;
@@ -104,10 +107,10 @@ export function set_api(app, source, port) {
           return run_api(js_index);
         }
       }
-      console.log(magenta(`\tUnknown path ${path}`));
+      error('API Error:', path, 'not found');
       res.sendStatus(404);
     } catch (e) {
-      console.log(red(e.message));
+      error('API Error:', path, e.message);
       next(e);
     }
   });

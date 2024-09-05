@@ -1,11 +1,12 @@
 import http from 'http';
 import WebSocket from 'ws';
+import { info, error } from './src/log.js';
 
 export default app => {
   const server = http.createServer(app);
   const wss = new WebSocket.Server({ server });
   wss.on('connection', (ws) => {
-    console.log('New WebSocket connection established');
+    info('WS:', 'New WebSocket connection established');
     ws.on('message', async function (message) {
       const data = JSON.parse(message);
       try {
@@ -44,12 +45,12 @@ export default app => {
           e && ws.send(JSON.stringify({ status:500, error: e.message }));
         });
       } catch (e) {
-        console.error(e);
+        error('ERROR:', e.message);
       }
     });
 
     ws.on('close', () => {
-      console.log('WebSocket connection closed');
+      info('WS:', 'WebSocket connection closed');
     });
   });
   return { server, wss };

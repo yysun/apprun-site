@@ -1,10 +1,11 @@
+/* eslint-disable no-console */
 //@ts-check
-import { existsSync, mkdirSync, readFileSync, rmSync, readdirSync, statSync, writeFileSync, copyFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, statSync, copyFileSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { join, dirname, basename, extname } from 'path';
 import chokidar from 'chokidar';
 import chalk from 'chalk';
-const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
+const { cyan, yellow, magenta, red } = chalk;
 import esbuild from './esbuild.js';
 import { build_main, build_component, add_route, routes } from './build-ts.js';
 import { build_css } from './build-css.js';
@@ -71,13 +72,8 @@ const debouncedOnChange = debounce(onChange, 300);
 let copy_files;
 export default async (config) => {
 
-  let { pages, assets, clean, relative } = config;
-
+  const { pages, output, assets, clean, relative } = config;
   const is_production = process.env.NODE_ENV === 'production';
-  const buildId = is_production ? '' : Math.floor(Date.now() / 1000).toString();
-  process.env.BUILD_ID = buildId;
-
-  const output = config.output = join(config.output, buildId);
 
   console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${is_production ? cyan('for production') : cyan('for development')}`);
   if (clean) {
@@ -95,7 +91,7 @@ export default async (config) => {
   let ready = false
   if (config.watch) {
     const watcher = chokidar.watch(pages, {
-      ignored: /(^|[\/\\])\../, // ignore dotfiles
+      ignored: /(^|[/\\])\../, // ignore dotfiles
       persistent: true
     });
     watcher.on('all', (event, path) => {
