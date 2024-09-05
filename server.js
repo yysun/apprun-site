@@ -10,7 +10,7 @@ import { info, debug, error, warn } from './src/log.js';
 export default function (config = {}) {
   let { source, output, ssr, port, root } = config;
   source = source || process.cwd();
-  port = port || 8080;
+  port = port || process.env.PORT || 8080;
   root = output || root || join(source, 'public');
   const app = express();
 

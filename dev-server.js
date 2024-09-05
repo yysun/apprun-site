@@ -8,7 +8,7 @@ import { info } from './src/log.js';
 
 export default function (config) {
   let { live_reload, port, no_ssr } = config;
-  config.port = port = port || 8080;
+  config.port = port = port || process.env.PORT || 8080;
 
   const app = app_server(config);
   const { server, wss } = ws_server(app);
