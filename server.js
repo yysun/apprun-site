@@ -9,7 +9,7 @@ import bodyParser from 'body-parser';
 import render from './src/render.js';
 
 export default function (config = {}) {
-  let { source, output, ssr, port, root, save_ssr } = config;
+  let { source, output, ssr, port, root } = config;
   source = source || process.cwd();
   port = port || 8080;
   root = output || root || join(source, 'public');
@@ -19,7 +19,7 @@ export default function (config = {}) {
   app.use(bodyParser.urlencoded({ extended: true }));
 
   set_api(app, source, port);
-  set_ssr(app, root, ssr, save_ssr);
+  set_ssr(app, root, ssr);
 
   app.use((err, req, res, next) => {
     const time = new Date(Date.now()).toString();
@@ -31,7 +31,7 @@ export default function (config = {}) {
   return app;
 }
 
-export function set_ssr(app, root, ssr, save_ssr) {
+export function set_ssr(app, root, ssr) {
 
   app.get('*', async (req, res, next) => {
     try {
@@ -58,9 +58,6 @@ export function set_ssr(app, root, ssr, save_ssr) {
         } else {
           let content = await render(path, root);
           if (content) {
-            if (save_ssr) {
-              writeFileSync(html_file, content);
-            }
             console.log(green(`\t${root}${path} - SSR`));
             res.send(content);
           } else {
