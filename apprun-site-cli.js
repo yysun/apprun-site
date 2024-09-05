@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import { existsSync } from 'fs';
 import { relative, join } from 'path';
