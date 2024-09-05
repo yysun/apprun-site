@@ -115,7 +115,8 @@ async function process_file(file, config) {
   const js_file = join(output, dir, name) + '.js';
 
   if (copy_files.indexOf(ext) >= 0) {
-    const dest = join(pub_dir, name) + ext;
+    let dest = join(pub_dir, name) + ext;
+    if (dest === join(output, 'index.html')) dest = join(output, '_.html');
     if (!should_ignore(file, dest)) {
       copyFileSync(file, dest);
       console.log(cyan('Copied File'), relative(dest));

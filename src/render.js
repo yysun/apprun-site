@@ -1,5 +1,5 @@
 //@ ts -check
-import { readFileSync, existsSync, statSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { JSDOM } from 'jsdom';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
@@ -8,9 +8,10 @@ export default async (path, output) => {
   let content = '';
   const paths = path.split('/');
   for (let i = paths.length - 1; i > 0; i--) {
-    const route = '/' + paths.slice(1, i).join('/');
-    const js_index = `${output}${route}/index.js`;
-    const js_file = `${output}${route}.js`;
+    let route = paths.slice(1, i).join('/');
+    route = route || '.';
+    const js_index = `${output}/${route}/index.js`;
+    const js_file = `${output}/${route}.js`;
     if (existsSync(js_index)) {
       content = await render(output, js_index, route, paths.slice(i));
       break;
@@ -23,7 +24,7 @@ export default async (path, output) => {
 }
 
 async function render(output, js_file, route, params) {
-  const html = readFileSync(`${output}/index.html`, 'utf8');
+  const html = readFileSync(`${output}/_.html`, 'utf8');
   const dom = new JSDOM(html);
   const win = global.window = dom.window;
   const document = global.document = dom.window.document;
@@ -43,8 +44,6 @@ async function render(output, js_file, route, params) {
 }
 
 async function run_module(element, js_file, route, params) {
-  // const { mtimeMs } = statSync(js_file);
-  // const module = await import(`file://${js_file}?${mtimeMs}`);
   const module = await import(`file://${js_file}`);
   const exp = module.default;
   // console.log(green(`\t ${js_file}`));

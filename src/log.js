@@ -10,7 +10,7 @@ const logFormat = printf(({ level, message, timestamp }) => {
 
 // Create the Winston logger instance
 const logger = createLogger({
-  level: 'info', // Default log level
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug', // Default log level
   format: process.env.NODE_ENV !== 'production'
     ? combine(
       colorize(),               // Add colors in development

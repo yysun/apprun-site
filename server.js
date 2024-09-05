@@ -5,7 +5,7 @@ import { join } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import render from './src/render.js';
-import { info, debug, error, warn } from './src/log';
+import { info, debug, error, warn } from './src/log.js';
 
 export default function (config = {}) {
   let { source, output, ssr, port, root } = config;
@@ -43,29 +43,29 @@ export function set_ssr(app, root, ssr) {
       } else {
         if (!path.endsWith('/')) path += '/';
         const html_file = `${root}${path}index.html`;
-        const home_html = `${root}/index.html`;
         info('Serve:', path);
         if (existsSync(html_file)) {
-          info('Serve:', html_file);
+          debug('Serve:', html_file);
           res.sendFile(html_file);
         }
         else if (ssr) {
-          debug('SSR:', path, 'start');
+          debug('SSR:', path);
           let content = await render(path, root);
-          debug('SSR:', path, 'done');
-
           if (content) {
             info('Serve:', `${root}${path}`, '(SSR)');
             res.send(content);
+            return;
           } else {
             warn('SSR:', path, 'failed, fallback to SPA');
           }
+          const home_html = `${root}/_.html`;
           info('Serve:', home_html, '(SPA)');
           res.sendFile(home_html);
         }
       }
     }
     catch (err) {
+      error('Error:', req.path, err.message);
       next(err);
     }
   });
@@ -91,7 +91,6 @@ export function set_api(app, source, port) {
         debug('API import:', js_file);
         const module = await import(`file://${js_file}`);
         const exp = module.default;
-        debug('API execute:', exp.name);
         exp(req, res, next);
       };
 
@@ -107,10 +106,10 @@ export function set_api(app, source, port) {
           return run_api(js_index);
         }
       }
-      error('API Error:', path, 'not found');
+      warn('API Error:', path, 'not found');
       res.sendStatus(404);
     } catch (e) {
-      error('API Error:', path, e.message);
+      error('Error:', path, e.message);
       next(e);
     }
   });

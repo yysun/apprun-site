@@ -1,15 +1,16 @@
+/* eslint-disable no-console */
 //@ts-check
-import { writeFileSync, existsSync, readFileSync, mkdirSync, copyFileSync, rmSync, unlinkSync } from 'fs';
+import { writeFileSync, existsSync, unlinkSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
+const { cyan, green, magenta, gray} = chalk;
 import render_page from './render.js';
 import esbuild, { bundle } from './esbuild.js';
 
 export let routes = [];
 
 export const build_component = (content, target) => {
-  const html = content.replace(/\`/g, '\\`');
+  const html = content.replace(/`/g, '\\`');
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
@@ -27,7 +28,7 @@ export const add_route = (route, target, output) => {
   }
 };
 
-export const build_main = ({ site_url, route, app_element, output, pages, live_reload, relative, source, should_ignore }) => {
+export const build_main = ({ site_url, route, app_element, output, pages, live_reload, relative, source }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -39,7 +40,7 @@ export const build_main = ({ site_url, route, app_element, output, pages, live_r
   const get_element = () => {
     const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
     const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
-    if (!el) console.warn(\`window['app-element'] not defined\, will use document.body\`);
+    if (!el) console.warn(\`window['app-element'] not defined, will use document.body\`);
     return el || document.body;
   }
   const add_component = (component, site_url) => {

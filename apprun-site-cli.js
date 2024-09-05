@@ -72,9 +72,7 @@ program
     process.env.NODE_ENV = 'development';
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
-    const output = options.output;
     build(options);
-    options.output = output;
     server(options);
   });
 
