@@ -35,6 +35,7 @@ export const build_main = ({ site_url, route, app_element, output, pages, live_r
   const tsx_file = `${output}/main.tsx`;
   const main_js_file = `${output}/main.js`;
   const init = existsSync(main_file);
+  const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
   const main = `import app from 'apprun';
   const get_element = () => {
@@ -113,7 +114,7 @@ function _init_refresh() {
 }
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
-${init ? `import main from '${path.relative(output, `${pages}/main`)}';
+${init ? `import main from '${pages_main}';
 export default main;
 main();
 `: 'export default () => {}'}
