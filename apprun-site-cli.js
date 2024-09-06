@@ -26,7 +26,7 @@ async function init_options(source, options) {
 }
 
 program
-  .version('1.3.16')
+  .version('1.3.17')
   .description('AppRun Site CLI');
 
 program

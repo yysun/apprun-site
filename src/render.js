@@ -1,5 +1,5 @@
 //@ ts -check
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { JSDOM } from 'jsdom';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
@@ -44,7 +44,8 @@ async function render(output, js_file, route, params) {
 }
 
 async function run_module(element, js_file, route, params) {
-  const module = await import(`file://${js_file}`);
+  const { mtimeMs } = statSync(js_file);
+  const module = await import(`file://${js_file}?${mtimeMs}`);
   const exp = module.default;
   // console.log(green(`\t ${js_file}`));
   if (exp.prototype && exp.prototype.constructor.name === exp.name) {
