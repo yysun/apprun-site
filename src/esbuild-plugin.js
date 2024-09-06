@@ -1,53 +1,69 @@
-import { resolve, join, dirname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+/* eslint-disable no-console */
+import { resolve, join, relative } from 'path';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
 import esbuild from 'esbuild';
-import { fileURLToPath } from 'url'; // import the fileURLToPath function
 
-const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
-const __dirname = dirname(__filename);
+function resolveModuleEntryPoint(moduleName, outputDir) {
+  const packageJsonPath = resolve(outputDir, '../node_modules', moduleName, 'package.json');
 
-const replaceGlobalWithLocalPlugin = {
+  if (!existsSync(packageJsonPath)) {
+    throw new Error(`Cannot find package.json for module ${moduleName}`);
+  }
+
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+
+  let entryPoint = packageJson.module || packageJson.main;
+
+  // Handle the case where 'exports' field is used
+  if (!entryPoint && typeof packageJson.exports === 'object') {
+    if (typeof packageJson.exports === 'string') {
+      entryPoint = packageJson.exports;
+    } else if (packageJson.exports['.'] && typeof packageJson.exports['.'] === 'string') {
+      entryPoint = packageJson.exports['.'];
+    } else if (packageJson.exports['.'] && packageJson.exports['.'].default) {
+      entryPoint = packageJson.exports['.'].default;
+    }
+  }
+
+  if (!entryPoint) entryPoint = 'index.js';
+  return resolve(outputDir, '../node_modules', moduleName, entryPoint);
+}
+
+
+const replaceGlobalWithLocalPlugin = (outputDir) => ({
   name: 'replace-global-with-local',
   setup(build) {
-    const modulesToBuild = new Set(); // Set to store modules that need to be built
+    const modulesToBuild = new Set();
 
-    // Intercept global import paths (ignore relative and absolute paths)
-    build.onResolve({ filter: /^(?!([A-Za-z]:|\.{1,2}[/\\]|\/)).+/ }, args => {
-      // Add the module to the Set for building later
+    build.onResolve({ filter: /^[^./\\@][^:]*$/ }, args => {
       modulesToBuild.add(args.path);
-
-      // Replace the import path with a local path in node_modules
-      return {
-        path: resolve(__dirname, `node_modules/${args.path}`),
-        namespace: 'file',
-      };
+      return { path: '/node_modules/' + args.path + '.js', external: true }
     });
 
-    // Post-build step to copy modules as ESM to public/node_module
     build.onEnd(async () => {
-      const outputDir = resolve(__dirname, 'public/node_module');
+      if (modulesToBuild.size <= 0) return;
 
-      // Ensure the output directory exists
       if (!existsSync(outputDir)) {
         mkdirSync(outputDir, { recursive: true });
       }
 
-      // Build each module individually if it hasn't been built already
       for (const moduleName of modulesToBuild) {
-        const outputFilePath = join(outputDir, `${moduleName}.js`);
-
-        // Check if the module has already been built
+        const outputFilePath = join(outputDir, 'node_modules', `${moduleName}.js`);
         if (!existsSync(outputFilePath)) {
-          await esbuild.build({
-            entryPoints: [require.resolve(moduleName)],
-            bundle: false,
+          const entryPoint = resolveModuleEntryPoint(moduleName, outputDir);
+          console.log('\tBuilding', relative(outputDir, entryPoint), 'to', relative(outputDir, outputFilePath));
+          await esbuild.buildSync({
+            entryPoints: [entryPoint],
+            bundle: true,
             format: 'esm',
+            sourcemap: true,
+            minify: false,
             outfile: outputFilePath,
           });
         }
       }
     });
   },
-};
+});
 
 export default replaceGlobalWithLocalPlugin;
