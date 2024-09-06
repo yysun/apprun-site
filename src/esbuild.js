@@ -10,12 +10,10 @@ export default async function (file, target, options = {}) {
       entryPoints: [file],
       outfile: target,
       format: 'esm',
-      bundle: true,
+      bundle: false,
       sourcemap: true,
-      external: ['./node_modules/*'],
       minify: false,
       ...options,
-      // plugins: [plugin],
     });
     result.errors.length && console.log(red(result.errors));
     result.warnings.length && console.log(yellow(result.warnings));
