@@ -60,7 +60,7 @@ const run_build = async (config) => {
   let start_time = Date.now();
   routes.length = 0;
   await walk(config.pages, config);
-  build_main(config);
+  await build_main(config);
   let elapsed = Date.now() - start_time;
   console.log(cyan(`Build done in ${elapsed} ms.`));
   start_time = Date.now();
@@ -72,9 +72,9 @@ const run_build = async (config) => {
       return fetch(url, ...p);
     };
     await render_routes(config);
+    elapsed = Date.now() - start_time;
+    console.log(cyan(`Render done in ${elapsed} ms.`));
   }
-  elapsed = Date.now() - start_time;
-  console.log(cyan(`Render done in ${elapsed} ms.`));
 }
 
 
@@ -150,7 +150,7 @@ async function process_file(file, config) {
       if (!content) {
         console.log(red('Markdown load failed'));
       } else {
-        build_component(content, js_file);
+        await build_component(content, js_file);
         console.log(cyan('Created Component'), relative(js_file));
       }
     }

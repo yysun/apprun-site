@@ -1,11 +1,12 @@
+/* eslint-disable no-console */
 import esbuild from 'esbuild';
 import chalk from 'chalk';
-
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
+// import plugin from './esbuild-plugin.js';
 
-export default function (file, target, options = {}) {
+export default async function (file, target, options = {}) {
   try {
-    const result = esbuild.buildSync({
+    const result = await esbuild.build({
       entryPoints: [file],
       outfile: target,
       format: 'esm',
@@ -13,7 +14,8 @@ export default function (file, target, options = {}) {
       sourcemap: true,
       external: ['./node_modules/*'],
       minify: false,
-      ...options
+      ...options,
+      // plugins: [plugin],
     });
     result.errors.length && console.log(red(result.errors));
     result.warnings.length && console.log(yellow(result.warnings));
@@ -22,9 +24,9 @@ export default function (file, target, options = {}) {
   }
 }
 
-export function bundle(output, entryPoints) {
+export async function bundle(output, entryPoints) {
   try {
-    const result = esbuild.buildSync({
+    const result = await esbuild.build({
       entryPoints,
       bundle: true,
       splitting: true,

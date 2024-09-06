@@ -9,14 +9,14 @@ import esbuild, { bundle } from './esbuild.js';
 
 export let routes = [];
 
-export const build_component = (content, target) => {
+export const build_component = async (content, target) => {
   const html = content.replace(/`/g, '\\`');
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
-  esbuild(tsx_file, target);
+  await esbuild(tsx_file, target);
   unlinkSync(tsx_file);
 };
 
@@ -28,7 +28,7 @@ export const add_route = (route, target, output) => {
   }
 };
 
-export const build_main = ({ site_url, route, app_element, output, pages, live_reload, relative, source }) => {
+export const build_main = async ({ site_url, route, app_element, output, pages, live_reload, relative, source }) => {
 
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
@@ -121,7 +121,7 @@ main();
 `;
 
   writeFileSync(tsx_file, main);
-  esbuild(tsx_file, main_js_file);
+  await esbuild(tsx_file, main_js_file);
   // unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
 
