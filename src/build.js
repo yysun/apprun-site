@@ -65,12 +65,6 @@ const run_build = async (config) => {
   console.log(cyan(`Build done in ${elapsed} ms.`));
   start_time = Date.now();
   if (config.render) {
-    const port = config.port || process.env.PORT || 8080;
-    const fetch = global.fetch;
-    global.fetch = (url, ...p) => {
-      if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
-      return fetch(url, ...p);
-    };
     await render_routes(config);
     elapsed = Date.now() - start_time;
     console.log(cyan(`Render done in ${elapsed} ms.`));

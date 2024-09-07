@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 //@ ts -check
 import { readFileSync, existsSync, statSync } from 'fs';
 import { JSDOM } from 'jsdom';
@@ -5,45 +6,55 @@ import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
 
 export default async (path, output) => {
-  let content = '';
-  const paths = path.split('/');
-  for (let i = paths.length - 1; i > 0; i--) {
-    let route = paths.slice(1, i).join('/');
-    route = route || '.';
-    const js_index = `${output}/${route}/index.js`;
-    const js_file = `${output}/${route}.js`;
-    if (existsSync(js_index)) {
-      content = await render(output, js_index, route, paths.slice(i));
-      break;
-    } else if (existsSync(js_file)) {
-      content = await render(output, js_file, route, paths.slice(i));
-      break;
-    }
-  }
-  return content;
-}
 
-async function render(output, js_file, route, params) {
   const html = readFileSync(`${output}/_.html`, 'utf8');
   const dom = new JSDOM(html);
   const win = global.window = dom.window;
   const document = global.document = dom.window.document;
-
   global.window.app = app;
   global.window.Component = Component;
   global.window.safeHTML = safeHTML;
   global.HTMLElement = dom.window.HTMLElement;
   global.SVGElement = dom.window.SVGElement;
+
+  const port = process.env.PORT || 8080;
+  const fetch = global.fetch;
+  global.fetch = (url, ...p) => {
+    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
+    return fetch(url, ...p);
+  };
+
   const main_file = `${output}/main.js`;
   if (existsSync(main_file)) {
     await run_module(document.body, main_file, '/', []);
   }
   const el = document.getElementById(win['app-element']) || document.body;
-  await run_module(el, js_file, route, params);
-  return document.documentElement.outerHTML;
-}
+  const paths = path.split('/').filter(p => !!p);
 
-async function run_module(element, js_file, route, params) {
+  for (let i = paths.length; i > 0; i--) {
+    const route = '/' + paths.slice(0,i).join('/');
+    const params = paths.slice(i);
+    try {
+      const js_index = `${output}${route}/index.js`;
+      const js_file = `${output}${route}.js`;
+      if (existsSync(js_index)) {
+        await run_module(el, js_index, route, params);
+        break;
+      } else if (existsSync(js_file)) {
+        await run_module(el, js_file, route, params);
+        break;
+      }
+    } catch (e) {
+      // Module not found, continue to the next path
+      if (e.code !== 'MODULE_NOT_FOUND') {
+        console.error(`Error loading module for path ${route}:`, e);
+      }
+    }
+  }
+  return document.documentElement.outerHTML;
+};
+
+export async function run_module(element, js_file, route, params) {
   const { mtimeMs } = statSync(js_file);
   const module = await import(`file://${js_file}?${mtimeMs}`);
   const exp = module.default;
@@ -57,5 +68,4 @@ async function run_module(element, js_file, route, params) {
     const vdom = await exp(...params);
     vdom && app.render(element, vdom);
   }
-
 }

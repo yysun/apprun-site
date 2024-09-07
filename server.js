@@ -1,6 +1,6 @@
 // @ts-check
 
-import { existsSync } from 'fs';
+import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -8,16 +8,15 @@ import render from './src/render.js';
 import { info, debug, error, warn } from './src/log.js';
 
 export default function (config = {}) {
-  let { source, output, ssr, port, root } = config;
+  let { source, output, ssr, root } = config;
   source = source || process.cwd();
-  port = port || process.env.PORT || 8080;
   root = output || root || join(source, 'public');
   const app = express();
 
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  set_api(app, source, port);
+  set_api(app, source);
   set_ssr(app, root, ssr);
 
   app.use((err, req, res, next) => {
@@ -70,25 +69,19 @@ export function set_ssr(app, root, ssr) {
   });
 }
 
-export function set_api(app, source, port) {
-
-  const fetch = global.fetch;
-  global.fetch = (url, ...p) => {
-    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
-    return fetch(url, ...p);
-  }
+export function set_api(app, source) {
 
   app.all('/api/*', async (req, res, next) => {
 
     const path = req.path;
     const paths = path.split('/');
-    info('API:', path);
+    info('API  :', path);
 
     try {
       const run_api = async (js_file) => {
-
-        debug('API import:', js_file);
-        const module = await import(`file://${js_file}`);
+        const { mtimeMs } = statSync(js_file);
+        const module = await import(`file://${js_file}?${mtimeMs}`);
+        debug('Load:', js_file);
         const exp = module.default;
         exp(req, res, next);
       };
