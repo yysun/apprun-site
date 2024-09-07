@@ -46,6 +46,7 @@ export function set_ssr(app, root, ssr) {
         if (existsSync(html_file)) {
           debug('Send:', html_file);
           res.sendFile(html_file);
+          return;
         }
         else if (ssr) {
           let content = await render(path, root);
@@ -56,10 +57,10 @@ export function set_ssr(app, root, ssr) {
           } else {
             warn('SSR:', path, 'failed, fallback to SPA');
           }
+          }
           const home_html = `${root}/_.html`;
           info('Serve:', '/._html', '(SPA)');
           res.sendFile(home_html);
-        }
       }
     }
     catch (err) {
