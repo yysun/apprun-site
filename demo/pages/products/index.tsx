@@ -45,7 +45,7 @@ export default class extends Component {
 
   update = {
     '/products': (state, id) => {
-      return ({ ...state, id: parseInt(id) })
+      if (id !== 'calculator') return ({ ...state, id: parseInt(id) })
     }
   };
 }
