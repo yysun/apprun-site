@@ -1,7 +1,7 @@
 // @ts-check
 
 import { existsSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import render from './src/render.js';
@@ -17,6 +17,7 @@ export default function (config = {}) {
   app.use(bodyParser.urlencoded({ extended: true }));
 
   set_api(app, source);
+  set_push(app, root);
   set_ssr(app, root, ssr);
 
   app.use((err, req, res, next) => {
@@ -57,10 +58,10 @@ export function set_ssr(app, root, ssr) {
           } else {
             warn('SSR:', path, 'failed, fallback to SPA');
           }
-          }
-          const home_html = `${root}/_.html`;
-          info('Serve:', '/._html', '(SPA)');
-          res.sendFile(home_html);
+        }
+        const home_html = `${root}/_.html`;
+        info('Serve:', '/._html', '(SPA)');
+        res.sendFile(home_html);
       }
     }
     catch (err) {
@@ -104,6 +105,46 @@ export function set_api(app, source) {
     } catch (e) {
       error('Error:', path, e.message);
       next(e);
+    }
+  });
+}
+
+export function set_push(app, root) {
+  app.get('/_/*', async (req, res, next) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    try {
+      let path = req.path.replace('/_', '');
+      const segments = path.split('/').filter(segment => segment !== '');
+      const paths = ['/'].concat(
+        segments.map((_, index, array) => '/' + array.slice(0, index + 1).join('/'))
+      );
+      const modules = [];
+      for (const route of paths) {
+        try {
+          if(route === '/' && paths.length > 1) continue;
+          const js_index = `${root}${route}/index.js`;
+          const js_file = `${root}${route}.js`;
+          let result = null;
+          if (existsSync(js_index)) {
+            result = relative(root, js_index);
+            modules.push(result);
+          } else if (existsSync(js_file)) {
+            result = relative(root, js_file);
+            modules.push(result);
+          }
+        } catch (error) {
+          res.write(`data: {"error": "${error.message}"}\n\n`);
+        }
+      }
+      if (modules.length) {
+        res.write(`data: ${JSON.stringify(modules.slice(-1))}\n\n`);
+      }
+      res.end();
+    } catch (err) {
+      error('Error:', req.path, err.message);
+      next(err);
     }
   });
 }

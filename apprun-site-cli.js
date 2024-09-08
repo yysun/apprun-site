@@ -37,7 +37,8 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-i, --info', 'print option information', false)
-  .option('-r --render', 'print option information', false)
+  .option('-r --render', 'pre-render pages', false)
+  .option('--no-csr', 'no client side rendering', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
@@ -66,6 +67,7 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('--no-ssr', 'disable server side rendering', true)
+  .option('--no-csr', 'no client side rendering', true)
   .option('--no-watch', 'watch the directory', true)
   .option('--no-live_reload', 'enable live reload', true)
   .option('-i, --info', 'print option information', false)

@@ -28,8 +28,8 @@ export const add_route = (route, target, output) => {
   }
 };
 
-export const build_main = async ({ site_url, route, app_element, output, pages, live_reload, relative, source }) => {
-
+export const build_main = async (config) => {
+  const { site_url, route, app_element, output, pages, live_reload, relative, source, csr } = config;
   const route_hash = route === '#';
   const main_file = `${pages}/main.tsx`;
   const tsx_file = `${output}/main.tsx`;
@@ -120,10 +120,61 @@ main();
 `: 'export default () => {}'}
 `;
 
-  writeFileSync(tsx_file, main);
+
+  const main_push = `import app from 'apprun';
+
+${init ? `import main from '${pages_main}';
+export default main;
+main();
+`: 'export default () => {}'}
+
+window.onload = ()=> {
+
+  const get_element = () => {
+    const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
+    const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
+    if (!el) console.warn(\`window['app-element'] not defined, will use document.body\`);
+    return el || document.body;
+  }
+
+  const es = new EventSource('/_' + document.location.pathname);
+  es.onmessage = async function (event) {
+    const data = JSON.parse(event.data);
+    for (const result of data) {
+      const timestamp = Date.now();
+      ${live_reload ? `
+      const module = await import(\`/\${result}?\${timestamp}\`);`: `
+      const module = await import(\`/\${result}\`);`}
+      const exp = module.default;
+      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+        const component = new module.default();
+        component.mount(get_element());
+        if (component.state instanceof Promise) {
+          component.state = await component.state;
+        }
+        app.route(location.pathname);
+      } else {
+        const vdom = await exp();
+        app.render(get_element(), vdom);
+      }
+    }
+  };
+
+  es.addEventListener('end', function (event) {
+    es.close();
+  });
+
+  es.onerror = function (event) {
+    es.close();
+  }
+};
+`;
+
+  writeFileSync(tsx_file, csr ? main : main_push);
   await esbuild(tsx_file, main_js_file);
   // unlinkSync(tsx_file);
-  console.log(green('Created main file'), 'main.js', magenta(`(live reload: ${live_reload || false})`));
+  console.log(green('Created main file'), 'main.js',
+    magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
   const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
   bundle(output, entryPoints);
