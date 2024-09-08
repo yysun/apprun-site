@@ -1,6 +1,6 @@
 // @ts-check
 
-import { existsSync, statSync } from 'fs';
+import { existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
 import { join, relative } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -29,7 +29,7 @@ export default function (config = {}) {
   return app;
 }
 
-export function set_ssr(app, root, ssr) {
+export function set_ssr(app, root, ssr, save=true) {
 
   app.get('*', async (req, res, next) => {
     try {
@@ -43,16 +43,33 @@ export function set_ssr(app, root, ssr) {
       } else {
         if (!path.endsWith('/')) path += '/';
         const html_file = `${root}${path}index.html`;
+        const source_js = find_js(path, root);
         info('Serve:', path);
-        if (existsSync(html_file)) {
-          debug('Send:', html_file);
-          res.sendFile(html_file);
-          return;
+        if (source_js && existsSync(html_file)) {
+          const { mtimeMs: html_mtimeMs } = statSync(html_file);
+          const { mtimeMs: js_mtimeMs } = statSync(source_js);
+          if (js_mtimeMs < html_mtimeMs) {
+            debug('Send:', html_file);
+            res.sendFile(html_file);
+            return;
+          }
         }
         else if (ssr) {
           let content = await render(path, root);
           if (content) {
             info('Serve:', `${path}`, '(SSR)');
+            if (save) {
+
+              //ensure the directory exists
+              const dir = join(root, path);
+              if (!existsSync(dir)) {
+                debug('Mkdir:', dir);
+                mkdirSync(dir, { recursive: true });
+              }
+
+              writeFileSync(html_file, content);
+              debug('Save:', html_file);
+            }
             res.send(content);
             return;
           } else {
@@ -147,4 +164,23 @@ export function set_push(app, root) {
       next(err);
     }
   });
+}
+
+
+function find_js(req_path, root) {
+  let path = req_path.replace('/_', '');
+  const segments = path.split('/').filter(segment => segment !== '');
+  const paths = ['/'].concat(
+    segments.map((_, index, array) => '/' + array.slice(0, index + 1).join('/'))
+  );
+  for (const route of paths) {
+    if (route === '/' && paths.length > 1) continue;
+    const js_index = `${root}${route}/index.js`;
+    const js_file = `${root}${route}.js`;
+    if (existsSync(js_index)) {
+      return (js_index);
+    } else if (existsSync(js_file)) {
+      return (js_file);
+    }
+  }
 }

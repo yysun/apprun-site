@@ -38,7 +38,7 @@ program
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-i, --info', 'print option information', false)
   .option('-r --render', 'pre-render pages', false)
-  .option('--no-csr', 'no client side rendering', false)
+  .option('--no-csr', 'no client side rendering')
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
@@ -51,6 +51,7 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('--no-ssr', 'disable server side rendering')
+  .option('--no-save', 'disable auto save of side rendered pages')
   .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
     process.env.NODE_ENV = 'production';
@@ -66,10 +67,11 @@ program
   .option('-c, --clean', 'clean the output directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .option('--no-ssr', 'disable server side rendering', true)
-  .option('--no-csr', 'no client side rendering', true)
-  .option('--no-watch', 'watch the directory', true)
-  .option('--no-live_reload', 'enable live reload', true)
+  .option('--no-ssr', 'disable server side rendering')
+  .option('--no-save', 'disable auto save of side rendered pages')
+  .option('--no-csr', 'no client side rendering')
+  .option('--no-watch', 'watch the directory')
+  .option('--no-live_reload', 'enable live reload')
   .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
     process.env.NODE_ENV = 'development';
