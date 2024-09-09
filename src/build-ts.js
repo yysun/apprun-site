@@ -128,46 +128,46 @@ export default main;
 main();
 `: 'export default () => {}'}
 
-window.onload = ()=> {
+// window.onload = ()=> {
 
-  const get_element = () => {
-    const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
-    const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
-    if (!el) console.warn(\`window['app-element'] not defined, will use document.body\`);
-    return el || document.body;
-  }
+//   const get_element = () => {
+//     const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
+//     const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
+//     if (!el) console.warn(\`window['app-element'] not defined, will use document.body\`);
+//     return el || document.body;
+//   }
 
-  const es = new EventSource('/_' + document.location.pathname);
-  es.onmessage = async function (event) {
-    const data = JSON.parse(event.data);
-    for (const result of data) {
-      const timestamp = Date.now();
-      ${live_reload ? `
-      const module = await import(\`/\${result}?\${timestamp}\`);`: `
-      const module = await import(\`/\${result}\`);`}
-      const exp = module.default;
-      if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-        const component = new module.default();
-        component.mount(get_element());
-        if (component.state instanceof Promise) {
-          component.state = await component.state;
-        }
-        app.route(location.pathname);
-      } else {
-        const vdom = await exp();
-        app.render(get_element(), vdom);
-      }
-    }
-  };
+//   const es = new EventSource('/_' + document.location.pathname);
+//   es.onmessage = async function (event) {
+//     const data = JSON.parse(event.data);
+//     for (const result of data) {
+//       const timestamp = Date.now();
+//       ${live_reload ? `
+//       const module = await import(\`/\${result}?\${timestamp}\`);`: `
+//       const module = await import(\`/\${result}\`);`}
+//       const exp = module.default;
+//       if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+//         const component = new module.default();
+//         component.mount(get_element());
+//         if (component.state instanceof Promise) {
+//           component.state = await component.state;
+//         }
+//         app.route(location.pathname);
+//       } else {
+//         const vdom = await exp();
+//         app.render(get_element(), vdom);
+//       }
+//     }
+//   };
 
-  es.addEventListener('end', function (event) {
-    es.close();
-  });
+//   es.addEventListener('end', function (event) {
+//     es.close();
+//   });
 
-  es.onerror = function (event) {
-    es.close();
-  }
-};
+//   es.onerror = function (event) {
+//     es.close();
+//   }
+// };
 `;
 
   writeFileSync(tsx_file, csr ? main : main_push);

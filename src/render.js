@@ -30,6 +30,7 @@ export default async (path, output) => {
   }
   const el = document.getElementById(win['app-element']) || document.body;
   const paths = path.split('/').filter(p => !!p);
+  if (paths.length === 0) paths.push('/'); // for /index.html
 
   for (let i = paths.length; i > 0; i--) {
     const route = '/' + paths.slice(0,i).join('/');

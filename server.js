@@ -54,7 +54,7 @@ export function set_ssr(app, root, ssr, save=true) {
             return;
           }
         }
-        else if (ssr) {
+        if (ssr) {
           let content = await render(path, root);
           if (content) {
             info('Serve:', `${path}`, '(SSR)');
