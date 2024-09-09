@@ -5,7 +5,7 @@ import { exec } from 'child_process';
 
 export const build_tailwind = async (from, to, config) => {
   const { source, pages, output, relative, should_ignore } = config;
-  const tailwind = `${source}/tailwind.config.cjs`;
+  const tailwind = `${source}/tailwind.config.js`;
   if (!existsSync(from)) return;
   if (!existsSync(tailwind)) {
     console.log(cyan('Copied CSS'), relative(to));
@@ -26,7 +26,7 @@ export const build_tailwind = async (from, to, config) => {
 export const build_css = async (from, to, config) => {
   const { source, relative } = config;
   try {
-    const postcss = `${source}/postcss.config.cjs`;
+    const postcss = `${source}/postcss.config.js`;
     if (!existsSync(from)) return;
     if (!existsSync(postcss)) return build_tailwind(from, to, config);
     const css = readFileSync(from, 'utf8');

@@ -17,7 +17,6 @@ export const add_js = (url, type = null) => {
 };
 
 export default ({ Layout, styles = null, scripts = null, body_class = null }) => {
-  window["app-element"] = 'my-app';
   if (document.head.getAttribute('has_css')) return;
   document.head.setAttribute('has_css', 'true');
   if (styles) {

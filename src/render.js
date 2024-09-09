@@ -9,8 +9,8 @@ export default async (path, output) => {
 
   const html = readFileSync(`${output}/_.html`, 'utf8');
   const dom = new JSDOM(html);
-  const win = global.window = dom.window;
   const document = global.document = dom.window.document;
+  global.window = dom.window;
   global.window.app = app;
   global.window.Component = Component;
   global.window.safeHTML = safeHTML;
@@ -24,11 +24,13 @@ export default async (path, output) => {
     return fetch(url, ...p);
   };
 
+  let app_element = 'my-app';
   const main_file = `${output}/main.js`;
   if (existsSync(main_file)) {
-    await run_module(document.body, main_file, '/', []);
+    const module = await run_module(document.body, main_file, '/', []);
+    if (module.app_element) app_element = module.app_element;
   }
-  const el = document.getElementById(win['app-element']) || document.body;
+  const el = document.getElementById(app_element) || document.body;
   const paths = path.split('/').filter(p => !!p);
   if (paths.length === 0) paths.push('/'); // for /index.html
 
@@ -59,7 +61,6 @@ export async function run_module(element, js_file, route, params) {
   const { mtimeMs } = statSync(js_file);
   const module = await import(`file://${js_file}?${mtimeMs}`);
   const exp = module.default;
-  // console.log(green(`\t ${js_file}`));
   if (exp.prototype && exp.prototype.constructor.name === exp.name) {
     const component = new module.default();
     component.mount && component.mount(element, { route });
@@ -68,14 +69,17 @@ export async function run_module(element, js_file, route, params) {
   } else if (typeof exp === 'function') {
     const vdom = await exp(...params);
     if (vdom) {
+      app.render(element, vdom);
       return new Promise((resolve, reject) => {
         try {
-          app.render(element, vdom);
-          setTimeout(resolve, 500);
+          setTimeout(() => {
+            resolve(module);
+          }, 500);
         } catch (e) {
           reject(e);
         }
       });
     }
   }
+  return module;
 }

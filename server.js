@@ -9,8 +9,7 @@ import { info, debug, error, warn } from './src/log.js';
 
 export default function (config = {}) {
   let { source, output, ssr, root } = config;
-  source = source || process.cwd();
-  root = output || root || join(source, 'public');
+  root = output || root || 'public';
   const app = express();
 
   app.use(bodyParser.json());

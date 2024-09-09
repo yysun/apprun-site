@@ -150,10 +150,10 @@ async function process_file(file, config) {
     }
     add_route(dir, js_file, output);
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    // if (js_file.endsWith('index.js')) {
+    if (!should_ignore(file, js_file)) {
       esbuild(file, js_file);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
-    // }
+    }
     add_route(dir, js_file, output);
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';

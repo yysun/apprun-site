@@ -4,7 +4,6 @@ import { writeFileSync, existsSync, unlinkSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 const { cyan, green, magenta, gray} = chalk;
-import render_page from './render.js';
 import esbuild, { bundle } from './esbuild.js';
 
 export let routes = [];
@@ -29,19 +28,25 @@ export const add_route = (route, target, output) => {
 };
 
 export const build_main = async (config) => {
-  const { site_url, route, app_element, output, pages, live_reload, relative, source, csr } = config;
-  const route_hash = route === '#';
+  const { site_url, output, pages, live_reload, relative, source, csr } = config;
   const main_file = `${pages}/main.tsx`;
   const tsx_file = `${output}/main.tsx`;
   const main_js_file = `${output}/main.js`;
   const init = existsSync(main_file);
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
+  const import_main = `import main from '${pages_main}';
+import {app_element} from '${pages_main}';
+export {app_element}
+export default main;
+main();
+`
   const main = `import app from 'apprun';
+${init ? import_main : 'export default () => {}'}
+
   const get_element = () => {
-    const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
     const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
-    if (!el) console.warn(\`window['app-element'] not defined, will use document.body\`);
+    if (!el) console.warn(\`'app-element' not defined, will use document.body\`);
     return el || document.body;
   }
   const add_component = (component, site_url) => {
@@ -70,9 +75,9 @@ export const build_main = async (config) => {
 window.onload = async () => {
   const components = ${JSON.stringify(routes)};
   components.map(item => add_component(item, '${site_url}'));
-  app.route(${route_hash ? 'loacation.hash' : 'location.pathname'});
+  app.route(${!csr ? 'loacation.hash' : 'location.pathname'});
 };
-${!route_hash ? `
+${csr ? `
 const route = app.route;
 app.route = null;
 document.addEventListener("DOMContentLoaded", () => app.route = route);
@@ -114,63 +119,9 @@ function _init_refresh() {
 }
 window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
-${init ? `import main from '${pages_main}';
-export default main;
-main();
-`: 'export default () => {}'}
 `;
 
-
-  const main_push = `import app from 'apprun';
-
-${init ? `import main from '${pages_main}';
-export default main;
-main();
-`: 'export default () => {}'}
-
-// window.onload = ()=> {
-
-//   const get_element = () => {
-//     const app_element = ${app_element ? `'${app_element}'` : 'window["app-element"];'}
-//     const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
-//     if (!el) console.warn(\`window['app-element'] not defined, will use document.body\`);
-//     return el || document.body;
-//   }
-
-//   const es = new EventSource('/_' + document.location.pathname);
-//   es.onmessage = async function (event) {
-//     const data = JSON.parse(event.data);
-//     for (const result of data) {
-//       const timestamp = Date.now();
-//       ${live_reload ? `
-//       const module = await import(\`/\${result}?\${timestamp}\`);`: `
-//       const module = await import(\`/\${result}\`);`}
-//       const exp = module.default;
-//       if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-//         const component = new module.default();
-//         component.mount(get_element());
-//         if (component.state instanceof Promise) {
-//           component.state = await component.state;
-//         }
-//         app.route(location.pathname);
-//       } else {
-//         const vdom = await exp();
-//         app.render(get_element(), vdom);
-//       }
-//     }
-//   };
-
-//   es.addEventListener('end', function (event) {
-//     es.close();
-//   });
-
-//   es.onerror = function (event) {
-//     es.close();
-//   }
-// };
-`;
-
-  writeFileSync(tsx_file, csr ? main : main_push);
+  writeFileSync(tsx_file, main);
   await esbuild(tsx_file, main_js_file);
   // unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js',
@@ -192,17 +143,3 @@ app.listen(port, () => console.log(\`Your app is listening on http://localhost:\
     console.log(gray('Server file exists, skipped'), relative(server_js_file));
   }
 };
-
-export const render = async (config) => {
-  const { output, relative } = config;
-  let pages = routes.map(route => route[0]);
-  config['static-pages'] && (pages = pages.concat(config['static-pages']));
-
-  for (let i = 0; i < pages.length; i++) {
-    const route = pages[i];
-    const html_file = path.join(output, route, 'index.html');
-    console.log(magenta('Creating File'), relative(html_file));
-    const content = await render_page(route + '/', config);
-    writeFileSync(html_file, content, { flag: 'w' });
-  };
-}
