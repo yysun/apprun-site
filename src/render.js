@@ -71,7 +71,7 @@ export async function run_module(element, js_file, route, params) {
       return new Promise((resolve, reject) => {
         try {
           app.render(element, vdom);
-          setTimeout(resolve, 200);
+          setTimeout(resolve, 500);
         } catch (e) {
           reject(e);
         }
