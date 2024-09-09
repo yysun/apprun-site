@@ -26,7 +26,7 @@ async function init_options(source, options) {
 }
 
 program
-  .version('1.3.17')
+  .version('1.3.18')
   .description('AppRun Site CLI');
 
 program
@@ -49,15 +49,13 @@ program
   .command('serve [source]')
   .description('launch preview server, live reload is optional')
   .option('-o, --output [output]', 'output directory', 'public')
-  .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('--no-ssr', 'disable server side rendering')
   .option('--no-save', 'disable auto save of side rendered pages')
   .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
-    process.env.NODE_ENV = 'production';
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
-    build(options);
+    // build(options);
     server(options);
   });
 
@@ -74,7 +72,6 @@ program
   .option('--no-live_reload', 'enable live reload')
   .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
-    process.env.NODE_ENV = 'development';
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
     build(options);
