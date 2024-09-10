@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { existsSync, writeFileSync, readFileSync, copyFileSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
@@ -13,7 +14,7 @@ export const build_tailwind = async (from, to, config) => {
     return;
   }
   return new Promise((resolve, reject) => {
-    exec(`npx tailwindcss -o ${to}`, { cwd: source }, (err, output) => {
+    exec(`npx tailwindcss -i ${from} -o ${to} -c ${tailwind}`, { cwd: source }, (err) => {
       if (err) {
         reject(err);
       }

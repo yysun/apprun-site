@@ -16,6 +16,7 @@ const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Copy_Types = ['.html', '.htm', '.png', '.gif', '.json', '.svg', '.jpg', '.jpeg', '.ico'];
 const Css_Types = ['.css'];
+const css_files = [];
 
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -61,6 +62,9 @@ const run_build = async (config) => {
   routes.length = 0;
   await walk(config.pages, config);
   await build_main(config);
+  for (const [from, to] of css_files) {
+    await build_css(from, to, config);
+  }
   let elapsed = Date.now() - start_time;
   console.log(cyan(`Build done in ${elapsed} ms.`));
   start_time = Date.now();
@@ -158,7 +162,7 @@ async function process_file(file, config) {
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';
     if (!should_ignore(file, css_file)) {
-      await build_css(file, css_file, config);
+      css_files.push([file, css_file]);
     }
   } else {
     console.log(magenta('Unknown file type'), relative(file));
