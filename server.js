@@ -11,11 +11,14 @@ export let config = {};
 
 export default function (_config = {}) {
   const cwd = process.cwd();
-  let { source, output, ssr, root } = _config;
+  let { source, output, ssr, root, port, save, live_reload } = _config;
   root = output || root || 'public';
   root = resolve(cwd, root);
   source = resolve(cwd, source || '.');
-  config = { ..._config, source, root };
+  ssr = ssr === undefined ? true : ssr;
+  save = save === undefined? true : save;
+  if (port === undefined) port = 8080;
+  config = { source, output, ssr, root, port, save, live_reload };
 
   const app = express();
   app.use(bodyParser.json());

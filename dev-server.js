@@ -7,7 +7,7 @@ import ws_server from './ws.js';
 import { info } from './src/log.js';
 
 export default function (config) {
-  let { live_reload, port, no_ssr, no_save } = config;
+  let { live_reload, port, ssr, save } = config;
   config.port = port = port || process.env.PORT || 8080;
 
   const app = app_server(config);
@@ -45,8 +45,8 @@ export default function (config) {
     }
     info('Your app is listening on:', `http://localhost:${port}`);
     info('Serving from:', `${config.output}`);
-    info('SSR:', `${no_ssr ? 'disabled' : 'enabled'}.`);
-    info('Save:', `${no_save ? 'disabled' : 'enabled'}.`);
+    info('SSR:', `${!ssr ? 'disabled' : 'enabled'}.`);
+    info('Save:', `${!save ? 'disabled' : 'enabled'}.`);
     info('Live reload:', `${!live_reload ? 'disabled' : 'enabled'}.`);
   });
 }
