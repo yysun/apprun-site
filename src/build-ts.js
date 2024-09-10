@@ -69,7 +69,7 @@ ${init ? import_main : 'export default () => {}'}
           app.render(get_element(), vdom);
         });
       }
-      app.route([path, ...p].join('/'));
+      app.route(location.pathname);
     });
   }
 window.onload = async () => {
