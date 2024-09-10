@@ -9,7 +9,7 @@
     "test": "",
     "lint": "eslint src",
     "dev": "node apprun-site-cli dev demo",
-    "start": "node demo/server",
+    "start": "npm --prefix ./demo start",
     "serve": "node apprun-site-cli serve demo",
     "build:watch": "node apprun-site-cli build demo --watch",
     "build": "node apprun-site-cli build demo -c",

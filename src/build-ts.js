@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 //@ts-check
-import { writeFileSync, existsSync, unlinkSync } from 'fs';
+import { writeFileSync, existsSync, unlinkSync, copyFileSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 const { cyan, green, magenta, gray} = chalk;
@@ -51,7 +51,7 @@ ${init ? import_main : 'export default () => {}'}
   }
   const add_component = (component, site_url) => {
     let [path, file] = component;
-    app.once(path, async (...p) => {
+    app.once(path, async () => {
       const timestamp = Date.now();
       ${live_reload ? `
       const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
@@ -133,11 +133,8 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
 
   const server_js_file = `${source}/server.js`;
   if (!existsSync(server_js_file)) {
-    writeFileSync(server_js_file, `import server from 'apprun-site/server.js';
-const port = process.env.PORT || 8080;
-const app = server();
-app.listen(port, () => console.log(\`Your app is listening on http://localhost:\${port}\`));
-  `);
+    const server_fn = new URL('./server.js', import.meta.url);
+    copyFileSync(server_fn, server_js_file);
     console.log(green('Created server file'), relative(server_js_file));
   } else {
     console.log(gray('Server file exists, skipped'), relative(server_js_file));

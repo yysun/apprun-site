@@ -1,17 +1,23 @@
 // @ts-check
 
 import { existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import render from './src/render.js';
 import { info, debug, error, warn } from './src/log.js';
 
-export default function (config = {}) {
-  let { source, output, ssr, root } = config;
-  root = output || root || 'public';
-  const app = express();
+export let config = {};
 
+export default function (_config = {}) {
+  const cwd = process.cwd();
+  let { source, output, ssr, root } = _config;
+  root = output || root || 'public';
+  root = resolve(cwd, root);
+  source = resolve(cwd, source || '.');
+  config = { ..._config, source, root };
+
+  const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
