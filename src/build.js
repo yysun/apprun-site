@@ -7,7 +7,7 @@ import chokidar from 'chokidar';
 import chalk from 'chalk';
 const { cyan, yellow, magenta, red, green } = chalk;
 import esbuild from './esbuild.js';
-import { build_main, build_component, add_route, routes } from './build-ts.js';
+import { build_main, build_component, add_route, routes, run_bundle } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 import render from './render.js';
@@ -17,6 +17,7 @@ const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Copy_Types = ['.html', '.htm', '.png', '.gif', '.json', '.svg', '.jpg', '.jpeg', '.ico'];
 const Css_Types = ['.css'];
 const css_files = [];
+let need_bundle = false;
 
 const ensure = dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -62,6 +63,7 @@ const run_build = async (config) => {
   routes.length = 0;
   await walk(config.pages, config);
   await build_main(config);
+  await run_bundle(config);
   for (const [from, to] of css_files) {
     await build_css(from, to, config);
   }
@@ -84,10 +86,15 @@ const debounce = (func, delay) => {
   };
 };
 
-const onChange = ((config, path) => {
+const onChange = (async (config, path) => {
   // console.log(yellow('Change detected'), relative(path));
-  walk(dirname(path), config);
+  await walk(dirname(path), config);
+  if (need_bundle) {
+    need_bundle = false;
+    await run_bundle(config);
+  }
 });
+
 const debouncedOnChange = debounce(onChange, 300);
 
 let copy_files;
@@ -144,6 +151,7 @@ async function process_file(file, config) {
     }
   } else if (Markdown_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file)) {
+      need_bundle = true;
       const content = markdown(file)
       if (!content) {
         console.log(red('Markdown load failed'));
@@ -155,6 +163,7 @@ async function process_file(file, config) {
     add_route(dir, js_file, output);
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file)) {
+      need_bundle = true;
       esbuild(file, js_file);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }

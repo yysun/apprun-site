@@ -22,7 +22,7 @@ export const build_component = async (content, target) => {
 export const add_route = (route, target, output) => {
   const module_file = target.replace(output, '').replace(/\\/g, '/');
   route = (route || '/').replace(/\\/g, '/');
-  if (module_file.endsWith('index.js')) {
+  if (module_file.endsWith('index.js') && !routes.find(r => r[0] === route && r[1] === module_file)) {
     routes.push([route, module_file]);
   }
 };
@@ -127,9 +127,6 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
   console.log(green('Created main file'), 'main.js',
     magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
-  const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
-  bundle(output, entryPoints);
-  console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
 
   const server_js_file = `${source}/server.js`;
   if (!existsSync(server_js_file)) {
@@ -140,3 +137,11 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
     console.log(gray('Server file exists, skipped'), relative(server_js_file));
   }
 };
+
+export function run_bundle({ output, relative }) {
+  const main_js_file = `${output}/main.js`;
+  const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
+  bundle(output, entryPoints);
+  console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
+}
+
