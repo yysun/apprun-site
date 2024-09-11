@@ -5,5 +5,5 @@ import Comic from './components/comic';
 
 app.webComponent('ws-comic', Comic);
 
-export const app_element = 'my-app'; // required for mounting components
+export const NEXT_ELEMENT = 'my-app'; // required for mounting components
 export default () => render_layout(Layout);

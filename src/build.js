@@ -61,7 +61,7 @@ const render_routes = async ({ output, relative}) => {
 }
 
 const run_build = async (config) => {
-  let start_time = Date.now();
+  const start_time = Date.now();
   routes.length = 0;
   await walk(config.pages, config);
   await build_main(config);
@@ -69,14 +69,8 @@ const run_build = async (config) => {
   for (const [from, to] of css_files) {
     await build_css(from, to, config);
   }
-  let elapsed = Date.now() - start_time;
+  const elapsed = Date.now() - start_time;
   console.log(cyan(`Build done in ${elapsed} ms.`));
-  start_time = Date.now();
-  if (config.render) {
-    await render_routes(config);
-    elapsed = Date.now() - start_time;
-    console.log(cyan(`Render done in ${elapsed} ms.`));
-  }
 }
 
 
@@ -127,6 +121,14 @@ export default async (config) => {
     renameSync(build_dir, _output);
     config.output = _output;
     config.relative = _relative;
+
+    if (config.render) {
+      const start_time = Date.now();
+      await render_routes(config);
+      const elapsed = Date.now() - start_time;
+      console.log(cyan(`Render done in ${elapsed} ms.`));
+    }
+
   } catch (e) {
     console.log(red('Build failed'), e.message);
   }

@@ -4,6 +4,8 @@ import { readFileSync, existsSync, statSync } from 'fs';
 import { JSDOM } from 'jsdom';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
+import parse from './parse-url.js';
+import { debug } from './log.js';
 
 export default async (path, output, port) => {
 
@@ -23,34 +25,42 @@ export default async (path, output, port) => {
     return fetch(url, ...p);
   };
 
-  let app_element = 'my-app';
-  const main_file = `${output}/main.js`;
-  if (existsSync(main_file)) {
-    const module = await run_module(document.body, main_file, '/', []);
-    if (module.app_element) app_element = module.app_element;
-  }
-  const el = document.getElementById(app_element) || document.body;
-  const paths = path.split('/').filter(p => !!p);
-  if (paths.length === 0) paths.push('/'); // for /index.html
+  const routes = parse(path);
+  let next_element = 'body';
+  let el = document.body;
 
-  for (let i = paths.length; i > 0; i--) {
-    const route = '/' + paths.slice(0,i).join('/');
-    const params = paths.slice(i);
-    try {
-      const js_index = `${output}${route}/index.js`;
-      const js_file = `${output}${route}.js`;
-      if (existsSync(js_index)) {
-        await run_module(el, js_index, route, params);
-        break;
-      } else if (existsSync(js_file)) {
-        await run_module(el, js_file, route, params);
-        break;
+  for (const route of routes) {
+    const route_path = route[0];
+    const params = route[1];
+
+    const set_next_element = (module) => {
+      const new_next_element = module.NEXT_ELEMENT;
+      if (new_next_element) {
+        const new_el = document.getElementById(new_next_element);
+        if (new_el) {
+          next_element = new_next_element;
+          el = new_el;
+        }
       }
-    } catch (e) {
-      // Module not found, continue to the next path
-      if (e.code !== 'MODULE_NOT_FOUND') {
-        console.error(`Error loading module for path ${route}:`, e);
+      debug(route_path, ' => ' + next_element);
+    };
+
+    if (route_path === '/') {
+      const main_file = `${output}/main.js`;
+      if (existsSync(main_file)) {
+        const module = await run_module(el, main_file, route_path, params);
+        set_next_element(module);
       }
+      continue;
+    }
+    const js_index = `${output}${route_path}/index.js`;
+    const js_file = `${output}${route_path}.js`;
+    if (existsSync(js_index)) {
+      const module =   await run_module(el, js_index, route_path, params);
+      set_next_element(module);
+    } else if (existsSync(js_file)) {
+      const module = await run_module(el, js_file, route_path, params);
+      set_next_element(module);
     }
   }
   return document.documentElement.outerHTML;

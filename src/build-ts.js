@@ -36,8 +36,8 @@ export const build_main = async (config) => {
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
   const import_main = `import main from '${pages_main}';
-import {app_element} from '${pages_main}';
-export {app_element}
+import {NEXT_ELEMENT} from '${pages_main}';
+export {NEXT_ELEMENT}
 export default main;
 main();
 `
@@ -45,7 +45,7 @@ main();
 ${init ? import_main : 'export default () => {}'}
 
   const get_element = () => {
-    const el = typeof app_element === 'string' ? document.getElementById(app_element) : app_element;
+    const el = typeof NEXT_ELEMENT === 'string' ? document.getElementById(NEXT_ELEMENT) : NEXT_ELEMENT;
     if (!el) console.warn(\`'app-element' not defined, will use document.body\`);
     return el || document.body;
   }
