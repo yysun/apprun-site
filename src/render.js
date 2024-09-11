@@ -5,9 +5,11 @@ import { JSDOM } from 'jsdom';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
 import parse from './parse-url.js';
-import { debug } from './log.js';
+// import { debug } from './log.js';
 
 export default async (path, output, port) => {
+
+  let lock = 0;
 
   const html = readFileSync(`${output}/_.html`, 'utf8');
   const dom = new JSDOM(html);
@@ -21,8 +23,24 @@ export default async (path, output, port) => {
 
   const fetch = global.fetch;
   global.fetch = (url, ...p) => {
-    if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
-    return fetch(url, ...p);
+    lock++;
+    try {
+      if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
+      return fetch(url, ...p);
+    } finally {
+      lock--;
+    }
+  };
+
+  window.requestAnimationFrame = (cb) => {
+    lock++;
+    setTimeout(() => {
+      try {
+        cb();
+      } finally {
+        lock--;
+      }
+    }, 0);
   };
 
   const routes = parse(path);
@@ -42,7 +60,6 @@ export default async (path, output, port) => {
           el = new_el;
         }
       }
-      debug(route_path, ' => ' + next_element);
     };
 
     if (route_path === '/') {
@@ -51,12 +68,15 @@ export default async (path, output, port) => {
         const module = await run_module(el, main_file, route_path, params);
         set_next_element(module);
       }
-      continue;
+      if (routes.length > 1) continue;  // skip /index.js
     }
+
+    // debug(route_path, ' => ' + next_element);
+
     const js_index = `${output}${route_path}/index.js`;
     const js_file = `${output}${route_path}.js`;
     if (existsSync(js_index)) {
-      const module =   await run_module(el, js_index, route_path, params);
+      const module = await run_module(el, js_index, route_path, params);
       set_next_element(module);
     } else if (existsSync(js_file)) {
       const module = await run_module(el, js_file, route_path, params);
@@ -64,31 +84,29 @@ export default async (path, output, port) => {
     }
   }
   return document.documentElement.outerHTML;
-};
 
-export async function run_module(element, js_file, route, params) {
-  const { mtimeMs } = statSync(js_file);
-  const module = await import(`file://${js_file}?${mtimeMs}`);
-  const exp = module.default;
-  if (exp.prototype && exp.prototype.constructor.name === exp.name) {
-    const component = new module.default();
-    component.mount && component.mount(element, { route });
-    component.run && await component.run(route, ...params);
-    component.unmount && component.unmount();
-  } else if (typeof exp === 'function') {
-    const vdom = await exp(...params);
-    if (vdom) {
-      app.render(element, vdom);
-      return new Promise((resolve, reject) => {
-        try {
-          setTimeout(() => {
-            resolve(module);
-          }, 500);
-        } catch (e) {
-          reject(e);
-        }
-      });
+  async function run_module(element, js_file, route, params) {
+    const { mtimeMs } = statSync(js_file);
+    const module = await import(`file://${js_file}?${mtimeMs}`);
+    const exp = module.default;
+    if (exp.prototype && exp.prototype.constructor.name === exp.name) {
+      const component = new module.default();
+      component.mount && component.mount(element, { route });
+      component.run && await component.run(route, ...params);
+      component.unmount && component.unmount();
+    } else if (typeof exp === 'function') {
+      const vdom = await exp(...params);
+      if (vdom) {
+        app.render(element, vdom);
+      }
     }
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (lock === 0) {
+          clearInterval(interval);
+          resolve(module);
+        }
+      }, 50);
+    });
   }
-  return module;
-}
+};

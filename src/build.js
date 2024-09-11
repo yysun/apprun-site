@@ -73,7 +73,6 @@ const run_build = async (config) => {
   console.log(cyan(`Build done in ${elapsed} ms.`));
 }
 
-
 const debounce = (func, delay) => {
   let timeout;
   return (...args) => {
@@ -128,7 +127,6 @@ export default async (config) => {
       const elapsed = Date.now() - start_time;
       console.log(cyan(`Render done in ${elapsed} ms.`));
     }
-
   } catch (e) {
     console.log(red('Build failed'), e.message);
   }
