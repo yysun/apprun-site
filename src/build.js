@@ -45,7 +45,8 @@ const render_routes = async ({ output, relative}) => {
   for (const route of routes) {
     const path = route[0];
     try {
-      const content = await render(path + '/', output);
+      const port = process.env.PORT || 8080;
+      const content = await render(path + '/', output, port);
       if (content) {
         const html_file = join(output, path, 'index.html');
         writeFileSync(html_file, content);

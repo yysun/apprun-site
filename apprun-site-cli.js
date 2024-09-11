@@ -37,6 +37,7 @@ program
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-i, --info', 'print option information', false)
   .option('--no-csr', 'no client side routing')
+  .option('-r --render', 'pre-render pages', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);

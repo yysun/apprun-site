@@ -37,7 +37,7 @@ export default function (_config = {}) {
   return app;
 }
 
-export function set_ssr(app, root, ssr, save=true) {
+export function set_ssr(app, root, port, ssr, save=true) {
 
   app.get('*', async (req, res, next) => {
     try {
@@ -63,7 +63,7 @@ export function set_ssr(app, root, ssr, save=true) {
           }
         }
         if (ssr) {
-          let content = await render(path, root);
+          let content = await render(path, root, port);
           if (content) {
             info('Serve:', `${path}`, '(SSR)');
             if (save) {

@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom';
 import apprun from 'apprun';
 const { app, Component, safeHTML } = apprun;
 
-export default async (path, output) => {
+export default async (path, output, port) => {
 
   const html = readFileSync(`${output}/_.html`, 'utf8');
   const dom = new JSDOM(html);
@@ -17,7 +17,6 @@ export default async (path, output) => {
   global.HTMLElement = dom.window.HTMLElement;
   global.SVGElement = dom.window.SVGElement;
 
-  const port = process.env.PORT || 8080;
   const fetch = global.fetch;
   global.fetch = (url, ...p) => {
     if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
