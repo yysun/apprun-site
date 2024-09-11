@@ -6,7 +6,7 @@
   "type": "module",
   "bin": "apprun-site-cli.js",
   "scripts": {
-    "test": "",
+    "test": "node --test --watch",
     "lint": "eslint src",
     "dev": "node apprun-site-cli dev demo",
     "start": "npm --prefix ./demo start",
@@ -48,7 +48,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
-    "eslint": "^9.10.0",
-    "globals": "^15.9.0"
+    "eslint": "^9.10.0"
   }
 }
