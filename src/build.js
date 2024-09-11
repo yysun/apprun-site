@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 //@ts-check
-import { existsSync, mkdirSync, rmSync, statSync, copyFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, statSync, copyFileSync, writeFileSync, renameSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { join, dirname, basename, extname } from 'path';
+import path from 'path';
 import chokidar from 'chokidar';
 import chalk from 'chalk';
 const { cyan, yellow, magenta, red, green } = chalk;
@@ -100,21 +101,34 @@ const debouncedOnChange = debounce(onChange, 300);
 let copy_files;
 export default async (config) => {
 
-  const { pages, output, assets, clean, relative } = config;
+  const { source, pages, output, assets, relative } = config;
   const is_production = process.env.NODE_ENV === 'production';
 
   console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${is_production ? cyan('for production') : cyan('for development')}`);
-  if (clean) {
-    rmSync(output, { recursive: true, force: true });
-    console.log(cyan('Clean'), relative(output));
-  }
+  // if (clean) {
+  //   rmSync(output, { recursive: true, force: true });
+  //   console.log(cyan('Clean'), relative(output));
+  // }
 
   config.should_ignore = should_ignore;
 
   Array.isArray(assets) && Copy_Types.push(...assets);
   copy_files = [...new Set(Copy_Types)];
 
-  await run_build(config);
+  try {
+    const _relative = config.relative;
+    const _output = config.output;
+    const build_dir = join(source, '.__site');
+    config.output = build_dir;
+    config.relative = fn => '/' + path.relative(build_dir, fn);
+    await run_build(config);
+    rmSync(output, { recursive: true, force: true });
+    renameSync(build_dir, _output);
+    config.output = _output;
+    config.relative = _relative;
+  } catch (e) {
+    console.log(red('Build failed'), e.message);
+  }
 
   let ready = false
   if (config.watch) {

@@ -32,12 +32,10 @@ program
 program
   .command('build [source]')
   .description('build site')
-  .option('-c, --clean', 'clean the output directory', false)
   .option('-w, --watch', 'watch the directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('-i, --info', 'print option information', false)
-  .option('-r --render', 'pre-render pages', false)
   .option('--no-csr', 'no client side routing')
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
