@@ -6,7 +6,7 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 
 export default async function (file, target, options = {}) {
   try {
-    const result = await esbuild.build({
+    const result = esbuild.buildSync({
       entryPoints: [file],
       outfile: target,
       format: 'esm',
@@ -24,7 +24,7 @@ export default async function (file, target, options = {}) {
 
 export async function bundle(output, entryPoints) {
   try {
-    const result = await esbuild.build({
+    const result = esbuild.buildSync({
       entryPoints,
       bundle: true,
       splitting: true,
