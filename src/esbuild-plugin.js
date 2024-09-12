@@ -1,69 +1,60 @@
-/* eslint-disable no-console */
-import { resolve, join, relative } from 'path';
-import { existsSync, mkdirSync, readFileSync } from 'fs';
-import esbuild from 'esbuild';
-
-function resolveModuleEntryPoint(moduleName, outputDir) {
-  const packageJsonPath = resolve(outputDir, '../node_modules', moduleName, 'package.json');
-
-  if (!existsSync(packageJsonPath)) {
-    throw new Error(`Cannot find package.json for module ${moduleName}`);
-  }
-
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-
-  let entryPoint = packageJson.module || packageJson.main;
-
-  // Handle the case where 'exports' field is used
-  if (!entryPoint && typeof packageJson.exports === 'object') {
-    if (typeof packageJson.exports === 'string') {
-      entryPoint = packageJson.exports;
-    } else if (packageJson.exports['.'] && typeof packageJson.exports['.'] === 'string') {
-      entryPoint = packageJson.exports['.'];
-    } else if (packageJson.exports['.'] && packageJson.exports['.'].default) {
-      entryPoint = packageJson.exports['.'].default;
-    }
-  }
-
-  if (!entryPoint) entryPoint = 'index.js';
-  return resolve(outputDir, '../node_modules', moduleName, entryPoint);
-}
-
-
-const replaceGlobalWithLocalPlugin = (outputDir) => ({
-  name: 'replace-global-with-local',
+import { readFileSync } from 'fs';
+const conditionalCompilePlugin = (conditions = {}) => ({
+  name: 'conditional-compile',
   setup(build) {
-    const modulesToBuild = new Set();
+    // Match files with .js, .jsx, .ts, and .tsx extensions
+    build.onLoad({ filter: /\.(js|jsx|ts|tsx)$/ }, async (args) => {
+      let source = readFileSync(args.path, 'utf8');
 
-    build.onResolve({ filter: /^[^./\\@][^:]*$/ }, args => {
-      modulesToBuild.add(args.path);
-      return { path: '/node_modules/' + args.path + '.js', external: true }
-    });
+      if (args.path.indexOf('node_modules') > -1) return { contents: source };
 
-    build.onEnd(async () => {
-      if (modulesToBuild.size <= 0) return;
+      // if (args.path.indexOf('comic') > 0) {
+      //   console.log(args.path);
+      // }
 
-      if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true });
-      }
+      // Regular expressions to identify #if, #else, and #endif
+      const ifRegex = /\/\/#if\s+([^\n]+)/;
+      const elseRegex = /\/\/#else/;
+      const endifRegex = /\/\/#endif/;
 
-      for (const moduleName of modulesToBuild) {
-        const outputFilePath = join(outputDir, 'node_modules', `${moduleName}.js`);
-        if (!existsSync(outputFilePath)) {
-          const entryPoint = resolveModuleEntryPoint(moduleName, outputDir);
-          console.log('\tBuilding', relative(outputDir, entryPoint), 'to', relative(outputDir, outputFilePath));
-          await esbuild.buildSync({
-            entryPoints: [entryPoint],
-            bundle: true,
-            format: 'esm',
-            sourcemap: true,
-            minify: false,
-            outfile: outputFilePath,
-          });
+      // Stack to handle nesting
+      let stack = [];
+      let newSource = '';
+      let lines = source.split('\n');
+
+      // Process each line
+      for (let line of lines) {
+        if (ifRegex.test(line)) {
+          let condition = line.match(ifRegex)[1].trim();
+          let conditionMet = !!conditions[condition];
+          stack.push(conditionMet);
+        } else if (elseRegex.test(line)) {
+          if (stack.length) {
+            let lastCondition = stack.pop();
+            stack.push(!lastCondition);  // Flip the last condition state
+          }
+        } else if (endifRegex.test(line)) {
+          stack.pop();
+        } else {
+          if (!stack.length || stack[stack.length - 1]) {
+            newSource += line + '\n';  // Include the line only if the condition is met
+          }
         }
       }
+
+      // Determine the correct loader based on the file extension
+      let loader;
+      if (args.path.endsWith('.jsx')) loader = 'jsx';
+      else if (args.path.endsWith('.ts')) loader = 'ts';
+      else if (args.path.endsWith('.tsx')) loader = 'tsx';
+      else loader = 'js';
+
+      return {
+        contents: newSource,
+        loader: loader,
+      };
     });
   },
 });
 
-export default replaceGlobalWithLocalPlugin;
+export default conditionalCompilePlugin;

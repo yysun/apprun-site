@@ -179,7 +179,7 @@ async function process_file(file, config) {
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     if (!should_ignore(file, js_file)) {
       need_bundle = true;
-      esbuild(file, js_file);
+      await esbuild(file, js_file);
       console.log(cyan('Compiled JavaSript'), relative(js_file));
     }
     add_route(dir, js_file, output);
