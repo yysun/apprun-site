@@ -32,6 +32,7 @@ program
 program
   .command('build [source]')
   .description('build site')
+  .option('-c, --clean', 'clean the output directory', false)
   .option('-w, --watch', 'watch the directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')

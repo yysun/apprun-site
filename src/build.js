@@ -95,14 +95,14 @@ const debouncedOnChange = debounce(onChange, 300);
 let copy_files;
 export default async (config) => {
 
-  const { source, pages, output, assets, relative } = config;
+  const { source, pages, output, assets, relative, clean } = config;
   const is_production = process.env.NODE_ENV === 'production';
 
   console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${is_production ? cyan('for production') : cyan('for development')}`);
-  // if (clean) {
-  //   rmSync(output, { recursive: true, force: true });
-  //   console.log(cyan('Clean'), relative(output));
-  // }
+  if (clean) {
+    rmSync(output, { recursive: true, force: true });
+    console.log(cyan('Clean'), relative(output));
+  }
 
   config.should_ignore = should_ignore;
 
@@ -110,16 +110,16 @@ export default async (config) => {
   copy_files = [...new Set(Copy_Types)];
 
   try {
-    const _relative = config.relative;
-    const _output = config.output;
-    const build_dir = join(source, '.__site');
-    config.output = build_dir;
-    config.relative = fn => '/' + path.relative(build_dir, fn);
+    // const _relative = config.relative;
+    // const _output = config.output;
+    // const build_dir = join(source, '.__site');
+    // config.output = build_dir;
+    // config.relative = fn => '/' + path.relative(build_dir, fn);
     await run_build(config);
-    rmSync(output, { recursive: true, force: true });
-    renameSync(build_dir, _output);
-    config.output = _output;
-    config.relative = _relative;
+    // rmSync(output, { recursive: true, force: true });
+    // renameSync(build_dir, _output);
+    // config.output = _output;
+    // config.relative = _relative;
 
     if (config.render) {
       const start_time = Date.now();

@@ -12,8 +12,8 @@
     "start": "npm --prefix ./demo start",
     "serve": "node apprun-site-cli serve demo",
     "build:watch": "node apprun-site-cli build demo --watch",
-    "build": "node apprun-site-cli build demo",
-    "render": "node apprun-site-cli build demo -r"
+    "build": "node apprun-site-cli build demo -c",
+    "render": "node apprun-site-cli build demo -cr"
   },
   "keywords": [
     "AppRun",
