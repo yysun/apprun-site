@@ -9,8 +9,6 @@ import { debug, warn } from './log.js';
 
 export default async (path, output, port) => {
 
-  let lock = 0;
-
   const html = readFileSync(`${output}/_.html`, 'utf8');
   const dom = new JSDOM(html);
   const document = global.document = dom.window.document;
@@ -20,28 +18,6 @@ export default async (path, output, port) => {
   global.window.safeHTML = safeHTML;
   global.HTMLElement = dom.window.HTMLElement;
   global.SVGElement = dom.window.SVGElement;
-
-  const fetch = global.fetch;
-  global.fetch = (url, ...p) => {
-    lock++;
-    try {
-      if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
-      return fetch(url, ...p);
-    } finally {
-      lock--;
-    }
-  };
-
-  window.requestAnimationFrame = (cb) => {
-    lock++;
-    setTimeout(() => {
-      try {
-        cb();
-      } finally {
-        lock--;
-      }
-    }, 0);
-  };
 
   const routes = parse(path);
   let next_element = 'body';
@@ -92,7 +68,29 @@ export default async (path, output, port) => {
 
   async function run_module(element, js_file, route, params) {
 
-    lock = 0;
+    let lock = 0;
+
+    const fetch = global.fetch;
+    global.fetch = async (url, ...p) => {
+      lock++;
+      try {
+        if (url.startsWith('/')) url = `http://localhost:${port}${url}`;
+        return await fetch(url, ...p);
+      } finally {
+        lock--;
+      }
+    };
+
+    window.requestAnimationFrame = (cb) => {
+      lock++;
+      setTimeout(() => {
+        try {
+          cb();
+        } finally {
+          lock--;
+        }
+      }, 0);
+    };
 
     const { mtimeMs } = statSync(js_file);
     const module = await import(`file://${js_file}?${mtimeMs}`);
@@ -108,13 +106,14 @@ export default async (path, output, port) => {
         app.render(element, vdom);
       }
     }
+
     return new Promise((resolve) => {
       const interval = setInterval(() => {
         if (lock === 0) {
           clearInterval(interval);
           resolve(module);
         }
-      }, 50);
+      }, 10);
     });
   }
 };
