@@ -73,7 +73,7 @@ program
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
-    build(options);
+    await build(options);
     server(options);
   });
 
