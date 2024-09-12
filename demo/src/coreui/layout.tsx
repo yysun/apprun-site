@@ -6,7 +6,7 @@ import Aside from './aside';
 import Footer from './footer';
 import Breadcrumb from './breadcrumb';
 
-const main_element = 'my-app';
+const main_element = 'main-app';
 
 const nav = [
   {

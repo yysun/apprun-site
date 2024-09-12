@@ -41,11 +41,13 @@ export default class extends Component {
     <pre>
       <code>{code}</code>
     </pre>
+    <div id="products-app"></div>
   </div>;
 
   update = {
     '/products': (state, id) => {
       if (id !== 'calculator') return ({ ...state, id: parseInt(id) })
+      return state;
     }
   };
 }

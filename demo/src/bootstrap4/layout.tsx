@@ -8,7 +8,7 @@ app.on('//', (route) => {
   item && item.parentElement.classList.add('active');
 });
 
-const main_element = 'my-app';
+const main_element = 'main-app';
 
 export const Layout = () => {
   return <div class="container">

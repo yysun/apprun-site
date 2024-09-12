@@ -8,7 +8,4 @@ export default class extends Component {
       {state}
     </div>
   </>
-  update = {
-    '/calculator': state => state,
-  }
 }

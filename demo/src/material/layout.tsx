@@ -6,7 +6,7 @@ let drawer;
 
 const site_name = 'My Site';
 
-const main_element = 'my-app';
+const main_element = 'main-app';
 
 const sidebar = [
   {

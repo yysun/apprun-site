@@ -26,7 +26,7 @@ export default function (_config = {}) {
 
   set_api(app, source);
   set_push(app, source);
-  set_ssr(app, root, ssr);
+  set_ssr(app, root, port, ssr, save);
 
   app.use((err, req, res, next) => {
     error('Failed: ', req.path, err.message);
@@ -37,7 +37,7 @@ export default function (_config = {}) {
   return app;
 }
 
-export function set_ssr(app, root, port, ssr, save=true) {
+export function set_ssr(app, root, port, ssr, save) {
 
   app.get('*', async (req, res, next) => {
     try {

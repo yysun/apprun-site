@@ -42,7 +42,7 @@ sidebar.collpase a span {
 //   document.querySelector('sidebar').classList.toggle('collpase');
 // }
 
-const main_element = 'my-app';
+const main_element = 'main-app';
 const nav = [
   {
     "text": "Home",
