@@ -36,19 +36,22 @@ export const build_main = async (config) => {
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
   const import_main = `import main from '${pages_main}';
-import {NEXT_ELEMENT} from '${pages_main}';
-export {NEXT_ELEMENT}
 export default main;
 main();
 `
   const main = `import app from 'apprun';
 ${init ? import_main : 'export default () => {}'}
 
-  const get_element = () => {
-    const el = typeof NEXT_ELEMENT === 'string' ? document.getElementById(NEXT_ELEMENT) : NEXT_ELEMENT;
-    if (!el) console.warn(\`'app-element' not defined, will use document.body\`);
-    return el || document.body;
-  }
+  const get_element = (path) => {
+    const paths = path.split('/').filter(p => !!p);
+    paths.pop();
+    let element_id = !paths.length ? 'main' : paths.join('-');
+    element_id += '-app';
+    const el = document.getElementById(element_id);
+    console.assert(!!el, \`\${element_id} not found, component will display\`);
+    return element_id;
+  };
+
   const add_component = (component, site_url) => {
     let [path, file] = component;
     app.once(path, async () => {
@@ -59,28 +62,43 @@ ${init ? import_main : 'export default () => {}'}
       const exp = module.default;
       if (exp.prototype && exp.prototype.constructor.name === exp.name) {
         const component = new module.default();
-        component.mount(get_element(), { route: path });
+        component.mount(get_element(path), { route: path });
         if (component.state instanceof Promise) {
           component.state = await component.state;
         }
       } else {
         app.on(path, async (...p) => {
           const vdom = await exp(...p);
-          app.render(get_element(), vdom);
+          app.render(get_element(path), vdom);
         });
       }
       app.route(location.pathname);
     });
   }
+const components = ${JSON.stringify(routes)};
+const route = (path) => {
+  let bestMatch;
+  let longestMatchLength = 0;
+  components.forEach((item, index) => {
+    const _route = item[0];
+    if (path.startsWith(_route) && (path[_route.length] === '/' || _route.length === path.length)) {
+      if (_route.length > longestMatchLength) {
+        longestMatchLength = _route.length;
+        bestMatch = _route;
+      }
+    }
+  });
+  const idx = path.indexOf(bestMatch);
+  const params = path.substring(bestMatch.length).split('/').filter(p => !!p);
+  app.run(bestMatch, ...params);
+};
+app.route = null;
 window.onload = async () => {
-  const components = ${JSON.stringify(routes)};
+  app.route = route;
   components.map(item => add_component(item, '${site_url}'));
   app.route(${!csr ? 'loacation.hash' : 'location.pathname'});
 };
 ${csr ? `
-const route = app.route;
-app.route = null;
-document.addEventListener("DOMContentLoaded", () => app.route = route);
 document.body.addEventListener('click', e => {
   const element = e.target as HTMLElement;
   const menu = (element.tagName === 'A' ? element : element.closest('a')) as HTMLAnchorElement;
