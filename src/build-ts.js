@@ -139,7 +139,9 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
 ` : ''}
 `;
 
-  writeFileSync(tsx_file, main);
+  const main_no_csr = init ? import_main : 'export default () => {}';
+
+  writeFileSync(tsx_file, csr ? main : main_no_csr);
   await esbuild(tsx_file, main_js_file);
   // unlinkSync(tsx_file);
   console.log(green('Created main file'), 'main.js',
