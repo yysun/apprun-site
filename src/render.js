@@ -25,8 +25,8 @@ export default async (path, output, port) => {
   global.sessionStorage = dom.window.sessionStorage;
   global.addEventListener = dom.window.addEventListener;
   global.removeEventListener = dom.window.removeEventListener;
-  global.cancelAnimationFrame = clearTimeout;
-  
+  global.cancelAnimationFrame = dom.window.cancelAnimationFrame;
+
   const routes = parse(path);
   let next_element = 'body';
   let el = document.body;
