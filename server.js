@@ -16,7 +16,8 @@ export default function (_config = {}) {
   root = resolve(cwd, root);
   source = resolve(cwd, source || '.');
   ssr = ssr === undefined ? true : ssr;
-  save = save === undefined? true : save;
+  save = save === undefined ? true : save;
+  if (!ssr) save = false;
   if (port === undefined) port = 8080;
   config = { source, output, ssr, root, port, save, live_reload };
 
