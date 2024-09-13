@@ -159,11 +159,14 @@ export function set_push(app, source) {
         if (existsSync(js_index)) {
           result = await run_action(js_index, params);
           res.json(result);
+          return;
         } else if (existsSync(js_file)) {
           result = await run_action(js_file, params);
           res.json(result);
+          return
         }
       }
+      res.sendStatus(404);
     } catch (err) {
       error('Error:', req.path, err.message);
       next(err);
