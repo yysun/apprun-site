@@ -69,7 +69,10 @@ ${init ? import_main : 'export default () => {}'}
       } else {
         app.on(path, async (...p) => {
           const vdom = await exp(...p);
-          app.render(get_element(path), vdom);
+          const element_id = get_element(path);
+          const el = document.getElementById(element_id);
+          console.assert(!!el, \`\${element_id} not found, component will display\`);
+          app.render(el, vdom);
         });
       }
       app.route(location.pathname);
