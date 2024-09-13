@@ -3,15 +3,10 @@ const conditionalCompilePlugin = (conditions = {}) => ({
   name: 'conditional-compile',
   setup(build) {
     // Match files with .js, .jsx, .ts, and .tsx extensions
-    build.onLoad({ filter: /\.(js|jsx|ts|tsx)$/ }, async (args) => {
-      let source = readFileSync(args.path, 'utf8');
-
-      if (args.path.indexOf('node_modules') > -1) return { contents: source };
-
-      // if (args.path.indexOf('comic') > 0) {
-      //   console.log(args.path);
-      // }
-
+    build.onLoad({ filter: /\.(js|jsx|ts|tsx)?$/ }, async (args) => {
+      const loader = args.path.split('.').pop();
+      let contents = readFileSync(args.path, 'utf8');
+      if (args.path.indexOf('node_modules') > -1) return { contents, loader };
       // Regular expressions to identify #if, #else, and #endif
       const ifRegex = /\/\/#if\s+([^\n]+)/;
       const elseRegex = /\/\/#else/;
@@ -20,7 +15,7 @@ const conditionalCompilePlugin = (conditions = {}) => ({
       // Stack to handle nesting
       let stack = [];
       let newSource = '';
-      let lines = source.split('\n');
+      let lines = contents.split('\n');
 
       // Process each line
       for (let line of lines) {
@@ -41,20 +36,9 @@ const conditionalCompilePlugin = (conditions = {}) => ({
           }
         }
       }
-
-      // Determine the correct loader based on the file extension
-      let loader;
-      if (args.path.endsWith('.jsx')) loader = 'jsx';
-      else if (args.path.endsWith('.ts')) loader = 'ts';
-      else if (args.path.endsWith('.tsx')) loader = 'tsx';
-      else loader = 'js';
-
-      return {
-        contents: newSource,
-        loader: loader,
-      };
+      return { contents: newSource, loader };
     });
-  },
+  }
 });
 
 export default conditionalCompilePlugin;

@@ -158,10 +158,9 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
   }
 };
 
-export function run_bundle({ output, relative }) {
+export async function run_bundle({ output, relative }) {
   const main_js_file = `${output}/main.js`;
   const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
-  bundle(output, entryPoints);
+  await bundle(output, entryPoints);
   console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
 }
-
