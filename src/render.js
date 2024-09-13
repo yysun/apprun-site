@@ -18,7 +18,15 @@ export default async (path, output, port) => {
   global.window.safeHTML = safeHTML;
   global.HTMLElement = dom.window.HTMLElement;
   global.SVGElement = dom.window.SVGElement;
-
+  global.navigator = dom.window.navigator;
+  global.location = dom.window.location;
+  global.XMLHttpRequest = dom.window.XMLHttpRequest;
+  global.localStorage = dom.window.localStorage;
+  global.sessionStorage = dom.window.sessionStorage;
+  global.addEventListener = dom.window.addEventListener;
+  global.removeEventListener = dom.window.removeEventListener;
+  global.cancelAnimationFrame = clearTimeout;
+  
   const routes = parse(path);
   let next_element = 'body';
   let el = document.body;
@@ -38,7 +46,7 @@ export default async (path, output, port) => {
           next_element = new_next_element;
           el = new_el;
         } else {
-          // warn('Element not found:', new_next_element);
+          warn('Element not found:', new_next_element);
         }
       }
     };
