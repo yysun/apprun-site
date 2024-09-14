@@ -66,7 +66,6 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
   .option('--no-ssr', 'disable server side rendering')
-  .option('--no-save', 'disable auto save of side rendered pages')
   .option('--no-csr', 'no client side routing')
   .option('--no-watch', 'watch the directory')
   .option('--no-live_reload', 'enable live reload')
@@ -74,6 +73,7 @@ program
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
+    options.save = false;
     await build(options);
     server(options);
   });
