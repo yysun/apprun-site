@@ -17,7 +17,7 @@ const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
 const Copy_Types = ['.html', '.htm', '.png', '.gif', '.json', '.svg', '.jpg', '.jpeg', '.ico'];
 const Css_Types = ['.css'];
-const css_files = [];
+// const css_files = [];
 let need_bundle = false;
 
 const ensure = dir => {
@@ -63,12 +63,14 @@ const render_routes = async ({ output, relative}) => {
 const run_build = async (config) => {
   const start_time = Date.now();
   routes.length = 0;
+  // css_files.length = 0;
   await walk(config.pages, config);
   await build_main(config);
   await run_bundle(config);
-  for (const [from, to] of css_files) {
-    await build_css(from, to, config);
-  }
+  // for (const [from, to] of css_files) {
+  //   await build_css(from, to, config);
+  // }
+  // css_files.length = 0;
   const elapsed = Date.now() - start_time;
   console.log(cyan(`Build done in ${elapsed} ms.`));
 }
@@ -186,7 +188,8 @@ async function process_file(file, config) {
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';
     if (!should_ignore(file, css_file)) {
-      css_files.push([file, css_file]);
+      // css_files.push([file, css_file]);
+      await build_css(file, css_file, config);
     }
   } else {
     console.log(magenta('Unknown file type'), relative(file));
