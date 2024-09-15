@@ -2,10 +2,12 @@
 
 import { existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
+import { readFileSync } from 'fs';
 import express from 'express';
 import bodyParser from 'body-parser';
 import render from './src/render.js';
 import { info, debug, error, warn } from './src/log.js';
+import vfs from './src/vfs.js';
 
 export let config = {};
 
@@ -26,7 +28,8 @@ export default function (_config = {}) {
   app.use(bodyParser.urlencoded({ extended: true }));
 
   set_api(app, source);
-  set_push(app, source);
+  set_action(app, source);
+  set_vfs(app, root);
   set_ssr(app, root, port, ssr, save);
 
   app.use((err, req, res, next) => {
@@ -37,6 +40,55 @@ export default function (_config = {}) {
 
   return app;
 }
+
+export function set_vfs(app, root) {
+  app.use((req, res, next) => {
+    const reqPath = join(root, req.path);
+    if (vfs.has(reqPath)) {
+      const asset = vfs.get(reqPath);
+      res.set('Content-Type', asset.type);
+      res.send(asset.content);
+      return;
+    }
+    next();
+  });
+}
+
+// export function send_live_reload(req, res, next) {
+//   const reqPath = req.path;
+//   if (reqPath.endsWith('.html') || reqPath === '/') {
+//     const filePath = join(root, reqPath === '/' ? 'index.html' : reqPath);
+//     if (existsSync(filePath)) {
+//       const data = readFileSync(filePath, 'utf8');
+//       const injectedData = data.replace(
+//         /<\/body>/i,
+//         `<script>
+//             const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+//             const address = protocol + window.location.host + window.location.pathname + '/ws';
+//             const ws = new WebSocket(address);
+//             ws.onmessage = (event) => {
+//               const message = JSON.parse(event.data);
+//               if (message.type === 'css') {
+//                 const links = document.querySelectorAll('link[rel="stylesheet"]');
+//                 links.forEach(link => {
+//                   const href = link.getAttribute('href');
+//                   if (href.includes(message.path)) {
+//                     const newHref = href.split('?')[0] + '?t=' + new Date().getTime();
+//                     link.setAttribute('href', newHref);
+//                   }
+//                 });
+//               } else if (message.type === 'js' || message.type === 'md') {
+//                 location.reload();
+//               }
+//             };
+//           </script></body>`
+//       );
+//       res.type('.html').send(injectedData);
+//       return;
+//     }
+//   }
+//   next();
+// }
 
 export function set_ssr(app, root, port, ssr, save) {
 
@@ -135,7 +187,7 @@ export function set_api(app, source) {
   });
 }
 
-export function set_push(app, source) {
+export function set_action(app, source) {
 
   app.get('/_/*', async (req, res, next) => {
     try {
@@ -174,7 +226,6 @@ export function set_push(app, source) {
     }
   });
 }
-
 
 function find_js(req_path, root) {
   let path = req_path.replace('/_', '');

@@ -3,6 +3,7 @@ import { existsSync, writeFileSync, readFileSync, copyFileSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import { exec } from 'child_process';
+import vfs from './vfs.js';
 
 export const build_tailwind = async (from, to, config) => {
   const { source, pages, output, relative, should_ignore } = config;
@@ -44,7 +45,12 @@ export const build_css = async (from, to, config) => {
       console.warn(err.toString());
     }
 
+
+    vfs.set(to, result.css, 'text/css');
+    // notifyChange('css', filePath);
+
     writeFileSync(to, result.css);
+
     console.log(cyan('Compiled CSS with PostCss'), relative(to));
 
   } catch (err) {

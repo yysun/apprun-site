@@ -63,14 +63,9 @@ const render_routes = async ({ output, relative}) => {
 const run_build = async (config) => {
   const start_time = Date.now();
   routes.length = 0;
-  // css_files.length = 0;
   await walk(config.pages, config);
   await build_main(config);
-  await run_bundle(config);
-  // for (const [from, to] of css_files) {
-  //   await build_css(from, to, config);
-  // }
-  // css_files.length = 0;
+  // await run_bundle(config);
   const elapsed = Date.now() - start_time;
   console.log(cyan(`Build done in ${elapsed} ms.`));
 }
@@ -145,7 +140,7 @@ export default async (config) => {
       }
     }).on('ready', () => {
       ready = true;
-      console.log(cyan('Watching ...'));
+      console.log(yellow('Watching ...'));
     });
   }
 }

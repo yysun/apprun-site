@@ -73,7 +73,9 @@ program
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
     options.info && console.log(options);
+    options.ssr = false;
     options.save = false;
+    options.dev = true;
     await build(options);
     server(options);
   });
