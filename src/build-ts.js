@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 //@ts-check
-import { writeFileSync, existsSync, unlinkSync, copyFileSync } from 'fs';
+import { writeFileSync, existsSync, unlinkSync, copyFileSync, readFileSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 const { cyan, green, magenta, gray} = chalk;
@@ -8,14 +8,14 @@ import esbuild, { bundle } from './esbuild.js';
 
 export let routes = [];
 
-export const build_component = async (content, target) => {
+export const build_component = async (content, target, config) => {
   const html = content.replace(/`/g, '\\`');
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
-  await esbuild(tsx_file, target);
+  await esbuild(tsx_file, target, config);
   unlinkSync(tsx_file);
 };
 
@@ -80,7 +80,7 @@ ${init ? import_main : 'export default () => {}'}
   }
 const components = ${JSON.stringify(routes)};
 const route = (path) => {
-  let bestMatch;
+  let bestMatch = '/';
   let longestMatchLength = 0;
   components.forEach((item, index) => {
     const _route = item[0];
@@ -99,7 +99,7 @@ app.route = null;
 window.onload = async () => {
   app.route = route;
   components.map(item => add_component(item, '${site_url}'));
-  app.route(${!csr ? 'loacation.hash' : 'location.pathname'});
+  app.route(${!csr ? 'location.hash' : 'location.pathname'});
 };
 ${csr ? `
 document.body.addEventListener('click', e => {
@@ -129,7 +129,7 @@ function _init_refresh() {
   const address = protocol + window.location.host + window.location.pathname + '/ws';
   const socket = new WebSocket(address);
   socket.onmessage = function (msg) {
-    const {event, path} = JSON.parse(msg.data);
+    const path = JSON.parse(msg.data);
     if(path.endsWith('.css')) {
       reload_css(location.protocol + '//' + location.host + path);
     } else {
@@ -145,19 +145,31 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
   // const main_no_csr = init ? import_main : 'export default () => {}';
 
   writeFileSync(tsx_file, main);
-  await esbuild(tsx_file, main_js_file);
-  // unlinkSync(tsx_file);
-  console.log(green('Created main file'), 'main.js',
+  await esbuild(tsx_file, main_js_file, config);
+  unlinkSync(tsx_file);
+  console.log(green('Created main.js'), relative(main_js_file),
     magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
+  if (!config.dev) {
 
-  const server_js_file = `${source}/server.js`;
-  if (!existsSync(server_js_file)) {
-    const server_fn = new URL('./server.js', import.meta.url);
-    copyFileSync(server_fn, server_js_file);
-    console.log(green('Created server file'), relative(server_js_file));
-  } else {
-    console.log(gray('Server file exists, skipped'), relative(server_js_file));
+    await run_bundle(config);
+
+    const pages_index_html = `${config.pages}/index.html`;
+    const main_index_html = `${config.output}/_.html`;
+    if (existsSync(pages_index_html)) {
+      const content = readFileSync(pages_index_html, 'utf8');
+      writeFileSync(main_index_html, content);
+      console.log(green('Copied index.html to '), relative(main_index_html));
+    }
+
+    const server_js_file = `${source}/server.js`;
+    if (!existsSync(server_js_file)) {
+      const server_fn = new URL('./server.js', import.meta.url);
+      copyFileSync(server_fn, server_js_file);
+      console.log(green('Created server file'), relative(server_js_file));
+    } else {
+      console.log(gray('Server file exists, skipped'), relative(server_js_file));
+    }
   }
 };
 

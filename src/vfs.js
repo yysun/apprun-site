@@ -11,13 +11,12 @@ export const get = (key)  => assets.get(key);
 
 export const has = (key) => assets.has(key);
 
-export const dump = (outputDir) => {
+export const list = () => {
   for (const [key, asset] of assets.entries()) {
-    const { content } = asset;
-    const outputPath = path.join(outputDir, key);
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, content);
+    const { type } = asset;
+
+    console.log('vfs', key, type);
   }
 }
 
-export default { has, set, get, clean, dump };
+export default { has, set, get, clean, list };

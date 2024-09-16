@@ -2,7 +2,6 @@
 
 import { existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
-import { readFileSync } from 'fs';
 import express from 'express';
 import bodyParser from 'body-parser';
 import render from './src/render.js';
@@ -13,7 +12,7 @@ export let config = {};
 
 export default function (_config = {}) {
   const cwd = process.cwd();
-  let { source, output, ssr, root, port, save, live_reload } = _config;
+  let { source, output, ssr, root, port, save, live_reload, dev } = _config;
   root = output || root || 'public';
   root = resolve(cwd, root);
   source = resolve(cwd, source || '.');
@@ -21,7 +20,7 @@ export default function (_config = {}) {
   save = save === undefined ? true : save;
   if (!ssr) save = false;
   if (port === undefined) port = 8080;
-  config = { source, output, ssr, root, port, save, live_reload };
+  config = { ..._config, source, output, ssr, root, port, save, live_reload };
 
   const app = express();
   app.use(bodyParser.json());
@@ -29,7 +28,7 @@ export default function (_config = {}) {
 
   set_api(app, source);
   set_action(app, source);
-  set_vfs(app, root);
+  if (dev) set_vfs(app, root);
   set_ssr(app, root, port, ssr, save);
 
   app.use((err, req, res, next) => {
@@ -43,52 +42,16 @@ export default function (_config = {}) {
 
 export function set_vfs(app, root) {
   app.use((req, res, next) => {
-    const reqPath = join(root, req.path);
-    if (vfs.has(reqPath)) {
-      const asset = vfs.get(reqPath);
-      res.set('Content-Type', asset.type);
-      res.send(asset.content);
-      return;
+    const reqPath = req.path;
+    const indexPath = '/index.html';
+    const asset = vfs.get(reqPath) || vfs.get(indexPath); // alwasy SPA mode
+    if (asset) {
+      res.type('.' + asset.type).send(asset.content);
+    } else {
+      next();
     }
-    next();
   });
 }
-
-// export function send_live_reload(req, res, next) {
-//   const reqPath = req.path;
-//   if (reqPath.endsWith('.html') || reqPath === '/') {
-//     const filePath = join(root, reqPath === '/' ? 'index.html' : reqPath);
-//     if (existsSync(filePath)) {
-//       const data = readFileSync(filePath, 'utf8');
-//       const injectedData = data.replace(
-//         /<\/body>/i,
-//         `<script>
-//             const protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-//             const address = protocol + window.location.host + window.location.pathname + '/ws';
-//             const ws = new WebSocket(address);
-//             ws.onmessage = (event) => {
-//               const message = JSON.parse(event.data);
-//               if (message.type === 'css') {
-//                 const links = document.querySelectorAll('link[rel="stylesheet"]');
-//                 links.forEach(link => {
-//                   const href = link.getAttribute('href');
-//                   if (href.includes(message.path)) {
-//                     const newHref = href.split('?')[0] + '?t=' + new Date().getTime();
-//                     link.setAttribute('href', newHref);
-//                   }
-//                 });
-//               } else if (message.type === 'js' || message.type === 'md') {
-//                 location.reload();
-//               }
-//             };
-//           </script></body>`
-//       );
-//       res.type('.html').send(injectedData);
-//       return;
-//     }
-//   }
-//   next();
-// }
 
 export function set_ssr(app, root, port, ssr, save) {
 
@@ -138,8 +101,12 @@ export function set_ssr(app, root, port, ssr, save) {
           }
         }
         const home_html = `${root}/_.html`;
-        info('Serve:', '/._html', '(SPA)');
-        res.sendFile(home_html);
+        if (existsSync(home_html)) {
+          info('Serve:', '/._html', '(SPA)');
+          res.sendFile(home_html);
+        } else {
+          res.sendStatus(404);
+        }
       }
     }
     catch (err) {

@@ -1,13 +1,18 @@
+//@ts-check
 /* eslint-disable no-console */
 import esbuild from 'esbuild';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import conditionalCompilePlugin from './esbuild-plugin.js';
 import vfs from './vfs.js';
+import { send } from '../ws.js';
 
-export default build_in_memory;
 
-export async function build(file, target, options = {}) {
+export default function (file, target, config) {
+  return config.dev ? build_in_memory(file, target, config) : build(file, target);
+}
+
+export async function build(file, target) {
   try {
     const result = await esbuild.build({
       entryPoints: [file],
@@ -16,7 +21,6 @@ export async function build(file, target, options = {}) {
       bundle: false,
       sourcemap: true,
       minify: false,
-      ...options,
     });
     result.errors.length && console.log(red(result.errors));
     result.warnings.length && console.log(yellow(result.warnings));
@@ -25,7 +29,7 @@ export async function build(file, target, options = {}) {
   }
 }
 
-export async function build_in_memory (file, target, options = {}) {
+export async function build_in_memory(file, target, config) {
   try {
     const result = await esbuild.build({
       entryPoints: [file],
@@ -34,7 +38,6 @@ export async function build_in_memory (file, target, options = {}) {
       bundle: true,
       sourcemap: true,
       minify: false,
-      ...options,
       write: false,
     });
     result.errors.length && console.log(red(result.errors));
@@ -44,9 +47,10 @@ export async function build_in_memory (file, target, options = {}) {
       result.outputFiles.forEach(f => {
         const filePath = f.path;
         const moduleKey = filePath.replace(/\\/g, '/');
-        vfs.set(moduleKey, f.text, 'application/javascript;charset=UTF-8');
+        const relativePath = config.relative(filePath);
+        vfs.set(relativePath, f.text, 'js');
       })
-      // notifyChange('js', filePath);
+      send(target);
     }
   } catch (e) {
     console.log(red(e.message));

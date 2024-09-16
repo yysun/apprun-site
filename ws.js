@@ -2,9 +2,19 @@ import http from 'http';
 import WebSocket from 'ws';
 import { info, error } from './src/log.js';
 
+let wss;
+
+export const send = message => {
+  if(wss) wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(message));
+    }
+  });
+}
+
 export default app => {
   const server = http.createServer(app);
-  const wss = new WebSocket.Server({ server });
+  wss = new WebSocket.Server({ server });
   wss.on('connection', (ws) => {
     info('WS:', 'New WebSocket connection established');
     ws.on('message', async function (message) {
@@ -53,5 +63,5 @@ export default app => {
       info('WS:', 'WebSocket connection closed');
     });
   });
-  return { server, wss };
+  return { server, wss, send };
 }

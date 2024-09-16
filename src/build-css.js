@@ -2,35 +2,35 @@
 import { existsSync, writeFileSync, readFileSync, copyFileSync } from 'fs';
 import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
-import { exec } from 'child_process';
+// import { exec } from 'child_process';
 import vfs from './vfs.js';
 
-export const build_tailwind = async (from, to, config) => {
-  const { source, pages, output, relative, should_ignore } = config;
-  const tailwind = `${source}/tailwind.config.js`;
-  if (!existsSync(from)) return;
-  if (!existsSync(tailwind)) {
-    console.log(cyan('Copied CSS'), relative(to));
-    copyFileSync(from, to);
-    return;
-  }
-  return new Promise((resolve, reject) => {
-    exec(`npx tailwindcss -i ${from} -o ${to} -c ${tailwind}`, { cwd: source }, (err) => {
-      if (err) {
-        reject(err);
-      }
-      console.log(cyan('Compiled CSS with Tailwindcss'), relative(to));
-      resolve(to);
-    })
-  })
-};
+// export const build_tailwind = async (from, to, config) => {
+//   const { source, pages, output, relative, should_ignore } = config;
+//   const tailwind = `${source}/tailwind.config.js`;
+//   if (!existsSync(from)) return;
+//   if (!existsSync(tailwind)) {
+//     console.log(cyan('Copied CSS'), relative(to));
+//     copyFileSync(from, to);
+//     return;
+//   }
+//   return new Promise((resolve, reject) => {
+//     exec(`npx tailwindcss -i ${from} -o ${to} -c ${tailwind}`, { cwd: source }, (err) => {
+//       if (err) {
+//         reject(err);
+//       }
+//       console.log(cyan('Compiled CSS with Tailwindcss'), relative(to));
+//       resolve(to);
+//     })
+//   })
+// };
 
 export const build_css = async (from, to, config) => {
   const { source, relative } = config;
   try {
     const postcss = `${source}/postcss.config.js`;
-    if (!existsSync(from)) return;
-    if (!existsSync(postcss)) return build_tailwind(from, to, config);
+    if (!existsSync(postcss)) return;
+    // if (!existsSync(postcss)) return build_tailwind(from, to, config);
     const css = readFileSync(from, 'utf8');
     const context = { from, to, cwd: source, map: true }
 
@@ -45,11 +45,12 @@ export const build_css = async (from, to, config) => {
       console.warn(err.toString());
     }
 
-
-    vfs.set(to, result.css, 'text/css');
+    if(config.dev) {
+      vfs.set(relative(to), result.css, 'css');
+    } else {
+      writeFileSync(to, result.css);
+    }
     // notifyChange('css', filePath);
-
-    writeFileSync(to, result.css);
 
     console.log(cyan('Compiled CSS with PostCss'), relative(to));
 

@@ -36,13 +36,12 @@ program
   .option('-w, --watch', 'watch the directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .option('-i, --info', 'print option information', false)
   .option('--no-csr', 'no client side routing')
   .option('-r --render', 'pre-render pages', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    options.info && console.log(options);
-    build(options);
+    options.dev = false;
+    await build(options);
   });
 
 program
@@ -51,28 +50,21 @@ program
   .option('-o, --output [output]', 'output directory', 'public')
   .option('--no-ssr', 'disable server side rendering')
   .option('--no-save', 'disable auto save of side rendered pages')
-  .option('-i, --info', 'print option information', false)
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    options.info && console.log(options);
-    // build(options);
     server(options);
   });
 
 program
   .command('dev [source]')
   .description('launch development server, watch and live reload')
-  .option('-c, --clean', 'clean the output directory', false)
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .option('--no-ssr', 'disable server side rendering')
-  .option('--no-csr', 'no client side routing')
   .option('--no-watch', 'watch the directory')
   .option('--no-live_reload', 'enable live reload')
-  .option('-i, --info', 'print option information', false)
+  .option('--no-csr', 'no client side routing')
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    options.info && console.log(options);
     options.ssr = false;
     options.save = false;
     options.dev = true;
