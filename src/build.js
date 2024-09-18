@@ -93,8 +93,7 @@ export default async (config) => {
 
   const { source, pages, output, assets, clean, dev } = config;
   const relative = fname => path_relative(source, fname);
-  console.log(`${cyan('Build from')} ${yellow(relative(pages))} to
-    ${yellow(relative(output))} ${dev ? cyan('in DEV mode') : ''}`);
+  console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${dev ? cyan('in DEV mode') : ''}`);
 
   if (!config.dev && clean) {
     rmSync(output, { recursive: true, force: true });
