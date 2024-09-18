@@ -5,8 +5,6 @@ import chalk from 'chalk';
 const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import conditionalCompilePlugin from './esbuild-plugin.js';
 import vfs from './vfs.js';
-import { send } from '../ws.js';
-
 
 export default function (file, target, config) {
   return config.dev ? build_in_memory(file, target, config) : build(file, target);
@@ -50,7 +48,6 @@ export async function build_in_memory(file, target, config) {
         const relativePath = config.relative(filePath);
         vfs.set(relativePath, f.text, 'js');
       })
-      send(target);
     }
   } catch (e) {
     console.log(red(e.message));

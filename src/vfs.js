@@ -1,12 +1,13 @@
-import fs from 'fs';
-import path from 'path';
+//@ts-checK
 
 const assets = new Map();
 
 export const clean = () => assets.clear();
 
-const set = (key, content, type) => assets.set(key, { content, type });
-
+const set = (key, content, type) => {
+  key = key.replace(/\\/g, '/');
+  assets.set(key, { content, type });
+}
 export const get = (key)  => assets.get(key);
 
 export const has = (key) => assets.has(key);

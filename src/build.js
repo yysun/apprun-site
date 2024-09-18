@@ -11,6 +11,7 @@ import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 import render from './render.js';
 import vfs from './vfs.js';
+import { send } from '../ws.js';
 
 const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
@@ -55,6 +56,7 @@ const render_routes = async ({ output, relative}) => {
 const run_build = async (config) => {
   const start_time = Date.now();
   routes.length = 0;
+  vfs.clean();
   await walk(config.pages, config);
   await build_main(config);
   const elapsed = Date.now() - start_time;
@@ -76,6 +78,7 @@ const onChange = (async (config, path) => {
   } else {
     await run_build(config);
   }
+  send(path);
 });
 
 const debouncedOnChange = debounce(onChange, 300);
@@ -87,7 +90,6 @@ export default async (config) => {
 
   console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${dev ? cyan('DEV mode') : ''}`);
 
-  if (config.dev) vfs.clean();
   if (!config.dev && clean) {
     rmSync(output, { recursive: true, force: true });
     console.log(cyan('Clean'), relative(output));
