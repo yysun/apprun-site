@@ -91,9 +91,10 @@ let copy_files;
 
 export default async (config) => {
 
-  const { source, pages, output, assets, relative, clean , dev } = config;
-
-  console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${dev ? cyan('DEV mode') : ''}`);
+  const { source, pages, output, assets, clean, dev } = config;
+  const relative = fname => path_relative(source, fname);
+  console.log(`${cyan('Build from')} ${yellow(relative(pages))} to
+    ${yellow(relative(output))} ${dev ? cyan('in DEV mode') : ''}`);
 
   if (!config.dev && clean) {
     rmSync(output, { recursive: true, force: true });
@@ -104,19 +105,8 @@ export default async (config) => {
   copy_files = [...new Set(Copy_Types)];
 
   try {
-    // if (config.dev) {
-    //   const _relative = config.relative;
-    //   const _output = config.output;
-    //   const build_dir = join(source, '._build');
-    //   config.output = build_dir;
-    //   config.relative = fn => '/' + path_relative(build_dir, fn);
-    //   await run_build(config);
-    //   rmSync(build_dir, { recursive: true, force: true });
-    //   // config.output = _output;
-    //   // config.relative = _relative;
-    // } else {
+    config.relative = fn => '/' + path_relative(output, fn);
     await run_build(config);
-
     if (config.render) {
       const start_time = Date.now();
       await render_routes(config);
@@ -145,15 +135,13 @@ export default async (config) => {
 }
 
 async function process_file(file, config) {
-  const { pages, output } = config;
+  const { pages, output, relative } = config;
   const dir = dirname(file).replace(pages, '');
   const name = basename(file).replace(/\.[^/.]+$/, '');
   const ext = extname(file);
   const pub_dir = join(output, dir);
   ensure(pub_dir);
   const js_file = join(output, dir, name) + '.js';
-  const relative = fn =>
-    path_relative(pages, fn);
 
   if (copy_files.indexOf(ext) >= 0) {
     let dest = join(pub_dir, name) + ext;

@@ -21,7 +21,7 @@ async function init_options(source, options) {
   }
   options = { ...default_options, ...options };
   options['site_url'].endsWith('/') && (options['site_url'] = options['site_url'].slice(0, -1));
-  options.relative = fname => relative(source, fname);
+  // options.relative = fname => relative(source, fname);
   return { source, options };
 }
 
