@@ -71,7 +71,7 @@ ${init ? import_main : 'export default () => {}'}
           const vdom = await exp(...p);
           const element_id = get_element(path);
           const el = document.getElementById(element_id);
-          console.assert(!!el, \`\${element_id} not found, component will display\`);
+          console.assert(!!el, \`\${element_id} not found, component will not display\`);
           app.render(el, vdom);
         });
       }
@@ -80,7 +80,7 @@ ${init ? import_main : 'export default () => {}'}
   }
 const components = ${JSON.stringify(routes)};
 const route = (path) => {
-  let bestMatch = '/';
+  let bestMatch;
   let longestMatchLength = 0;
   components.forEach((item, index) => {
     const _route = item[0];
@@ -91,6 +91,8 @@ const route = (path) => {
       }
     }
   });
+  console.assert(!!bestMatch, \`\${path} not found.\`);
+  bestMatch = bestMatch || '/';
   const idx = path.indexOf(bestMatch);
   const params = path.substring(bestMatch.length).split('/').filter(p => !!p);
   app.run(bestMatch, ...params);
