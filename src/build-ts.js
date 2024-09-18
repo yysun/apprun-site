@@ -16,7 +16,7 @@ export const build_component = async (content, target, config) => {
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
   await esbuild(tsx_file, target, config);
-  unlinkSync(tsx_file);
+  // unlinkSync(tsx_file);
 };
 
 export const add_route = (route, target, output) => {
@@ -148,7 +148,7 @@ window.addEventListener('DOMContentLoaded', _init_refresh);
 
   writeFileSync(tsx_file, main);
   await esbuild(tsx_file, main_js_file, config);
-  unlinkSync(tsx_file);
+  // unlinkSync(tsx_file);
   console.log(green('Created main.js'), relative(main_js_file),
     magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
