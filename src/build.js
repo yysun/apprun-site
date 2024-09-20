@@ -9,7 +9,6 @@ import esbuild from './esbuild.js';
 import { build_main, build_component, add_route, routes } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
-import render from './render.js';
 import vfs from './vfs.js';
 import { send } from '../ws.js';
 
@@ -31,25 +30,6 @@ async function walk(dir, config) {
     const stats = statSync(filePath);
     if (stats.isDirectory()) await walk(filePath, config);
     else if (stats.isFile()) await process_file(filePath, config);
-  }
-}
-
-const render_routes = async ({ output, relative}) => {
-  for (const route of routes) {
-    const path = route[0];
-    try {
-      const port = process.env.PORT || 8080;
-      const content = await render(path + '/', output, port);
-      if (content) {
-        const html_file = join(output, path, 'index.html');
-        writeFileSync(html_file, content);
-        console.log(green('Rendered'), relative(html_file));
-      } else {
-        console.log(magenta('Rendered empty'), path);
-      }
-    } catch (e) {
-      console.log(red('Render failed'), path, e.message);
-    }
   }
 }
 
@@ -106,12 +86,6 @@ export default async (config) => {
   try {
     config.relative = fn => '/' + path_relative(output, fn);
     await run_build(config);
-    if (config.render) {
-      const start_time = Date.now();
-      await render_routes(config);
-      const elapsed = Date.now() - start_time;
-      console.log(cyan(`Render done in ${elapsed} ms.`));
-    }
   } catch (e) {
     console.log(red('Build failed'), e.message);
   }

@@ -6,8 +6,11 @@ import { relative, join } from 'path';
 import default_options from './config.js';
 
 import { program } from 'commander';
+import chalk from 'chalk';
 import { build } from './index.js';
 import server from './dev-server.js';
+import { routes } from './src/build-ts.js';
+const { red, yellow } = chalk;
 
 async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
@@ -42,6 +45,23 @@ program
     ({ source, options } = await init_options(source, options));
     options.dev = false;
     await build(options);
+    if (options.render) {
+      options.ssr = true;
+      options.save = true;
+      server(options);
+      for (const route of routes) {
+        const path = route[0];
+        try {
+          const port = process.env.PORT || 8080;
+          const reponse = await fetch(`http://localhost:${port}${path}`);
+          const html = await reponse.text();
+          console.log(yellow`✔ Rendered`, path);
+        } catch (e) {
+          console.log(red(`✖ Render failed`), path, e.message);
+        }
+      }
+    }
+    process.exit(0);
   });
 
 program
