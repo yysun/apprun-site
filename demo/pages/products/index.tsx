@@ -38,9 +38,7 @@ export default class extends Component {
       }
     </ul>
     <p>It leverages AppRun features: async state, routing as events, pure function view and more. </p>
-    <pre>
-      <code>{code}</code>
-    </pre>
+    <a href="/products/calculator">Load calculator</a>
     <div id="products-app"></div>
   </div>;
 
