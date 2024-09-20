@@ -5,5 +5,5 @@ export default class Comic extends Component {
     return response.json();
   }
 
-  view = ({ img }) => img ? <img src={img} /> : `Loading...`;
+  view = ({ img, alt }) => img ? <img src={img} alt={alt} /> : `Loading...`;
 }

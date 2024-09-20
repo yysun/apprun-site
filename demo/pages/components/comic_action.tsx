@@ -3,5 +3,5 @@ import comic from '../../_/comic.js';
 export default class Comic extends Component {
   state = comic;
 
-  view = ({ img }) => img ? <img src={img} /> : `Loading...`;
+  view = ({ img, alt }) => img ? <img src={img} alt={alt} /> : `Loading...`;
 }
