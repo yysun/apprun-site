@@ -54,6 +54,7 @@ const debounce = (func, delay) => {
 let paused = false;
 
 const onChange = (async (config, path) => {
+  console.clear();
   paused = true;
   const ext = extname(path);
   if (Css_Types.indexOf(ext) >= 0) {
