@@ -3,14 +3,15 @@
 
 import { existsSync } from 'fs';
 import { relative, join } from 'path';
+import http from 'http';
 import default_options from './config.js';
-
 import { program } from 'commander';
 import chalk from 'chalk';
 import { build } from './index.js';
-import server from './dev-server.js';
+import dev_server from './dev-server.js';
+import app from './server.js';
 import { routes } from './src/build-ts.js';
-const { red, yellow } = chalk;
+const { red, yellow, gray } = chalk;
 
 async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
@@ -48,7 +49,22 @@ program
     if (options.render) {
       options.ssr = true;
       options.save = true;
-      server(options);
+      const server = http.createServer(app(options));
+      const port = process.env.PORT || 8080;
+      server.on('error', async (err) => {
+        if (err.code === 'EADDRINUSE') {
+          console.log(gray(`✖ Port ${port} is already in use.`));
+          await render();
+        } else {
+          console.log(red(`✖`), err.message);
+        }
+      });
+      server.listen(port, async () => {
+        await render();
+      });
+    }
+
+    async function render() {
       for (const route of routes) {
         const path = route[0];
         try {
@@ -60,8 +76,8 @@ program
           console.log(red(`✖ Render failed`), path, e.message);
         }
       }
+      process.exit(0);
     }
-    process.exit(0);
   });
 
 program
@@ -72,7 +88,7 @@ program
   .option('--no-save', 'disable auto save of side rendered pages')
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));
-    server(options);
+    dev_server(options);
   });
 
 program
@@ -89,7 +105,7 @@ program
     options.save = false;
     options.dev = true;
     await build(options);
-    server(options);
+    dev_server(options);
   });
 
 program.parseAsync(process.argv);
