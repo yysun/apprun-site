@@ -6,11 +6,8 @@ const { cyan, yellow, blue, green, magenta, gray, red } = chalk;
 import conditionalCompilePlugin from './esbuild-plugin.js';
 import vfs from './vfs.js';
 
-export default function (file, target, config) {
-  return config.dev ? build_in_memory(file, target, config) : build(file, target);
-}
-
-export async function build(file, target) {
+export async function build(file, target, config) {
+  const build_in_memory = !!config.dev;
   try {
     const result = await esbuild.build({
       entryPoints: [file],
@@ -19,42 +16,26 @@ export async function build(file, target) {
       bundle: false,
       sourcemap: true,
       minify: false,
-    });
-    result.errors.length && console.log(red(result.errors));
-    result.warnings.length && console.log(yellow(result.warnings));
-  } catch (e) {
-    console.log(red(e.message));
-  }
-}
-
-export async function build_in_memory(file, target, config) {
-  try {
-    const result = await esbuild.build({
-      entryPoints: [file],
-      outfile: target,
-      format: 'esm',
-      bundle: true,
-      sourcemap: true,
-      minify: false,
-      write: false,
+      write: !build_in_memory
     });
     result.errors.length && console.log(red(result.errors));
     result.warnings.length && console.log(yellow(result.warnings));
 
-    if (result.outputFiles) {
+    if (build_in_memory && result.outputFiles) {
       result.outputFiles.forEach(f => {
         const filePath = f.path;
-        const moduleKey = filePath.replace(/\\/g, '/');
-        const relativePath = config.relative(filePath);
+        const relativePath = config.relative(filePath).replace(/\\/g, '/');
         vfs.set(relativePath, f.text, 'js');
       })
     }
+
   } catch (e) {
     console.log(red(e.message));
   }
 }
 
-export async function bundle(output, entryPoints) {
+export async function bundle(output, entryPoints, config) {
+  const build_in_memory = !!config.dev;
   try {
     const result = await esbuild.build({
       entryPoints,
@@ -66,11 +47,18 @@ export async function bundle(output, entryPoints) {
       minify: process.env.NODE_ENV === 'production',
       sourcemap: true,
       allowOverwrite: true,
+      write: !build_in_memory,
       plugins: [conditionalCompilePlugin()]
     });
     result.errors.length && console.log(red(result.errors));
     result.warnings.length && console.log(yellow(result.warnings));
-
+    if (build_in_memory && result.outputFiles) {
+      result.outputFiles.forEach(f => {
+        const filePath = f.path;
+        const relativePath = config.relative(filePath).replace(/\\/g, '/');
+        vfs.set(relativePath, f.text, 'js');
+      })
+    }
   } catch (e) {
     console.log(red(e.message));
   }

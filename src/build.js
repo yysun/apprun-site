@@ -5,8 +5,7 @@ import { join, dirname, basename, extname, relative as path_relative } from 'pat
 import chokidar from 'chokidar';
 import chalk from 'chalk';
 const { cyan, yellow, magenta, red, green } = chalk;
-import esbuild from './esbuild.js';
-import { build_main, build_component, add_route, routes } from './build-ts.js';
+import { build_ts, build_main, build_component, add_route, routes } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 import vfs from './vfs.js';
@@ -137,7 +136,7 @@ async function process_file(file, config) {
     }
     add_route(dir, js_file, output);
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
-    await esbuild(file, js_file, config);
+    await build_ts(file, js_file, config);
     console.log(cyan('Compiled JavaSript'), relative(js_file));
     // }
     add_route(dir, js_file, output);

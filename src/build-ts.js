@@ -3,9 +3,11 @@ import { writeFileSync, existsSync, copyFileSync, readFileSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 const { cyan, green, magenta, gray} = chalk;
-import esbuild, { bundle } from './esbuild.js';
+import { build, bundle } from './esbuild.js';
+export { build as build_ts };
 
 export let routes = [];
+
 
 export const build_component = async (content, target, config) => {
   const html = content.replace(/`/g, '\\`');
@@ -14,7 +16,7 @@ export const build_component = async (content, target, config) => {
   const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
-  await esbuild(tsx_file, target, config);
+  await build(tsx_file, target, config);
   // unlinkSync(tsx_file);
 };
 
@@ -165,15 +167,14 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
   };
 
   writeFileSync(tsx_file, main);
-  await esbuild(tsx_file, main_js_file, config);
+  await build(tsx_file, main_js_file, config);
   // unlinkSync(tsx_file);
   console.log(green('Created main.js'), relative(main_js_file),
     magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
+  await run_bundle(config);
+
   if (!config.dev) {
-
-    await run_bundle(config);
-
     const pages_index_html = `${config.pages}/index.html`;
     const main_index_html = `${config.output}/_.html`;
     if (existsSync(pages_index_html)) {
@@ -193,9 +194,10 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
   }
 };
 
-export async function run_bundle({ output, relative }) {
+export async function run_bundle(config) {
+  const { output, relative } = config;
   const main_js_file = `${output}/main.js`;
   const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
-  await bundle(output, entryPoints);
+  await bundle(output, entryPoints, config);
   console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
 }
