@@ -5,7 +5,7 @@ import { join, dirname, basename, extname, relative as path_relative } from 'pat
 import chokidar from 'chokidar';
 import chalk from 'chalk';
 const { cyan, yellow, magenta, red, green } = chalk;
-import { build_ts, build_main, build_component, add_route, routes } from './build-ts.js';
+import { build_ts, build_main, build_component, routes, run_bundle } from './build-ts.js';
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 import vfs from './vfs.js';
@@ -23,7 +23,6 @@ const ensure = dir => {
 
 async function walk(dir, config) {
   let files = readdirSync(dir);
-
   for(const file of files) {
     const filePath = join(dir, file);
     const stats = statSync(filePath);
@@ -38,6 +37,7 @@ const run_build = async (config) => {
   vfs.clean();
   await walk(config.pages, config);
   await build_main(config);
+  await run_bundle(config);
   const elapsed = Date.now() - start_time;
   console.log(cyan(`Build done in ${elapsed} ms.`));
 }
@@ -113,7 +113,7 @@ async function process_file(file, config) {
   const name = basename(file).replace(/\.[^/.]+$/, '');
   const ext = extname(file);
   const pub_dir = join(output, dir);
-  ensure(pub_dir);
+  // ensure(pub_dir);
   const js_file = join(output, dir, name) + '.js';
 
   if (copy_files.indexOf(ext) >= 0) {
@@ -126,7 +126,6 @@ async function process_file(file, config) {
     }
     console.log(cyan('Copied File'), relative(dest));
   } else if (Markdown_Types.indexOf(ext) >= 0) {
-
     const content = markdown(file)
     if (!content) {
       console.log(red('Markdown load failed'));
@@ -134,12 +133,9 @@ async function process_file(file, config) {
       await build_component(content, js_file, config);
       console.log(cyan('Created Component'), relative(js_file));
     }
-    add_route(dir, js_file, output);
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     await build_ts(file, js_file, config);
     console.log(cyan('Compiled JavaSript'), relative(js_file));
-    // }
-    add_route(dir, js_file, output);
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';
     await build_css(file, css_file, config);

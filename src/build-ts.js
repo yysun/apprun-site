@@ -1,38 +1,51 @@
 //@ts-check
-import { writeFileSync, existsSync, copyFileSync, readFileSync } from 'fs';
+import { writeFileSync, existsSync, copyFileSync, readFileSync, unlinkSync, renameSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-const { cyan, green, magenta, gray} = chalk;
-import { build, bundle } from './esbuild.js';
-export { build as build_ts };
+const { cyan, green, magenta, gray, yellow } = chalk;
+import { bundle } from './esbuild.js';
+import vfs from './vfs.js';
 
-export let routes = [];
+export const routes = [];
+const clean_up = [];
 
+export const build_ts = async (file, target, config) => {
+  // await build(file, target, {dev:false});
+  add_route(file, target, config);
+};
 
 export const build_component = async (content, target, config) => {
+  const { pages, output } = config;
   const html = content.replace(/`/g, '\\`');
   const component = `const {safeHTML} = window;
   export default () => safeHTML(\`${html}\`);`;
-  const tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
+  let tsx_file = target.replace(/\.[^/.]+$/, '.tsx');
+  tsx_file = tsx_file.replace(output, pages);
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
-  await build(tsx_file, target, config);
+  // await build(tsx_file, target, config);
+  add_route(tsx_file, target, config);
   // unlinkSync(tsx_file);
+
+  clean_up.push(tsx_file);
 };
 
-export const add_route = (route, target, output) => {
+const add_route = (file, target, config) => {
+  const { output } = config;
   const module_file = target.replace(output, '').replace(/\\/g, '/');
+  let route = module_file.replace(/\/index.js$/, '');
   route = (route || '/').replace(/\\/g, '/');
   if (module_file.endsWith('index.js') && !routes.find(r => r[0] === route && r[1] === module_file)) {
-    routes.push([route, module_file]);
+    routes.push([route, module_file, file]);
+    // console.log(yellow('Added route:'), route, module_file, file);
   }
 };
 
 export const build_main = async (config) => {
   const { site_url, output, pages, live_reload, relative, source, csr } = config;
   const main_file = `${pages}/main.tsx`;
-  const tsx_file = `${output}/main.tsx`;
-  const main_js_file = `${output}/main.js`;
+  const tsx_file = `${pages}/_main.tsx`;
+  // const main_js_file = `${pages}/main.js`;
   const init = existsSync(main_file);
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
@@ -167,12 +180,11 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
   };
 
   writeFileSync(tsx_file, main);
-  await build(tsx_file, main_js_file, config);
+  // await build(tsx_file, main_js_file, config);
   // unlinkSync(tsx_file);
-  console.log(green('Created main.js'), relative(main_js_file),
-    magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
-  await run_bundle(config);
+  console.log(green('Created main.js'), relative(tsx_file),
+    magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
   if (!config.dev) {
     const pages_index_html = `${config.pages}/index.html`;
@@ -195,9 +207,20 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
 };
 
 export async function run_bundle(config) {
-  const { output, relative } = config;
-  const main_js_file = `${output}/main.js`;
-  const entryPoints = [main_js_file, ...routes.map(route => `${output}${route[1]}`)];
+  const { pages, output } = config;
+  const main_tsx_file = `${pages}/_main.tsx`;
+  const entryPoints = [main_tsx_file, ...routes.map(route => route[2])];
   await bundle(output, entryPoints, config);
-  console.log(cyan('Bundled: '), entryPoints.map(p => relative(p)));
+
+  if (config.dev) {
+    const { content } = vfs.get('/_main.js');
+    vfs.set('/main.js', content, 'js');
+  } else {
+    renameSync(`${output}/_main.js`, `${output}/main.js`);
+  }
+
+  unlinkSync(main_tsx_file);
+  clean_up.forEach(f => unlinkSync(f));
+
+  console.log(cyan('Bundled: '), entryPoints.map(p => '/'+ path.relative(pages, p)));
 }
