@@ -113,7 +113,7 @@ async function process_file(file, config) {
   const name = basename(file).replace(/\.[^/.]+$/, '');
   const ext = extname(file);
   const pub_dir = join(output, dir);
-  // ensure(pub_dir);
+  if(!config.dev) ensure(pub_dir);
   const js_file = join(output, dir, name) + '.js';
 
   if (copy_files.indexOf(ext) >= 0) {
