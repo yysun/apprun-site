@@ -10,7 +10,6 @@ export const routes = [];
 const clean_up = [];
 
 export const build_ts = async (file, target, config) => {
-  // await build(file, target, {dev:false});
   add_route(file, target, config);
 };
 
@@ -23,10 +22,7 @@ export const build_component = async (content, target, config) => {
   tsx_file = tsx_file.replace(output, pages);
   if (!tsx_file.endsWith('index.tsx')) return;
   writeFileSync(tsx_file, component);
-  // await build(tsx_file, target, config);
   add_route(tsx_file, target, config);
-  // unlinkSync(tsx_file);
-
   clean_up.push(tsx_file);
 };
 
@@ -45,7 +41,6 @@ export const build_main = async (config) => {
   const { site_url, output, pages, live_reload, relative, source, csr } = config;
   const main_file = `${pages}/main.tsx`;
   const tsx_file = `${pages}/_main.tsx`;
-  // const main_js_file = `${pages}/main.js`;
   const init = existsSync(main_file);
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
