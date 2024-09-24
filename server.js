@@ -126,13 +126,22 @@ export function set_api(app, source) {
 
     try {
       const run_api = async (js_file) => {
-        const { mtimeMs } = statSync(js_file);
-        const module = await import(`file://${js_file}?${mtimeMs}`);
-        debug('Load:', js_file);
-        const exp = module.default;
-        exp(req, res, next);
-      };
+        try {
+          const { mtimeMs } = statSync(js_file);
+          const module = await import(`file://${js_file}?${mtimeMs}`);
+          debug('Load:', js_file);
 
+          const exp = module.default;
+          if (typeof exp !== 'function') {
+            throw new Error(`Default export is not a function in module ${js_file}`);
+          }
+
+          await exp(req, res, next);
+        } catch (importError) {
+          error('Error during module import or execution:', importError);
+          res.status(500).send('Internal Server Error');
+        }
+      };
 
       for (let i = paths.length; i > 1; i--) {
         const route = paths.slice(1, i).join('/');
@@ -157,17 +166,33 @@ export function set_api(app, source) {
 export function set_action(app, source) {
 
   app.get('/_/*', async (req, res, next) => {
+
+    const path = req.path;
+    const paths = path.split('/').filter(p => !!p);
+    if (paths.length === 0) paths.push('/'); // for /index.html
+
     try {
-      const path = req.path;
       const run_action = async (js_file, params) => {
         const { mtimeMs } = statSync(js_file);
-        const module = await import(`file://${js_file}?${mtimeMs}`);
-        debug('Load:', js_file);
+        let module;
+        try {
+          module = await import(`file://${js_file}?${mtimeMs}`);
+          debug('Load:', js_file);
+        } catch (importError) {
+          throw new Error(`Error during import of module ${js_file}: ${importError.message}`);
+        }
+
         const exp = module.default;
-        return exp(...params);
+        if (typeof exp !== 'function') {
+          throw new Error(`Default export is not a function in module ${js_file}`);
+        }
+
+        try {
+          return await exp(...params);
+        } catch (executionError) {
+          throw new Error(`Error during execution of module ${js_file}: ${executionError.message}`);
+        }
       };
-      const paths = path.split('/').filter(p => !!p);
-      if (paths.length === 0) paths.push('/'); // for /index.html
 
       for (let i = paths.length; i > 0; i--) {
         const route = '/' + paths.slice(0, i).join('/');
