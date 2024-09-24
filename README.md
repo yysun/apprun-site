@@ -1,34 +1,38 @@
 ## AppRun Site
 
-[AppRun-Site](https://github.com/yysun/apprun-site) is a command-line tool for building modern web applications with [AppRun](https://github.com/yysun/apprun).  It consists of three features:
+[AppRun-Site](https://github.com/yysun/apprun-site) is a server and a command-line tool for building modern web applications with [AppRun](https://github.com/yysun/apprun).  It has following features:
 
-* A build command compiles your code to ES Modules with [esbuild](https://esbuild.github.io/)
-* A build command option renders your pages to create a static website
-* A development server that supports your code run as Single Page Applications (SPA) and supports Server-Side Rendering (SSR)
+* You can build web pages using AppRun components and markdown
+* Compile your pages to dynamic modules and load them on demand
+* Run as Single Page Applications (SPA) and Server-Side Rendering (SSR)
+* Render your pages to create a static website
+* File-based routing
+* API endpoints
+* Server-side actions
 
-It allows you to build website pages using HTML, markdown, and AppRun components.
 
 ## Quick Start
 
-To create a new AppRun Site, run `npm init apprun-app` command and select the `AppRun Site` template.
+To create a new AppRun Site, run `npx create-apprun-app` command and select the `AppRun Site` template.
 
 ```sh
-npm init apprun-app [my-app]
+npx create-apprun-app@latest [my-app]
 ```
 
 An AppRun-Site project has the following structure:
 
 ```
-/public             <- static website
+/_                  <- action folder
+/api                <- api folder
 /pages              <- pages of the website
   /index.html       <- index page
-  /index.md         <- home page
+  /index.tsx        <- home page
   /main.tsx         <- start up code (registers web component and renders the layout)
-/components         <- optional
-/api                <- optional
+/public             <- static files (genegretd by the build command)
+/server.js          <- server code (genegretd by the build command for SSR)
 ```
 
-You can add pages to the directory `pages`; they can be HTML files, markdown files, and tsx/jsx files (AppRun components).
+You can add pages to the directory `pages`; they can be markdown files, and tsx/jsx files (AppRun components).
 
 Then, you can use:
 
