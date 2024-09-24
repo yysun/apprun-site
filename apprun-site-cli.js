@@ -2,30 +2,28 @@
 /* eslint-disable no-console */
 
 import { existsSync } from 'fs';
-import { relative, join } from 'path';
+import { join } from 'path';
 import http from 'http';
-import default_options from './config.js';
 import { program } from 'commander';
 import chalk from 'chalk';
+const { red, yellow, gray } = chalk;
 import { build } from './index.js';
 import dev_server from './dev-server.js';
 import app from './server.js';
 import { routes } from './src/build-ts.js';
-const { red, yellow, gray } = chalk;
 
 async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
   options.source = source;
-  options.pages = join(source, options.pages || 'pages');
-  options.output = join(source, options.output || 'output');
+  options['site_url'] = '/';
   const conf = `${source}/apprun-site.config.js`;
   if (existsSync(conf)) {
-    const config = await import(conf);
+    const config = await import(`file://${conf}`);
     options = { ...config.default, ...options };
   }
-  options = { ...default_options, ...options };
+  options.pages = join(source, options.pages || 'pages');
+  options.output = join(source, options.output || 'output');
   options['site_url'].endsWith('/') && (options['site_url'] = options['site_url'].slice(0, -1));
-  // options.relative = fname => relative(source, fname);
   return { source, options };
 }
 
@@ -65,8 +63,10 @@ program
     }
 
     async function render() {
-      for (const route of routes) {
-        const path = route[0];
+      const render_pages = routes;
+      if (Array.isArray(options.static_pages)) render_pages.push(...options.static_pages);
+      for (const page of render_pages) {
+        const path = page[0];
         try {
           const port = process.env.PORT || 8080;
           const reponse = await fetch(`http://localhost:${port}${path}`);
