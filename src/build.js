@@ -84,7 +84,7 @@ export default async (config) => {
   copy_files = [...new Set(Copy_Types)];
 
   try {
-    config.relative = fn => '/' + path_relative(output, fn);
+    config.relative = fn => '/' + path_relative(output, fn).replace(/\\/g, '/');
     await run_build(config);
   } catch (e) {
     console.log(red('Build failed'), e.message);
@@ -124,18 +124,18 @@ async function process_file(file, config) {
     } else {
       copyFileSync(file, dest);
     }
-    console.log(cyan('Copied File'), relative(dest));
+    console.log(cyan('Copied File:'), relative(dest));
   } else if (Markdown_Types.indexOf(ext) >= 0) {
     const content = markdown(file)
     if (!content) {
       console.log(red('Markdown load failed'));
     } else {
       await build_component(content, js_file, config);
-      console.log(cyan('Created Component'), relative(js_file));
+      // console.log(cyan('Created Component'), relative(js_file));
     }
   } else if (Esbuild_Types.indexOf(ext) >= 0) {
     await build_ts(file, js_file, config);
-    console.log(cyan('Compiled JavaSript'), relative(js_file));
+    // console.log(cyan('Compiled JavaSript'), relative(js_file));
   } else if (Css_Types.indexOf(ext) >= 0) {
     const css_file = join(output, dir, name) + '.css';
     await build_css(file, css_file, config);

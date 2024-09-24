@@ -37,7 +37,7 @@ const add_route = (file, target, config) => {
   route = (route || '/').replace(/\\/g, '/');
   if (module_file.endsWith('index.js') && !routes.find(r => r[0] === route && r[1] === module_file)) {
     routes.push([route, module_file, file]);
-    // console.log(yellow('Added route:'), route, module_file, file);
+    console.log(cyan('Added route:'), route);
   }
 };
 
@@ -183,7 +183,7 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
   // await build(tsx_file, main_js_file, config);
   // unlinkSync(tsx_file);
 
-  console.log(green('Created main.js'), relative(tsx_file),
+  console.log(green('Created _main.tsx'),
     magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
 
   if (!config.dev) {
@@ -199,9 +199,9 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
     if (!existsSync(server_js_file)) {
       const server_fn = new URL('./server.js', import.meta.url);
       copyFileSync(server_fn, server_js_file);
-      console.log(green('Created server file'), relative(server_js_file));
+      console.log(green('Created server file'));
     } else {
-      console.log(gray('Server file exists, skipped'), relative(server_js_file));
+      console.log(gray('Server file exists, skipped'));
     }
   }
 };
@@ -223,5 +223,6 @@ export async function run_bundle(config) {
   clean_up.forEach(f => unlinkSync(f));
   clean_up.length = 0;
 
-  console.log(cyan('Bundled: '), entryPoints.map(p => '/'+ path.relative(pages, p)));
+  console.log(cyan('Bundled: '), entryPoints.map(p => '/' +
+    path.relative(pages, p).replace(/\\/g, '/')));
 }
