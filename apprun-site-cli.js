@@ -1,10 +1,13 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
-import { existsSync } from 'fs';
-import { join } from 'path';
+/* eslint-disable no-console */
+//@ts-check
+import fs from 'fs';
+import { resolve, join } from 'path';
 import http from 'http';
 import { program } from 'commander';
+import inquirer from 'inquirer';
+import degit from 'degit';
 import chalk from 'chalk';
 const { red, yellow, gray } = chalk;
 import { build } from './index.js';
@@ -17,7 +20,7 @@ async function init_options(source, options) {
   options.source = source;
   options['site_url'] = '/';
   const conf = `${source}/apprun-site.config.js`;
-  if (existsSync(conf)) {
+  if (fs.existsSync(conf)) {
     const config = await import(`file://${conf}`);
     options = { ...config.default, ...options };
   }
@@ -28,8 +31,89 @@ async function init_options(source, options) {
 }
 
 program
-  .version('1.3.20')
+  .version('1.5.0')
   .description('AppRun Site CLI');
+
+program
+  .command('init [destination]')
+  .description('Initialize a new project from a template')
+  .action(async (destination) => {
+
+    const defaultTemplates = [
+      { name: "AppRun Site Basic", value: "apprunjs/apprun-site-template" },
+      { name: "AppRun Site with Shadcn/ui", value: "apprunjs/apprun-shadcn"},
+      { name: "AppRun Site with Ant Design Pro", value: "apprunjs/apprun-antd-pro"}
+    ];
+
+    const templatesUrl = 'https://raw.githubusercontent.com/yysun/apprun-site/main/templates.json';
+    let templates = [];
+    // console.log('Fetching templates from GitHub...');
+    try {
+      const response = await fetch(templatesUrl);
+      templates = await response.json();
+    } catch (error) {
+      // console.error('Error fetching templates from GitHub:', error.message);
+      // console.log('Using default templates instead.');
+      templates = defaultTemplates;
+    }
+
+
+    function isDirectoryEmpty(directory) {
+      return fs.promises.readdir(directory)
+        .then(files => files.length === 0)
+        .catch(() => true); // Directory doesn't exist
+    }
+
+
+    try {
+      // Step 1: Prompt for destination if not provided
+      if (!destination) {
+        const answers = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'destination',
+            message: 'Enter the destination directory:',
+            default: '.',
+          },
+        ]);
+        destination = answers.destination;
+      }
+
+      // Step 2: Check if destination directory is empty
+      const destPath = resolve(process.cwd(), destination);
+      const isEmpty = await isDirectoryEmpty(destPath);
+
+      if (!isEmpty) {
+        console.error('Error: Destination directory is not empty.');
+        process.exit(1);
+      }
+
+      // Step 3: Prompt the user to select a template
+      const answers = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'template',
+          message: 'Select a template to use:',
+          choices: templates,
+        },
+      ]);
+
+      const emitter = degit(answers.template, {
+        cache: false,
+        force: true,
+        verbose: true,
+      });
+
+      // Step 4: Clone the selected template
+      console.log(`Scaffolding project in ${destPath}...`);
+
+      await emitter.clone(destPath);
+
+      console.log('Project initialized successfully!');
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
+  });
 
 program
   .command('build [source]')

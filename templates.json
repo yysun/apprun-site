@@ -1,0 +1,14 @@
+[
+  {
+    "name": "AppRun Site Basic",
+    "value": "apprunjs/apprun-site-template"
+  },
+  {
+    "name": "AppRun Site with Shadcn/ui",
+    "value": "apprunjs/apprun-shadcn"
+  },
+  {
+    "name": "AppRun Site with Ant Design Pro",
+    "value": "apprunjs/apprun-antd-pro"
+  }
+]
