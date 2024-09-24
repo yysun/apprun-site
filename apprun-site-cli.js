@@ -52,23 +52,21 @@ program
       server.on('error', async (err) => {
         if (err.code === 'EADDRINUSE') {
           console.log(gray(`✖ Port ${port} is already in use.`));
-          await render();
+          await render(port);
         } else {
           console.log(red(`✖`), err.message);
         }
       });
       server.listen(port, async () => {
-        await render();
+        await render(port);
       });
     }
 
-    async function render() {
-      const render_pages = routes;
-      if (Array.isArray(options.static_pages)) render_pages.push(...options.static_pages);
-      for (const page of render_pages) {
-        const path = page[0];
+    async function render(port) {
+      const render_paths = routes.map(r => r[0]);
+      if (Array.isArray(options.static_pages)) render_paths.push(...options.static_pages);
+      for (const path of render_paths) {
         try {
-          const port = process.env.PORT || 8080;
           const reponse = await fetch(`http://localhost:${port}${path}`);
           const html = await reponse.text();
           console.log(yellow`✔ Rendered`, path);
