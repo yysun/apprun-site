@@ -11,7 +11,7 @@ export const build_css = async (from, to, config) => {
     if (!existsSync(postcss)) return;
     // if (!existsSync(postcss)) return build_tailwind(from, to, config);
     const css = readFileSync(from, 'utf8');
-    const context = { from, to, cwd: source, map: true }
+    const context = { from, to, cwd: source, map: process.env.NODE_ENV !== 'production', }
 
     const { plugins, options } = await (await import('postcss-load-config'))
       .default(context, source);
