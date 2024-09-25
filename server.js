@@ -4,6 +4,7 @@ import { existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
+import compression from 'compression';
 import render from './src/render.js';
 import { info, debug, error, warn } from './src/log.js';
 import vfs from './src/vfs.js';
@@ -25,6 +26,7 @@ export default function (_config = {}) {
   const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(compression());
 
   set_api(app, source);
   set_action(app, source);
@@ -60,6 +62,7 @@ export function set_ssr(app, root, port, ssr, save) {
       let path = req.path;
       if (path.includes('.')) {
         if (existsSync(`${root}${path}`)) {
+          debug('Send:', path);
           res.sendFile(path, { root });
         } else {
           res.sendStatus(404);
@@ -73,7 +76,7 @@ export function set_ssr(app, root, port, ssr, save) {
           const { mtimeMs: html_mtimeMs } = statSync(html_file);
           const { mtimeMs: js_mtimeMs } = statSync(source_js);
           if (js_mtimeMs < html_mtimeMs) {
-            debug('Send:', html_file);
+            debug('Send:', `${path}index.html`);
             res.sendFile(html_file);
             return;
           }
@@ -102,7 +105,7 @@ export function set_ssr(app, root, port, ssr, save) {
         }
         const home_html = `${root}/_.html`;
         if (existsSync(home_html)) {
-          info('Serve:', '/._html', '(SPA)');
+          info('Send:', '/._html', '(SPA)');
           res.sendFile(home_html);
         } else {
           res.sendStatus(404);
