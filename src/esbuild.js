@@ -17,7 +17,7 @@ export async function bundle(output, entryPoints, config) {
       outdir: output,
       chunkNames: 'dist/[name]-[hash]',
       minify: process.env.NODE_ENV === 'production',
-      sourcemap: true,
+      sourcemap: process.env.NODE_ENV !== 'production',
       allowOverwrite: true,
       write: !build_in_memory,
       plugins: [conditionalCompilePlugin()]
