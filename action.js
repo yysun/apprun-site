@@ -1,17 +1,14 @@
-//@ts-ignore
-const is_on_server = typeof process !== 'undefined' && process.versions && process.versions.node;
-
-export default (fn, path) => async (...args) => {
-  if (is_on_server) {
-    return await fn(...args);
+export default async (name, data) => {
+  const response = !data ?
+    await fetch(`/_/${name}`) :
+    await fetch(`/_/${name}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+  if (response.ok) {
+    return response.json();
   } else {
-    return fetch(`/_/${path || fn.name}`)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error(response.statusText);
-        }
-      });
+    throw new Error(response.statusText);
   }
 }

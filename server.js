@@ -3,7 +3,6 @@
 import { existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
 import express from 'express';
-import bodyParser from 'body-parser';
 import compression from 'compression';
 import render from './src/render.js';
 import { info, debug, error, warn } from './src/log.js';
@@ -24,8 +23,8 @@ export default function (_config = {}) {
   config = { ..._config, source, output, ssr, root, port, save, live_reload };
 
   const app = express();
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.use(compression());
 
   set_api(app, source);
@@ -168,14 +167,14 @@ export function set_api(app, source) {
 
 export function set_action(app, source) {
 
-  app.get('/_/*', async (req, res, next) => {
+  app.all('/_/*', async (req, res, next) => {
 
     const path = req.path;
     const paths = path.split('/').filter(p => !!p);
     if (paths.length === 0) paths.push('/'); // for /index.html
 
     try {
-      const run_action = async (js_file, params) => {
+      const run_action = async (js_file, params, body) => {
         const { mtimeMs } = statSync(js_file);
         let module;
         try {
@@ -191,7 +190,7 @@ export function set_action(app, source) {
         }
 
         try {
-          return await exp(...params);
+          return await exp(...params, body);
         } catch (executionError) {
           throw new Error(`Error during execution of module ${js_file}: ${executionError.message}`);
         }
@@ -200,16 +199,17 @@ export function set_action(app, source) {
       for (let i = paths.length; i > 0; i--) {
         const route = '/' + paths.slice(0, i).join('/');
         const params = paths.slice(i);
+        const body = req.body;
 
         const js_index = `${source}${route}/index.js`;
         const js_file = `${source}${route}.js`;
         let result = null;
         if (existsSync(js_index)) {
-          result = await run_action(js_index, params);
+          result = await run_action(js_index, params, body);
           res.json(result);
           return;
         } else if (existsSync(js_file)) {
-          result = await run_action(js_file, params);
+          result = await run_action(js_file, params, body);
           res.json(result);
           return
         }

@@ -2,13 +2,13 @@
 
 [AppRun-Site](https://github.com/yysun/apprun-site) is a server plus command-line tool for building modern web applications with [AppRun](https://github.com/yysun/apprun).  It has following features:
 
-* You can build web pages using AppRun components and markdown
-* Compile your pages to dynamic modules and load them on demand
-* Run as Single Page Applications (SPA) and Server-Side Rendering (SSR)
-* Render your pages to create a static website
-* File-based routing
-* API endpoints
-* Server-side actions
+* You can [create web pages](###quick-start) using AppRun components and markdown
+* [Build](###build) your pages to dynamic modules and load them on demand
+* [Run a server](###serve) as Single Page Applications (SPA) and Server-Side Rendering (SSR)
+* Render your pages to create a [static website](###static-website)
+* [File-based routing](##file-based-routing)
+* [API endpoints](##api-endpoints)
+* [Server-side actions](##server-side-actions)
 
 
 ## Quick Start
@@ -80,6 +80,8 @@ The `npx apprun-site build` command compiles your code to the `public` folder. I
 
 You can deploy the `public` folder to any static file server, such as GitHub Pages.
 
+### Serve
+
 Or you can run the server.js file to serve the pages with SSR.
 
 ### File-based  Routing
@@ -138,34 +140,32 @@ You can add server-side actions in the `_` folder. The server-side actions are s
 ```js
 // _/comic.js
 import action from 'apprun-site/action.js';
-
-const comic = async () => {
+export default async (data) => {
   //#if server
-  let response = await fetch('https://xkcd.com/info.0.json');
-  const current = await response.json();
-  const num = Math.floor(Math.random() * current.num) + 1;
-  response = await fetch(`https://xkcd.com/${num}/info.0.json`);
+  const num = data?.num || Math.floor(Math.random() * 2990) + 1;
+  const response = await fetch(`https://xkcd.com/${num}/info.0.json`);
   return response.json();
+  //#else
+  return action('comic', data);
   //#endif
 }
-
-// made available on the client side
-export default action(comic, 'comic');
 ```
 
-The `action` function is a wrapper for server-side actions. It will execute the action on the server side. It will generate a fetch call to the action on the client side. You can refer to the server-side action in your AppRun components:
+The compiler will strip out the server-side code from the client-side code, noted by `//#if server` and `//#else`. So, no server side code will be visible on the client side.
+
+The `action` function will use fetch to POST to the `comic` action on the client side.
+
+You can refer to the server-side action in your AppRun components:
 
 ```tsx
 // components/comic.tsx
 import { app, Component } from 'apprun';
 import comic from '../_/comic.js';
 export default class Comic extends Component {
-  state = comic;
+  state = comic();
   view = ({ img, alt }) => img ? <img src={img} alt={alt} /> : `Loading...`;
 }
 ```
-
-The compiler will strip out the server-side code from the client-side code, noted by `//#if server` and `//#endif`. So, no server side code will be visible on the client side.
 
 
 ## Command Line

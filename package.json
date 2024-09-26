@@ -51,6 +51,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
+    "@types/compression": "^1.7.5",
+    "@types/express": "^5.0.0",
     "eslint": "^9.10.0"
   }
 }
