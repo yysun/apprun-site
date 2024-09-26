@@ -160,13 +160,14 @@ You can refer to the server-side action in your AppRun components:
 ```tsx
 // components/comic.tsx
 import { app, Component } from 'apprun';
-import comic from '../_/comic.js';
+import comic from '../../app/_/comic';
 export default class Comic extends Component {
   state = comic();
   view = ({ img, alt }) => img ? <img src={img} alt={alt} /> : `Loading...`;
 }
 ```
 
+The benefit of referring to the server-side code is that you can get type checking, code completion and go-to-definition in your IDE.
 
 ## Command Line
 
