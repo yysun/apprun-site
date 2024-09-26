@@ -75,6 +75,11 @@ export default async (config) => {
   const relative = fname => path_relative(source, fname);
   console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${dev ? cyan('in DEV mode') : ''}`);
 
+  if (!existsSync(pages)) {
+    console.log(red('"pages" folder not found'), pages);
+    return;
+  }
+
   if (!config.dev && clean) {
     rmSync(output, { recursive: true, force: true });
     console.log(cyan('Clean'), relative(output));

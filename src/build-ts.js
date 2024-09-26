@@ -189,15 +189,6 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
       writeFileSync(main_index_html, content);
       console.log(green('Copied index.html to '), relative(main_index_html));
     }
-
-    const server_js_file = `${source}/server.js`;
-    if (!existsSync(server_js_file)) {
-      const server_fn = new URL('./server.js', import.meta.url);
-      copyFileSync(server_fn, server_js_file);
-      console.log(green('Created server file'));
-    } else {
-      console.log(gray('Server file exists, skipped'));
-    }
   }
 };
 

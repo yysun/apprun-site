@@ -6,4 +6,5 @@ coverage
 .cache
 src/_lib
 public
-._build
+demo/_
+demo/api

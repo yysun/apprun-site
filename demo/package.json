@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --watch --watch-path public server.js"
+    "start": "node server.js",
+    "dev": "apprun-site dev",
+    "build": "apprun-site build --clean",
+    "render": "apprun-site build --render",
+    "build:server": "apprun-site build --server-only",
+    "build:client": "apprun-site build --client-only"
   },
   "keywords": [],
   "author": "",
