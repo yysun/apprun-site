@@ -189,8 +189,8 @@ program
   .description('launch development server, watch and live reload')
   .option('-o, --output [output]', 'output directory', 'public')
   .option('-p, --pages [pages]', 'pages directory', 'pages')
-  .option('--no-watch', 'watch the directory')
-  .option('--no-live_reload', 'enable live reload')
+  .option('--no-watch', 'no watching the directory')
+  .option('--no-live_reload', 'no live reload')
   .option('--no-csr', 'no client side routing')
   .action(async (source, options) => {
     ({ source, options } = await init_options(source, options));

@@ -15,6 +15,12 @@
 
 To create a new AppRun Site, run `npx apprun-site init`.
 
+The `init` command provides a few more project templates to choose from:
+
+* [AppRun Site Basic](https://github.com/apprunjs/apprun-site-template)
+* [AppRun Site with Shadcn/ui](https://github.com/apprunjs/apprun-shadcn)
+* [AppRun Site with Ant Design](https://github.com/apprunjs/apprun-antd-pro)
+
 An AppRun-Site project has the following structure:
 
 ```
