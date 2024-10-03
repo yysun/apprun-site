@@ -1,11 +1,11 @@
 import http from 'http';
 import WebSocket from 'ws';
-import { info, error } from './src/log.js';
+import { info, error } from './log.js';
 
 let wss;
 
 export const send = message => {
-  if(wss) wss.clients.forEach(client => {
+  if (wss) wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(message));
     }
@@ -52,7 +52,7 @@ export default app => {
           },
         };
         await app._router.handle(req, res, (e) => {
-          e && ws.send(JSON.stringify({ status:500, error: e.message }));
+          e && ws.send(JSON.stringify({ status: 500, error: e.message }));
         });
       } catch (e) {
         error('ERROR:', e.message);

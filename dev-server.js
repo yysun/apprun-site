@@ -3,7 +3,7 @@ import { relative } from 'path';
 import WebSocket from 'ws';
 import chokidar from 'chokidar';
 import app_server from './server.js';
-import ws_server from './ws.js';
+import ws_server from './src/ws.js';
 import { info } from './src/log.js';
 
 export default function (config) {

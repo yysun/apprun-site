@@ -9,7 +9,7 @@ import { build_ts, build_main, build_component, routes, run_bundle } from './bui
 import { build_css } from './build-css.js';
 import { markdown } from './build-md.js';
 import vfs from './vfs.js';
-import { send } from '../ws.js';
+import { send } from './ws.js';
 
 const Markdown_Types = ['.md', '.mdx'];
 const Esbuild_Types = ['.js', '.jsx', '.ts', '.tsx'];
@@ -23,7 +23,7 @@ const ensure = dir => {
 
 async function walk(dir, config) {
   let files = readdirSync(dir);
-  for(const file of files) {
+  for (const file of files) {
     const filePath = join(dir, file);
     const stats = statSync(filePath);
     if (stats.isDirectory()) await walk(filePath, config);
@@ -118,7 +118,7 @@ async function process_file(file, config) {
   const name = basename(file).replace(/\.[^/.]+$/, '');
   const ext = extname(file);
   const pub_dir = join(output, dir);
-  if(!config.dev) ensure(pub_dir);
+  if (!config.dev) ensure(pub_dir);
   const js_file = join(output, dir, name) + '.js';
 
   if (copy_files.indexOf(ext) >= 0) {
