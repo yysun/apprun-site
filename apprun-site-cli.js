@@ -145,7 +145,7 @@ program
       const server = http.createServer(app(options));
       const port = process.env.PORT || 8080;
       server.on('error', async (err) => {
-        if (err.code === 'EADDRINUSE') {
+        if (err["code"] === 'EADDRINUSE') {
           console.log(gray(`✖ Port ${port} is already in use.`));
           await render(port);
         } else {
