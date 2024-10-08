@@ -46,7 +46,7 @@ program
       { name: "AppRun Site with Ant Design Pro", value: "apprunjs/apprun-antd-pro"}
     ];
 
-    const templatesUrl = 'https://raw.githubusercontent.com/yysun/apprun-site/main/templates.json';
+    const templatesUrl = 'https://raw.githubusercontent.com/yysun/apprun-site/master/templates.json';
     let templates = [];
     // console.log('Fetching templates from GitHub...');
     try {
