@@ -2,7 +2,7 @@
 
 ## 1.3
 
-- Server-side actions
+- Server-side fuctions in the `_` folder
 - Compile client side code to and serve from memory in dev mode
 - Compile server side code from the `app` folder
 - Conditional compilation with `//#if`, `//#else`, and `//#endif` comments

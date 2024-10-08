@@ -8,7 +8,7 @@
 * [Serve](#serve) Single Page Applications (SPA) and Server-Side Rendering (SSR)
 * [File-based routing](#file-based-routing)
 * [API endpoints](#api-endpoints)
-* [Server-side actions](#server-side-actions)
+* [Server-side functions](#server-side-functions)
 
 
 ## Quick Start
@@ -149,7 +149,7 @@ If you add server backend code, you can add an `app` folder with the following s
 /pages              <- pages of the website
 ```
 
-The `build` command will compile the server code to allow the API endpoints and server-side actions.
+The `build` command will compile the server code to allow the API endpoints and server-side functions.
 
 If you only want to build the server code, you can use the `--server-only` option:
 
@@ -170,9 +170,9 @@ export default (req, res) => {
 };
 ```
 
-### Server-side Actions
+### Server-side functions
 
-You can add server-side actions in the `_` folder. The server-side actions are served at the path `/_/[action]`. For example, the `_/comic.js` file will be served at `/_/comic`.
+You can add server-side functions in the `_` folder. The server-side functions are served at the path `/_/[action]`. For example, the `_/comic.js` file will be served at `/_/comic`.
 
 Use the `//#if server`, `//#else`, and `//#endif` comments to separate the server-side code from the client-side code. The compiler will strip out the server-side code from the client-side code and vice versa.
 

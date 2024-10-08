@@ -1,4 +1,4 @@
-import action from '../../../action';
+import sfc from '../../../sfc';
 
 export default async (data?: {num: number}) => {
   //#if server
@@ -6,6 +6,6 @@ export default async (data?: {num: number}) => {
   const response = await fetch(`https://xkcd.com/${num}/info.0.json`);
   return response.json();
   //#else
-  return action('comic', data);
+  return sfc('comic', data);
   //#endif
 }
