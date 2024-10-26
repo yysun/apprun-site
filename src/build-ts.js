@@ -206,7 +206,7 @@ export async function run_bundle(config) {
   }
 
   unlinkSync(main_tsx_file);
-  clean_up.forEach(f => unlinkSync(f));
+  // clean_up.forEach(f => unlinkSync(f));
   clean_up.length = 0;
 
   console.log(cyan('Bundled: '), entryPoints.map(p => '/' +
