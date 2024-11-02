@@ -175,8 +175,6 @@ window.addEventListener('DOMContentLoaded', init_refresh);`;
   };
 
   writeFileSync(tsx_file, main);
-  // await build(tsx_file, main_js_file, config);
-  // unlinkSync(tsx_file);
 
   console.log(green('Created _main.tsx'),
     magenta(`(live reload: ${live_reload || false}, client side rendering: ${csr || false})`));
@@ -206,7 +204,7 @@ export async function run_bundle(config) {
   }
 
   unlinkSync(main_tsx_file);
-  // clean_up.forEach(f => unlinkSync(f));
+  clean_up.forEach(f => unlinkSync(f));
   clean_up.length = 0;
 
   console.log(cyan('Bundled: '), entryPoints.map(p => '/' +

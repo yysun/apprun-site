@@ -42,31 +42,6 @@ const run_build = async (config) => {
   console.log(cyan(`Build done in ${elapsed} ms.`));
 }
 
-const debounce = (func, delay) => {
-  let timeout;
-  return (...args) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), delay);
-  };
-};
-
-let paused = false;
-
-const onChange = (async (config, path) => {
-  console.clear();
-  paused = true;
-  const ext = extname(path);
-  if (Css_Types.indexOf(ext) >= 0) {
-    await process_file(path, config);
-  } else {
-    await run_build(config);
-  }
-  send(path);
-  paused = false;
-});
-
-const debouncedOnChange = debounce(onChange, 300);
-
 let copy_files;
 
 export default async (config) => {
@@ -94,24 +69,45 @@ export default async (config) => {
   } catch (e) {
     console.log(red('Build failed'), e.message);
   }
-
-  let ready = false
+  let isProcessing = false;
+  let changeTimeout = null;
   if (config.watch) {
     const watcher = chokidar.watch(pages, {
       ignored: /(^|[/\\])\../, // ignore dotfiles
-      persistent: true
-    });
-    watcher.on('all', (event, path) => {
-      if (ready && !paused) {
-        debouncedOnChange(config, path);
+      persistent: true,
+      ignoreInitial: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 500,
+        pollInterval: 100
       }
-    }).on('ready', () => {
-      ready = true;
-      console.log(yellow('Watching ...'));
     });
+    watcher.on('all', (event, filePath) => {
+      if (!isProcessing && (event === 'change' || event === 'add')) {
+        if (changeTimeout) {
+          clearTimeout(changeTimeout);
+        }
+        changeTimeout = setTimeout(() => {
+          triggerProcessing(filePath);
+        }, 500);
+      }
+    });
+
+    async function triggerProcessing(filePath) {
+      if (isProcessing) return;
+      isProcessing = true;
+      console.clear();
+      console.log(yellow('File changed'), relative(filePath));
+      const ext = extname(filePath);
+      if (Css_Types.indexOf(ext) >= 0 || Copy_Types.indexOf(ext) >= 0) {
+        await process_file(filePath, config);
+      } else if (Markdown_Types.indexOf(ext) >= 0 || Esbuild_Types.indexOf(ext) >= 0) {
+        await run_build(config);
+      }
+      send(filePath);
+      isProcessing = false;
+    }
   }
 }
-
 async function process_file(file, config) {
   const { pages, output, relative } = config;
   const dir = dirname(file).replace(pages, '');
@@ -146,3 +142,4 @@ async function process_file(file, config) {
     console.log(magenta('Unknown file type'), relative(file));
   }
 }
+
