@@ -35,11 +35,15 @@ const run_build = async (config) => {
   const start_time = Date.now();
   routes.length = 0;
   vfs.clean();
-  await walk(config.pages, config);
-  await build_main(config);
-  await run_bundle(config);
-  const elapsed = Date.now() - start_time;
-  console.log(cyan(`Build done in ${elapsed} ms.`));
+  try {
+    await walk(config.pages, config);
+    await build_main(config);
+    await run_bundle(config);
+    const elapsed = Date.now() - start_time;
+    console.log(cyan(`Build done in ${elapsed} ms.`));
+  } catch (e) {
+    console.log(red('Build failed'), e.message);
+  }
 }
 
 let copy_files;
