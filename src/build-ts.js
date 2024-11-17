@@ -204,8 +204,8 @@ export async function run_bundle(config) {
     renameSync(`${output}/_main.js`, `${output}/main.js`);
   }
 
-  unlinkSync(main_tsx_file);
-  clean_up.forEach(f => unlinkSync(f));
+  clean_up.push(main_tsx_file);
+  clean_up.forEach(f => existsSync(f) && unlinkSync(f));
   clean_up.length = 0;
 
   console.log(cyan('Bundled: '), entryPoints.map(p => '/' +
