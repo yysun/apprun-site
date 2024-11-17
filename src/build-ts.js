@@ -140,6 +140,7 @@ document.body.addEventListener('click', e => {
     menu.origin === location.origin && menu.pathname.startsWith('/')) {
     e.preventDefault();
     history.pushState(null, '', menu.href);
+    app.run('//');
     app.route(menu.pathname);
   }
 });`;
