@@ -44,6 +44,7 @@ export default function (_config = {}) {
 
 // Add this helper function after the import statements
 function normalizePath(path, base_dir) {
+  if(base_dir === '/') return path;
   path = path.startsWith(base_dir) ? path.slice(base_dir.length) : path;
   return path || '/';
 }

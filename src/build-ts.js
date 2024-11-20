@@ -44,13 +44,14 @@ export const build_main = async (config) => {
   const init = existsSync(main_file);
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
-  console.log(green('Base dir'), base_dir);
+  const base = !base_dir || base_dir === '/' ? '': base_dir;
+  console.log(green('Base'), base);
 
   let main = `import app from 'apprun';
 ${init ? `import main from '${pages_main}';` : 'const main = () => {}'}
 export default main;
 main();
-const base_dir = '${base_dir}';
+const base_dir = '${base}';
 const get_element = (path) => {
   const paths = path.split('/').filter(p => !!p);
   paths.pop();
@@ -132,7 +133,7 @@ const route = async (path) => {
 
 app.route = route;
 window.onload = async () => {
-  components.map(item => add_component(item, '${base_dir}'));
+  components.map(item => add_component(item, \`\${base_dir}\`));
   app.route(location.pathname);
 };`;
 
