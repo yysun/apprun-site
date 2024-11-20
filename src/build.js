@@ -55,16 +55,16 @@ class BuildCache {
 }
 
 function validateConfig(config) {
-  const required = ['source', 'pages', 'output'];
+  const required = ['source', 'pages', 'output', 'base_dir'];
   const missing = required.filter(field => !config[field]);
   if (missing.length) {
     throw new Error(`Missing required configuration fields: ${missing.join(', ')}`);
   }
-  
+
   if (!existsSync(config.source)) {
     throw new Error(`Source directory does not exist: ${config.source}`);
   }
-  
+
   return config;
 }
 
@@ -89,7 +89,7 @@ const FileProcessors = {
     const ext = extname(file);
     const pub_dir = join(output, dir);
     const dest = join(pub_dir, name) + ext;
-    
+
     if (config.dev) {
       const content = readFileSync(file, 'utf-8');
       vfs.set(relative(dest), content, ext.replace('.', ''));
@@ -175,7 +175,7 @@ const buildCache = new BuildCache();
 export default async (config) => {
   try {
     validateConfig(config);
-    
+
     const { source, pages, output, assets, clean, dev } = config;
     const relative = fname => path_relative(source, fname);
     console.log(`${cyan('Build from')} ${yellow(relative(pages))} to ${yellow(relative(output))} ${dev ? cyan('in DEV mode') : ''}`);
@@ -190,7 +190,7 @@ export default async (config) => {
 
     config.relative = fn => '/' + path_relative(output, fn).replace(/\\/g, '/');
     await run_build(config);
-    
+
     let isProcessing = false;
     let changeTimeout = null;
 
@@ -210,11 +210,11 @@ export default async (config) => {
           if (!buildCache.isChanged(filePath)) {
             return; // Skip if file hasn't changed
           }
-          
+
           if (changeTimeout) {
             clearTimeout(changeTimeout);
           }
-          
+
           changeTimeout = setTimeout(() => {
             triggerProcessing(filePath);
           }, 500);

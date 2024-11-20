@@ -12,7 +12,8 @@ export let config = {};
 
 export default function (_config = {}) {
   const cwd = process.cwd();
-  let { source, output, ssr, root, port, save, live_reload, dev } = _config;
+  let { source, output, ssr, root, port, save, live_reload, dev, base_dir } = _config;
+  base_dir = base_dir || '';
   root = output || root || 'public';
   root = resolve(cwd, root);
   source = resolve(cwd, source || '.');
@@ -20,17 +21,17 @@ export default function (_config = {}) {
   save = save === undefined ? true : save;
   if (!ssr) save = false;
   if (port === undefined) port = 8080;
-  config = { ..._config, source, output, ssr, root, port, save, live_reload };
+  config = { ..._config, source, output, ssr, root, port, save, live_reload, base_dir };
 
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(compression());
 
-  set_api(app, source);
-  set_action(app, source);
-  if (dev) set_vfs(app, root);
-  set_ssr(app, root, port, ssr, save);
+  set_api(app, source, base_dir);
+  set_action(app, source, base_dir);
+  if (dev) set_vfs(app, base_dir);
+  set_ssr(app, root, port, ssr, save, base_dir);
 
   app.use((err, req, res, next) => {
     error('Failed: ', req.path, err.message);
@@ -41,9 +42,15 @@ export default function (_config = {}) {
   return app;
 }
 
-export function set_vfs(app, root) {
+// Add this helper function after the import statements
+function normalizePath(path, base_dir) {
+  path = path.startsWith(base_dir) ? path.slice(base_dir.length) : path;
+  return path || '/';
+}
+
+export function set_vfs(app, base_dir) {
   app.use((req, res, next) => {
-    const reqPath = req.path;
+    const reqPath = normalizePath(req.path, base_dir);
     const indexPath = '/index.html';
     const asset = vfs.get(reqPath) || vfs.get(indexPath); // alwasy SPA mode
     if (asset) {
@@ -54,11 +61,11 @@ export function set_vfs(app, root) {
   });
 }
 
-export function set_ssr(app, root, port, ssr, save) {
+export function set_ssr(app, root, port, ssr, save, base_dir) {
 
   app.get('*', async (req, res, next) => {
     try {
-      let path = req.path;
+      let path = normalizePath(req.path, base_dir); // Ensure base_dir is removed from the path
       if (path.includes('.')) {
         if (existsSync(`${root}${path}`)) {
           debug('Send:', path);
@@ -118,11 +125,11 @@ export function set_ssr(app, root, port, ssr, save) {
   });
 }
 
-export function set_api(app, source) {
+export function set_api(app, source, base_dir) {
 
-  app.all('/api/*', async (req, res, next) => {
+  app.all(base_dir + '/api/*', async (req, res, next) => {
 
-    const path = req.path;
+    const path = normalizePath(req.path, base_dir); // Ensure base_dir is removed from the path
     const paths = path.split('/');
     info('API  :', path);
 
@@ -165,11 +172,11 @@ export function set_api(app, source) {
   });
 }
 
-export function set_action(app, source) {
+export function set_action(app, source, base_dir) {
 
-  app.all('/_/*', async (req, res, next) => {
+  app.all(base_dir + '/_/*', async (req, res, next) => {
 
-    const path = req.path;
+    const path = normalizePath(req.path, base_dir);
     const paths = path.split('/').filter(p => !!p);
     if (paths.length === 0) paths.push('/'); // for /index.html
 

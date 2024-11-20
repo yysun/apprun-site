@@ -38,17 +38,19 @@ const add_route = (file, target, config) => {
 };
 
 export const build_main = async (config) => {
-  const { site_url, output, pages, live_reload, relative, source, csr } = config;
+  const { base_dir, output, pages, live_reload, relative, source, csr } = config;
   const main_file = `${pages}/main.tsx`;
   const tsx_file = `${pages}/_main.tsx`;
   const init = existsSync(main_file);
   const pages_main = path.relative(output, `${pages}/main`).replace(/\\/g, '/');
 
+  console.log(green('Base dir'), base_dir);
+
   let main = `import app from 'apprun';
 ${init ? `import main from '${pages_main}';` : 'const main = () => {}'}
 export default main;
 main();
-
+const base_dir = '${base_dir}';
 const get_element = (path) => {
   const paths = path.split('/').filter(p => !!p);
   paths.pop();
@@ -67,13 +69,13 @@ const resolvePromise = (path: string) => {
     handlerPromises.delete(path);
   }
 }
-const add_component = (path, site_url) => {
+const add_component = (path, base_dir) => {
   const file = path === '/' ? '/index.js' : path + '/index.js';
   app.once(path, async () => {
     const timestamp = Date.now();
     ${live_reload ? `
-    const module = await import(\`\${site_url}\${file}?\${timestamp}\`);`: `
-    const module = await import(\`\${site_url}\${file}\`);`}
+    const module = await import(\`\${base_dir}\${file}?\${timestamp}\`);`: `
+    const module = await import(\`\${base_dir}\${file}\`);`}
     const exp = module.default;
     if (exp.prototype && exp.prototype.constructor.name === exp.name) {
       const component = new module.default();
@@ -100,19 +102,22 @@ const add_component = (path, site_url) => {
     resolvePromise(path);
   });
 };
-const components = ${JSON.stringify(routes.map( r=> r[0]).sort())};
+const components = ${JSON.stringify(routes.map(r => r[0]).sort())};
 const route = async (path) => {
-  if (path === '/') {
+  // Remove base path from the incoming path
+  const normalizedPath = path.startsWith(base_dir) ? path.substring(base_dir.length) : path;
+  
+  if (normalizedPath === '/' || normalizedPath === '') {
     app.run('/');
     return;
   }
-  const paths = path.split('/').filter(p => !!p);
+  const paths = normalizedPath.split('/').filter(p => !!p);
   let routed = false;
   for (let i=0; i<paths.length; i++) {
     const current = '/' + paths.slice(0, i+1).join('/');
     const component = components.find(item => item === current);
     if (component) {
-      routed = component === path;
+      routed = component === normalizedPath;
       let resolveFn;
       const promise = new Promise((resolve) => {
         resolveFn = resolve;
@@ -122,12 +127,12 @@ const route = async (path) => {
       await promise;
     }
   }
-  console.assert(!!routed, \`\${path} can not be routed.\`);
+  console.assert(!!routed, \`\${normalizedPath} can not be routed.\`);
 };
 
 app.route = route;
 window.onload = async () => {
-  components.map(item => add_component(item, '${site_url}'));
+  components.map(item => add_component(item, '${base_dir}'));
   app.route(location.pathname);
 };`;
 
@@ -137,13 +142,15 @@ document.body.addEventListener('click', e => {
   const element = e.target as HTMLElement;
   const menu = (element.tagName === 'A' ? element : element.closest('a')) as HTMLAnchorElement;
   if (menu &&
-    menu.origin === location.origin && menu.pathname.startsWith('/')) {
+    menu.origin === location.origin) {
     e.preventDefault();
-    history.pushState(null, '', menu.href);
+    history.pushState(null, '', menu.origin + base_dir + menu.pathname);
     app.run('//');
     app.route(menu.pathname);
   }
-});`;
+});
+window.addEventListener("popstate", () => route(location.pathname));
+`;
   };
 
   if (live_reload) {

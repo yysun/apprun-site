@@ -19,15 +19,15 @@ import build_server from './src/build-server.js';
 async function init_options(source, options) {
   source = (source && source !== '.') ? `${process.cwd()}/${source}` : `${process.cwd()}`;
   options.source = source;
-  options['site_url'] = '/';
   const conf = `${source}/apprun-site.config.js`;
   if (fs.existsSync(conf)) {
     const config = await import(`file://${conf}`);
     options = { ...config.default, ...options };
   }
   options.pages = join(source, options.pages || 'pages');
-  options.output = join(source, options.output || 'output');
-  options['site_url'].endsWith('/') && (options['site_url'] = options['site_url'].slice(0, -1));
+  options.output = join(source, options.output || 'public');
+  options['base_dir'].endsWith('/') && (options['base_dir'] = options['base_dir'].slice(0, -1));
+  if (!options.base_dir) options.base_dir = '/';
   return { source, options };
 }
 
@@ -42,8 +42,8 @@ program
 
     const defaultTemplates = [
       { name: "AppRun Site Basic", value: "apprunjs/apprun-site-template" },
-      { name: "AppRun Site with Shadcn/ui", value: "apprunjs/apprun-shadcn"},
-      { name: "AppRun Site with Ant Design Pro", value: "apprunjs/apprun-antd-pro"}
+      { name: "AppRun Site with Shadcn/ui", value: "apprunjs/apprun-shadcn" },
+      { name: "AppRun Site with Ant Design Pro", value: "apprunjs/apprun-antd-pro" }
     ];
 
     const templatesUrl = 'https://raw.githubusercontent.com/yysun/apprun-site/master/templates.json';
