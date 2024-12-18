@@ -12,8 +12,8 @@ export let config = {};
 
 export default function (_config = {}) {
   const cwd = process.cwd();
-  let { source, output, ssr, root, port, save, live_reload, dev, base_dir } = _config;
-  base_dir = base_dir || '';
+  let { source, output, ssr, root, port, save, live_reload, dev, base_dir, middlewares } = _config;
+  base_dir = base_dir || '/';
   root = output || root || 'public';
   root = resolve(cwd, root);
   source = resolve(cwd, source || '.');
@@ -27,9 +27,15 @@ export default function (_config = {}) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(compression());
+  if (middlewares) {
+    for(const middleware of middlewares) {
+      app.use(middleware);
+    }
+  }
 
   set_api(app, source, base_dir);
   set_action(app, source, base_dir);
+
   if (dev) set_vfs(app, base_dir);
   set_ssr(app, root, port, ssr, save, base_dir);
 
@@ -128,7 +134,7 @@ export function set_ssr(app, root, port, ssr, save, base_dir) {
 
 export function set_api(app, source, base_dir) {
 
-  app.all(base_dir + '/api/*', async (req, res, next) => {
+  app.all(base_dir + 'api/*', async (req, res, next) => {
 
     const path = normalizePath(req.path, base_dir); // Ensure base_dir is removed from the path
     const paths = path.split('/');
@@ -175,7 +181,7 @@ export function set_api(app, source, base_dir) {
 
 export function set_action(app, source, base_dir) {
 
-  app.all(base_dir + '/_/*', async (req, res, next) => {
+  app.all(base_dir + '_/*', async (req, res, next) => {
 
     const path = normalizePath(req.path, base_dir);
     const paths = path.split('/').filter(p => !!p);
