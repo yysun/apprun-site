@@ -26,6 +26,7 @@ async function init_options(source, options) {
   }
   options.pages = join(source, options.pages || 'pages');
   options.output = join(source, options.output || 'public');
+  options.base_dir = options.base_dir || '/';
   options['base_dir'].endsWith('/') && (options['base_dir'] = options['base_dir'].slice(0, -1));
   if (!options.base_dir) options.base_dir = '/';
   return { source, options };
